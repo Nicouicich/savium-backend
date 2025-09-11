@@ -1,0 +1,99 @@
+export {default as appConfig} from './app.config';
+export {default as databaseConfig} from './database.config';
+export {default as redisConfig} from './redis.config';
+export {default as jwtConfig} from './jwt.config';
+export {default as swaggerConfig} from './swagger.config';
+export {default as integrationsConfig} from './integrations.config';
+export {default as stripeConfig} from './stripe.config';
+
+// Configuration validation schema
+import * as Joi from 'joi';
+
+export const configValidationSchema = Joi.object({
+  // App Configuration
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  PORT: Joi.number().default(3000),
+  APP_NAME: Joi.string().default('Savium AI Backend'),
+  APP_URL: Joi.string().uri().default('http://localhost:3000'),
+
+  // Database Configuration
+  MONGODB_URI: Joi.string().required(),
+  MONGODB_TEST_URI: Joi.string(),
+
+  // Redis Configuration
+  REDIS_HOST: Joi.string().default('localhost'),
+  REDIS_PORT: Joi.number().default(6379),
+  REDIS_PASSWORD: Joi.string().allow('').optional(),
+  REDIS_DB: Joi.number().default(0),
+
+  // JWT Configuration
+  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),
+  JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
+
+  // Security Configuration
+  BCRYPT_ROUNDS: Joi.number().min(10).max(15).default(12),
+
+  // Rate Limiting
+  THROTTLE_TTL: Joi.number().default(60),
+  THROTTLE_LIMIT: Joi.number().default(100),
+
+  // CORS Configuration
+  CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
+  CORS_CREDENTIALS: Joi.boolean().default(true),
+
+  // File Upload Configuration
+  MAX_FILE_SIZE: Joi.number().default(10485760), // 10MB
+  ALLOWED_FILE_TYPES: Joi.string().default('image/jpeg,image/png,image/gif,application/pdf'),
+
+  // External APIs (optional for development)
+  OPENAI_API_KEY: Joi.string().optional(),
+  WHATSAPP_ACCESS_TOKEN: Joi.string().optional(),
+  WHATSAPP_VERIFY_TOKEN: Joi.string().optional(),
+  TELEGRAM_BOT_TOKEN: Joi.string().optional(),
+
+  // Cache Configuration
+  CACHE_TTL: Joi.number().default(300),
+  CACHE_MAX_ITEMS: Joi.number().default(1000),
+
+  // Logging
+  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'debug').default('info'),
+  LOG_FORMAT: Joi.string().valid('json', 'simple').default('json'),
+
+  // Email Configuration
+  EMAIL_HOST: Joi.string().optional(),
+  EMAIL_PORT: Joi.number().optional(),
+  EMAIL_USER: Joi.string().optional(),
+  EMAIL_PASSWORD: Joi.string().optional(),
+  EMAIL_FROM: Joi.string().email().optional()
+n  // Stripe Configuration
+  STRIPE_SECRET_KEY: Joi.string().optional(),
+  STRIPE_PUBLISHABLE_KEY: Joi.string().optional(),
+  STRIPE_WEBHOOK_SECRET: Joi.string().optional(),
+  STRIPE_CLIENT_ID: Joi.string().optional(),
+  STRIPE_DEFAULT_CURRENCY: Joi.string().default('usd'),
+  STRIPE_DEFAULT_LOCALE: Joi.string().default('en'),
+  STRIPE_TRIAL_PERIOD_DAYS: Joi.number().default(14),
+  STRIPE_GRACE_PERIOD_DAYS: Joi.number().default(3),
+  STRIPE_AUTOMATIC_TAX: Joi.boolean().default(false),
+  STRIPE_COLLECT_TAX_ID: Joi.boolean().default(false),
+  STRIPE_DEFAULT_TAX_BEHAVIOR: Joi.string().valid('inclusive', 'exclusive').default('exclusive'),
+  STRIPE_PERSONAL_PRICE_ID: Joi.string().optional(),
+  STRIPE_PERSONAL_PRODUCT_ID: Joi.string().optional(),
+  STRIPE_COUPLE_PRICE_ID: Joi.string().optional(),
+  STRIPE_COUPLE_PRODUCT_ID: Joi.string().optional(),
+  STRIPE_FAMILY_PRICE_ID: Joi.string().optional(),
+  STRIPE_FAMILY_PRODUCT_ID: Joi.string().optional(),
+  STRIPE_BUSINESS_PRICE_ID: Joi.string().optional(),
+  STRIPE_BUSINESS_PRODUCT_ID: Joi.string().optional(),
+  STRIPE_RADAR_RULES: Joi.boolean().default(false),
+  STRIPE_REQUIRE_AUTH: Joi.boolean().default(true),
+  STRIPE_ALLOWED_COUNTRIES: Joi.string().optional(),
+  STRIPE_BLOCKED_COUNTRIES: Joi.string().optional(),
+  STRIPE_WEBHOOK_TOLERANCE: Joi.number().default(300),
+  STRIPE_MAX_RETRIES: Joi.number().default(3),
+  STRIPE_RETRY_DELAY: Joi.number().default(1000),
+  STRIPE_TEST_CLOCK_ID: Joi.string().optional(),
+  STRIPE_WEBHOOK_TESTING: Joi.boolean().default(false)
+});
