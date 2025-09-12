@@ -1,14 +1,13 @@
-import {BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {JwtService} from '@nestjs/jwt';
-import {v4 as uuidv4} from 'uuid';
+import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 
-import {UsersService} from '../users/users.service';
-import {AuthResponseDto, ChangePasswordDto, LoginDto, RegisterDto} from './dto';
-import {UserDocument} from '../users/schemas/user.schema';
-import {JwtPayload, JwtRefreshPayload} from './strategies/jwt.strategy';
-import {TokenBlacklistService} from '@common/services/token-blacklist.service';
+import { UsersService } from '../users/users.service';
+import { AuthResponseDto, ChangePasswordDto, LoginDto, RegisterDto } from './dto';
+import { JwtPayload, JwtRefreshPayload } from './strategies/jwt.strategy';
+import { TokenBlacklistService } from '@common/services/token-blacklist.service';
 
 @Injectable()
 export class AuthService {
@@ -77,7 +76,7 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(refreshToken: string): Promise<{accessToken: string; refreshToken: string; expiresIn: string}> {
+  async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; expiresIn: string }> {
     try {
       // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
@@ -186,9 +185,9 @@ export class AuthService {
 
       // Remove password from user object before returning
       const userObj = user.toJSON();
-      const {password: _, ...result} = userObj;
+      const { password: _, ...result } = userObj;
       return result;
-    } catch (error) {
+    } catch {
       this.logger.warn(`User validation failed for email: ${email}`);
       return null;
     }

@@ -1,13 +1,13 @@
-import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {BudgetProgressDto, BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto, CategoryBudgetResponseDto, CreateBudgetDto, UpdateBudgetDto} from './dto';
-import {Budget, BudgetDocument, BudgetPeriod, BudgetStatus} from './schemas/budget.schema';
-import {AccountsService} from '../accounts/accounts.service';
-import {CategoriesService} from '../categories/categories.service';
-import {ExpensesService} from '../expenses/expenses.service';
-import {UsersService} from '../users/users.service';
-import {PaginatedResult} from '../expenses/expenses.repository';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { BudgetProgressDto, BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto, CategoryBudgetResponseDto, CreateBudgetDto, UpdateBudgetDto } from './dto';
+import { Budget, BudgetDocument, BudgetPeriod, BudgetStatus } from './schemas/budget.schema';
+import { AccountsService } from '../accounts/accounts.service';
+import { CategoriesService } from '../categories/categories.service';
+import { ExpensesService } from '../expenses/expenses.service';
+import { UsersService } from '../users/users.service';
+import { PaginatedResult } from '../expenses/expenses.repository';
 
 @Injectable()
 export class BudgetsService {
@@ -55,8 +55,8 @@ export class BudgetsService {
       isDeleted: false,
       $or: [
         {
-          startDate: {$lte: createBudgetDto.endDate},
-          endDate: {$gte: createBudgetDto.startDate}
+          startDate: { $lte: createBudgetDto.endDate },
+          endDate: { $gte: createBudgetDto.startDate }
         }
       ]
     });
@@ -98,10 +98,10 @@ export class BudgetsService {
   }
 
   async findAll(query: BudgetQueryDto, userId: string): Promise<PaginatedResult<BudgetResponseDto>> {
-    const {page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', includeProgress = false, includeCategoryBreakdown = false, ...filters} = query;
+    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', includeProgress = false, includeCategoryBreakdown = false, ...filters } = query;
 
     // Build query
-    const mongoQuery: any = {isDeleted: false};
+    const mongoQuery: any = { isDeleted: false };
 
     // If user doesn't have admin access, filter by accessible accounts
     if (filters.accountId) {
@@ -114,7 +114,7 @@ export class BudgetsService {
       // Get user's accessible accounts
       const userAccounts = await this.accountsService.findByUser(userId);
       const accountIds = userAccounts.map(account => account._id);
-      mongoQuery.$or = [{accountId: {$in: accountIds}}, {allowedUsers: new Types.ObjectId(userId)}];
+      mongoQuery.$or = [{ accountId: { $in: accountIds } }, { allowedUsers: new Types.ObjectId(userId) }];
     }
 
     // Apply other filters
@@ -127,7 +127,7 @@ export class BudgetsService {
     if (filters.startDate || filters.endDate) {
       mongoQuery.startDate = {};
       if (filters.startDate) mongoQuery.startDate.$gte = new Date(filters.startDate);
-      if (filters.endDate) mongoQuery.endDate = {$lte: new Date(filters.endDate)};
+      if (filters.endDate) mongoQuery.endDate = { $lte: new Date(filters.endDate) };
     }
     if (filters.isTemplate !== undefined) {
       mongoQuery.isTemplate = filters.isTemplate;
@@ -135,12 +135,12 @@ export class BudgetsService {
     if (filters.search) {
       const searchRegex = new RegExp(filters.search, 'i');
       mongoQuery.$or = mongoQuery.$or
-        ? [...mongoQuery.$or, {name: searchRegex}, {description: searchRegex}]
-        : [{name: searchRegex}, {description: searchRegex}];
+        ? [...mongoQuery.$or, { name: searchRegex }, { description: searchRegex }]
+        : [{ name: searchRegex }, { description: searchRegex }];
     }
     if (filters.tags) {
       const tagArray = filters.tags.split(',').map(tag => tag.trim());
-      mongoQuery['metadata.tags'] = {$in: tagArray};
+      mongoQuery['metadata.tags'] = { $in: tagArray };
     }
 
     // Execute query
@@ -185,7 +185,7 @@ export class BudgetsService {
   }
 
   async update(id: string, updateBudgetDto: UpdateBudgetDto, userId: string): Promise<BudgetResponseDto> {
-    const budget = await this.budgetModel.findOne({_id: id, isDeleted: false}).exec();
+    const budget = await this.budgetModel.findOne({ _id: id, isDeleted: false }).exec();
 
     if (!budget) {
       throw new NotFoundException('Budget not found');
@@ -212,7 +212,7 @@ export class BudgetsService {
     }
 
     // Prepare update data
-    const updateData: any = {...updateBudgetDto};
+    const updateData: any = { ...updateBudgetDto };
     if (updateBudgetDto.categoryBudgets) {
       updateData.categoryBudgets = updateBudgetDto.categoryBudgets.map(catBudget => ({
         ...catBudget,
@@ -221,7 +221,7 @@ export class BudgetsService {
     }
 
     // Update the budget first
-    await this.budgetModel.findByIdAndUpdate(id, updateData, {new: true}).exec();
+    await this.budgetModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
 
     // Use optimized aggregation pipeline to get updated budget (PERF-001)
     const updatedBudgets = await this.getBudgetByIdWithAggregation(id);
@@ -236,7 +236,7 @@ export class BudgetsService {
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const budget = await this.budgetModel.findOne({_id: id, isDeleted: false}).exec();
+    const budget = await this.budgetModel.findOne({ _id: id, isDeleted: false }).exec();
 
     if (!budget) {
       throw new NotFoundException('Budget not found');
@@ -368,7 +368,7 @@ export class BudgetsService {
 
     // Calculate new budget period dates
     const now = new Date();
-    const {startDate, endDate} = this.calculatePeriodDates(template.period, now);
+    const { startDate, endDate } = this.calculatePeriodDates(template.period, now);
 
     const newBudgetData: CreateBudgetDto = {
       name: `${template.name} (from template)`,
@@ -412,15 +412,15 @@ export class BudgetsService {
       .find({
         autoRenew: true,
         status: BudgetStatus.COMPLETED,
-        endDate: {$lt: new Date()},
+        endDate: { $lt: new Date() },
         isDeleted: false,
-        renewedFromId: {$exists: false} // Haven't been renewed yet
+        renewedFromId: { $exists: false } // Haven't been renewed yet
       })
       .exec();
 
     for (const budget of budgetsToRenew) {
       try {
-        const {startDate, endDate} = this.calculatePeriodDates(budget.period, budget.endDate);
+        const { startDate, endDate } = this.calculatePeriodDates(budget.period, budget.endDate);
 
         const newBudget = new this.budgetModel({
           ...budget.toObject(),
@@ -628,7 +628,7 @@ export class BudgetsService {
     }
   }
 
-  private calculatePeriodDates(period: BudgetPeriod, fromDate: Date): {startDate: Date; endDate: Date} {
+  private calculatePeriodDates(period: BudgetPeriod, fromDate: Date): { startDate: Date; endDate: Date } {
     const startDate = new Date(fromDate);
     const endDate = new Date(fromDate);
 
@@ -650,17 +650,17 @@ export class BudgetsService {
     endDate.setDate(endDate.getDate() - 1); // End date is inclusive
     endDate.setHours(23, 59, 59, 999);
 
-    return {startDate, endDate};
+    return { startDate, endDate };
   }
 
   /**
    * PERF-001: Optimized aggregation pipeline to avoid N+1 queries
    * Replaces multiple populate() calls with efficient $lookup operations
    */
-  private async getBudgetsWithAggregation(matchQuery: any, sort: any, skip: number, limit: number): Promise<{data: any[]; total: number}> {
+  private async getBudgetsWithAggregation(matchQuery: any, sort: any, skip: number, limit: number): Promise<{ data: any[]; total: number }> {
     const pipeline = [
       // Match stage - filter documents early
-      {$match: matchQuery},
+      { $match: matchQuery },
 
       // Lookup account information
       {
@@ -669,7 +669,7 @@ export class BudgetsService {
           localField: 'accountId',
           foreignField: '_id',
           as: 'account',
-          pipeline: [{$project: {name: 1, type: 1}}]
+          pipeline: [{ $project: { name: 1, type: 1 } }]
         }
       },
 
@@ -680,7 +680,7 @@ export class BudgetsService {
           localField: 'createdBy',
           foreignField: '_id',
           as: 'creator',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
@@ -691,15 +691,15 @@ export class BudgetsService {
           localField: 'allowedUsers',
           foreignField: '_id',
           as: 'allowedUsersData',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: {$arrayElemAt: ['$account', 0]},
-          createdBy: {$arrayElemAt: ['$creator', 0]},
+          accountId: { $arrayElemAt: ['$account', 0] },
+          createdBy: { $arrayElemAt: ['$creator', 0] },
           allowedUsers: '$allowedUsersData'
         }
       },
@@ -714,13 +714,13 @@ export class BudgetsService {
       },
 
       // Sort the results
-      {$sort: sort},
+      { $sort: sort },
 
       // Facet for pagination and counting
       {
         $facet: {
-          data: [{$skip: skip}, {$limit: limit}],
-          totalCount: [{$count: 'count'}]
+          data: [{ $skip: skip }, { $limit: limit }],
+          totalCount: [{ $count: 'count' }]
         }
       }
     ];
@@ -754,7 +754,7 @@ export class BudgetsService {
           localField: 'accountId',
           foreignField: '_id',
           as: 'account',
-          pipeline: [{$project: {name: 1, type: 1}}]
+          pipeline: [{ $project: { name: 1, type: 1 } }]
         }
       },
 
@@ -765,7 +765,7 @@ export class BudgetsService {
           localField: 'createdBy',
           foreignField: '_id',
           as: 'creator',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
@@ -776,15 +776,15 @@ export class BudgetsService {
           localField: 'allowedUsers',
           foreignField: '_id',
           as: 'allowedUsersData',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: {$arrayElemAt: ['$account', 0]},
-          createdBy: {$arrayElemAt: ['$creator', 0]},
+          accountId: { $arrayElemAt: ['$account', 0] },
+          createdBy: { $arrayElemAt: ['$creator', 0] },
           allowedUsers: '$allowedUsersData'
         }
       },

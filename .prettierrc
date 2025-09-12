@@ -2,7 +2,7 @@
   "singleQuote": true,
   "trailingComma": "none",
   "printWidth": 160,
-  "bracketSpacing": false,
+  "bracketSpacing": true,
   "bracketSameLine": true,
   "arrowParens": "avoid"
 }

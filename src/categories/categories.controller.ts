@@ -1,13 +1,20 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, ValidationPipe} from '@nestjs/common';
-import {ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import {CategoriesService} from './categories.service';
-import {CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto, CategoryHierarchyResponseDto, BulkCategoryOperationDto, BulkOperationResultDto} from './dto';
+import { CategoriesService } from './categories.service';
+import {
+  CategoryResponseDto,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+  CategoryHierarchyResponseDto,
+  BulkCategoryOperationDto,
+  BulkOperationResultDto
+} from './dto';
 
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
-import {ApiResponseDto} from '@common/decorators/api-response.decorator';
-import {ExpenseCategory} from '@common/constants/expense-categories';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { ApiResponseDto } from '@common/decorators/api-response.decorator';
+import { ExpenseCategory } from '@common/constants/expense-categories';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -17,10 +24,10 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @ApiOperation({summary: 'Create a new category'})
+  @ApiOperation({ summary: 'Create a new category' })
   @ApiResponseDto(CategoryResponseDto, 201, 'Category created successfully')
-  @ApiResponse({status: 400, description: 'Invalid input data'})
-  @ApiResponse({status: 409, description: 'Category name already exists'})
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 409, description: 'Category name already exists' })
   @ApiQuery({
     name: 'accountId',
     required: false,
@@ -35,9 +42,9 @@ export class CategoriesController {
   }
 
   @Get()
-  @ApiOperation({summary: 'Get all categories'})
+  @ApiOperation({ summary: 'Get all categories' })
   @ApiResponseDto([CategoryResponseDto], 200, 'Categories retrieved successfully')
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   @ApiQuery({
     name: 'includeGlobal',
     required: false,
@@ -58,7 +65,7 @@ export class CategoriesController {
     description: 'Returns categories with their subcategories in a hierarchical format for tree views'
   })
   @ApiResponseDto([CategoryHierarchyResponseDto], 200, 'Category hierarchy retrieved successfully')
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   @ApiQuery({
     name: 'includeGlobal',
     required: false,
@@ -79,9 +86,9 @@ export class CategoriesController {
     description: 'Execute bulk operations like delete, activate, or deactivate on multiple categories'
   })
   @ApiResponseDto(BulkOperationResultDto, 200, 'Bulk operation completed')
-  @ApiResponse({status: 400, description: 'Invalid operation or category IDs'})
-  @ApiResponse({status: 403, description: 'Insufficient permissions'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiResponse({ status: 400, description: 'Invalid operation or category IDs' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async bulkOperation(
     @Body(ValidationPipe) bulkDto: BulkCategoryOperationDto,
     @CurrentUser('id') userId: string,
@@ -91,23 +98,23 @@ export class CategoriesController {
   }
 
   @Get('search')
-  @ApiOperation({summary: 'Search categories'})
+  @ApiOperation({ summary: 'Search categories' })
   @ApiResponseDto([CategoryResponseDto], 200, 'Categories found')
-  @ApiQuery({name: 'q', description: 'Search term'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'q', description: 'Search term' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async search(@Query('q') searchTerm: string, @CurrentUser('id') userId: string, @Query('accountId') accountId?: string): Promise<CategoryResponseDto[]> {
     return this.categoriesService.searchCategories(searchTerm, accountId, userId);
   }
 
   @Get('type/:type')
-  @ApiOperation({summary: 'Get categories by type'})
+  @ApiOperation({ summary: 'Get categories by type' })
   @ApiParam({
     name: 'type',
     enum: ExpenseCategory,
     description: 'Category type'
   })
   @ApiResponseDto([CategoryResponseDto], 200, 'Categories retrieved successfully')
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async findByType(
     @Param('type') type: ExpenseCategory,
     @CurrentUser('id') userId: string,
@@ -117,28 +124,28 @@ export class CategoriesController {
   }
 
   @Get('stats')
-  @ApiOperation({summary: 'Get category statistics'})
+  @ApiOperation({ summary: 'Get category statistics' })
   @ApiResponse({
     status: 200,
     description: 'Category statistics retrieved successfully',
     schema: {
       type: 'object',
       properties: {
-        total: {type: 'number'},
-        custom: {type: 'number'},
-        global: {type: 'number'},
-        active: {type: 'number'},
-        inactive: {type: 'number'}
+        total: { type: 'number' },
+        custom: { type: 'number' },
+        global: { type: 'number' },
+        active: { type: 'number' },
+        inactive: { type: 'number' }
       }
     }
   })
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async getStats(@CurrentUser('id') userId: string, @Query('accountId') accountId?: string) {
     return this.categoriesService.getStats(accountId, userId);
   }
 
   @Get('popular')
-  @ApiOperation({summary: 'Get popular categories'})
+  @ApiOperation({ summary: 'Get popular categories' })
   @ApiResponse({
     status: 200,
     description: 'Popular categories retrieved successfully',
@@ -147,15 +154,15 @@ export class CategoriesController {
       items: {
         type: 'object',
         properties: {
-          categoryId: {type: 'string'},
-          name: {type: 'string'},
-          displayName: {type: 'string'},
-          usageCount: {type: 'number'}
+          categoryId: { type: 'string' },
+          name: { type: 'string' },
+          displayName: { type: 'string' },
+          usageCount: { type: 'number' }
         }
       }
     }
   })
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   @ApiQuery({
     name: 'limit',
     required: false,
@@ -167,22 +174,22 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  @ApiOperation({summary: 'Get category by ID'})
-  @ApiParam({name: 'id', description: 'Category ID'})
+  @ApiOperation({ summary: 'Get category by ID' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponseDto(CategoryResponseDto, 200, 'Category retrieved successfully')
-  @ApiResponse({status: 404, description: 'Category not found'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async findOne(@Param('id') id: string, @CurrentUser('id') userId: string, @Query('accountId') accountId?: string): Promise<CategoryResponseDto> {
     return this.categoriesService.findOne(id, userId, accountId);
   }
 
   @Patch(':id')
-  @ApiOperation({summary: 'Update category'})
-  @ApiParam({name: 'id', description: 'Category ID'})
+  @ApiOperation({ summary: 'Update category' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponseDto(CategoryResponseDto, 200, 'Category updated successfully')
-  @ApiResponse({status: 404, description: 'Category not found'})
-  @ApiResponse({status: 403, description: 'Insufficient permissions'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async update(
     @Param('id') id: string,
     @Body(ValidationPipe) updateCategoryDto: UpdateCategoryDto,
@@ -193,24 +200,24 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @ApiOperation({summary: 'Delete category'})
-  @ApiParam({name: 'id', description: 'Category ID'})
-  @ApiResponse({status: 200, description: 'Category deleted successfully'})
-  @ApiResponse({status: 404, description: 'Category not found'})
-  @ApiResponse({status: 403, description: 'Insufficient permissions'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
-  async remove(@Param('id') id: string, @CurrentUser('id') userId: string, @Query('accountId') accountId?: string): Promise<{message: string}> {
+  @ApiOperation({ summary: 'Delete category' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
+  @ApiResponse({ status: 200, description: 'Category deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
+  async remove(@Param('id') id: string, @CurrentUser('id') userId: string, @Query('accountId') accountId?: string): Promise<{ message: string }> {
     await this.categoriesService.remove(id, userId, accountId);
-    return {message: 'Category deleted successfully'};
+    return { message: 'Category deleted successfully' };
   }
 
   @Post(':id/subcategories')
-  @ApiOperation({summary: 'Add subcategory to category'})
-  @ApiParam({name: 'id', description: 'Category ID'})
-  @ApiResponse({status: 201, description: 'Subcategory added successfully'})
-  @ApiResponse({status: 404, description: 'Category not found'})
-  @ApiResponse({status: 409, description: 'Subcategory already exists'})
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiOperation({ summary: 'Add subcategory to category' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
+  @ApiResponse({ status: 201, description: 'Subcategory added successfully' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponse({ status: 409, description: 'Subcategory already exists' })
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async addSubcategory(
     @Param('id') categoryId: string,
     @Body(ValidationPipe)
@@ -227,15 +234,15 @@ export class CategoriesController {
   }
 
   @Patch(':id/subcategories/:subcategoryName')
-  @ApiOperation({summary: 'Update subcategory'})
-  @ApiParam({name: 'id', description: 'Category ID'})
-  @ApiParam({name: 'subcategoryName', description: 'Subcategory name'})
-  @ApiResponse({status: 200, description: 'Subcategory updated successfully'})
+  @ApiOperation({ summary: 'Update subcategory' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
+  @ApiParam({ name: 'subcategoryName', description: 'Subcategory name' })
+  @ApiResponse({ status: 200, description: 'Subcategory updated successfully' })
   @ApiResponse({
     status: 404,
     description: 'Category or subcategory not found'
   })
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async updateSubcategory(
     @Param('id') categoryId: string,
     @Param('subcategoryName') subcategoryName: string,
@@ -252,15 +259,15 @@ export class CategoriesController {
   }
 
   @Delete(':id/subcategories/:subcategoryName')
-  @ApiOperation({summary: 'Remove subcategory from category'})
-  @ApiParam({name: 'id', description: 'Category ID'})
-  @ApiParam({name: 'subcategoryName', description: 'Subcategory name'})
-  @ApiResponse({status: 200, description: 'Subcategory removed successfully'})
+  @ApiOperation({ summary: 'Remove subcategory from category' })
+  @ApiParam({ name: 'id', description: 'Category ID' })
+  @ApiParam({ name: 'subcategoryName', description: 'Subcategory name' })
+  @ApiResponse({ status: 200, description: 'Subcategory removed successfully' })
   @ApiResponse({
     status: 404,
     description: 'Category or subcategory not found'
   })
-  @ApiQuery({name: 'accountId', required: false, description: 'Account ID'})
+  @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async removeSubcategory(
     @Param('id') categoryId: string,
     @Param('subcategoryName') subcategoryName: string,

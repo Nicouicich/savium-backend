@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {FilterQuery, Model, UpdateQuery} from 'mongoose';
-import {User, UserDocument} from './schemas/user.schema';
-import {CreateUserDto} from './dto';
-import {PaginationDto, PaginationHelper} from '@common/utils/pagination.util';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import { CreateUserDto } from './dto';
+import { PaginationDto, PaginationHelper } from '@common/utils/pagination.util';
 
 @Injectable()
 export class UsersRepository {
@@ -23,15 +23,15 @@ export class UsersRepository {
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({email}).exec();
+    return this.userModel.findOne({ email }).exec();
   }
 
   async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({email}).select('+password').exec();
+    return this.userModel.findOne({ email }).select('+password').exec();
   }
 
   async findAll(paginationDto: PaginationDto, filters?: FilterQuery<UserDocument>) {
-    const {skip, limit, sort} = PaginationHelper.createMongoosePaginationOptions(paginationDto);
+    const { skip, limit, sort } = PaginationHelper.createMongoosePaginationOptions(paginationDto);
 
     const query = filters ? this.userModel.find(filters) : this.userModel.find();
 
@@ -48,7 +48,7 @@ export class UsersRepository {
   }
 
   async updateById(id: string, updateUserDto: UpdateQuery<UserDocument>): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
   }
 
   async deleteById(id: string): Promise<UserDocument | null> {
@@ -56,23 +56,23 @@ export class UsersRepository {
   }
 
   async updatePassword(id: string, hashedPassword: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {password: hashedPassword}).exec();
+    await this.userModel.findByIdAndUpdate(id, { password: hashedPassword }).exec();
   }
 
   async updateLastLogin(id: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {lastLoginAt: new Date()}).exec();
+    await this.userModel.findByIdAndUpdate(id, { lastLoginAt: new Date() }).exec();
   }
 
   async addRefreshToken(id: string, refreshToken: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {$push: {refreshTokens: refreshToken}}).exec();
+    await this.userModel.findByIdAndUpdate(id, { $push: { refreshTokens: refreshToken } }).exec();
   }
 
   async removeRefreshToken(id: string, refreshToken: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {$pull: {refreshTokens: refreshToken}}).exec();
+    await this.userModel.findByIdAndUpdate(id, { $pull: { refreshTokens: refreshToken } }).exec();
   }
 
   async clearAllRefreshTokens(id: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {refreshTokens: []}).exec();
+    await this.userModel.findByIdAndUpdate(id, { refreshTokens: [] }).exec();
   }
 
   async verifyEmail(id: string): Promise<void> {
@@ -85,7 +85,7 @@ export class UsersRepository {
   }
 
   async setEmailVerificationToken(id: string, token: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {emailVerificationToken: token}).exec();
+    await this.userModel.findByIdAndUpdate(id, { emailVerificationToken: token }).exec();
   }
 
   async setPasswordResetToken(id: string, token: string, expires: Date): Promise<void> {
@@ -138,7 +138,7 @@ export class UsersRepository {
   }
 
   async updateAvatar(id: string, avatar: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {avatar}).exec();
+    await this.userModel.findByIdAndUpdate(id, { avatar }).exec();
   }
 
   async removeOAuthInfo(id: string): Promise<void> {

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {getModelToken} from '@nestjs/mongoose';
-import {Model, Types, ClientSession} from 'mongoose';
-import {Logger} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model, Types, ClientSession } from 'mongoose';
+import { Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
-import {StripeWebhookService} from './stripe-webhook.service';
-import {Payment, PaymentDocument} from '../schemas/payment.schema';
-import {EnhancedPayment, EnhancedPaymentDocument} from '../schemas/enhanced-payment.schema';
-import {Subscription, SubscriptionDocument} from '../schemas/subscription.schema';
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
+import { StripeWebhookService } from './stripe-webhook.service';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { EnhancedPayment, EnhancedPaymentDocument } from '../schemas/enhanced-payment.schema';
+import { Subscription, SubscriptionDocument } from '../schemas/subscription.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
 
-import {PaymentException} from '../../common/exceptions/payment.exception';
-import {DatabaseService} from '../../database/database.service';
+import { PaymentException } from '../../common/exceptions/payment.exception';
+import { DatabaseService } from '../../database/database.service';
 
 describe('StripeWebhookService - Unit Tests', () => {
   let service: StripeWebhookService;
@@ -39,7 +39,7 @@ describe('StripeWebhookService - Unit Tests', () => {
     },
     livemode: false,
     pending_webhooks: 1,
-    request: {id: 'req_test', idempotency_key: null},
+    request: { id: 'req_test', idempotency_key: null },
     type: type as Stripe.Event.Type
   });
 
@@ -395,7 +395,7 @@ describe('StripeWebhookService - Unit Tests', () => {
     describe('handlePaymentIntentCreated', () => {
       it('should handle payment intent created event', async () => {
         // Arrange
-        const mockPaymentIntent = createMockPaymentIntent({status: 'requires_payment_method'});
+        const mockPaymentIntent = createMockPaymentIntent({ status: 'requires_payment_method' });
         const event = createMockStripeEvent('payment_intent.created', mockPaymentIntent);
         const mockEnhancedPayment = createMockEnhancedPayment();
 
@@ -415,7 +415,7 @@ describe('StripeWebhookService - Unit Tests', () => {
     describe('handlePaymentIntentSucceeded', () => {
       it('should handle payment intent succeeded event with charge details', async () => {
         // Arrange
-        const mockPaymentIntent = createMockPaymentIntent({status: 'succeeded'});
+        const mockPaymentIntent = createMockPaymentIntent({ status: 'succeeded' });
         const event = createMockStripeEvent('payment_intent.succeeded', mockPaymentIntent);
         const mockEnhancedPayment = createMockEnhancedPayment();
 
@@ -447,7 +447,7 @@ describe('StripeWebhookService - Unit Tests', () => {
         // Arrange
         const mockPaymentIntent = createMockPaymentIntent({
           status: 'succeeded',
-          charges: {object: 'list', data: []}
+          charges: { object: 'list', data: [] }
         });
         const event = createMockStripeEvent('payment_intent.succeeded', mockPaymentIntent);
         const mockEnhancedPayment = createMockEnhancedPayment();
@@ -496,7 +496,7 @@ describe('StripeWebhookService - Unit Tests', () => {
     describe('handlePaymentIntentCanceled', () => {
       it('should handle payment intent canceled event', async () => {
         // Arrange
-        const mockPaymentIntent = createMockPaymentIntent({status: 'canceled'});
+        const mockPaymentIntent = createMockPaymentIntent({ status: 'canceled' });
         const event = createMockStripeEvent('payment_intent.canceled', mockPaymentIntent);
         const mockEnhancedPayment = createMockEnhancedPayment();
 
@@ -514,7 +514,7 @@ describe('StripeWebhookService - Unit Tests', () => {
     describe('handlePaymentIntentRequiresAction', () => {
       it('should handle payment intent requires action event', async () => {
         // Arrange
-        const mockPaymentIntent = createMockPaymentIntent({status: 'requires_action'});
+        const mockPaymentIntent = createMockPaymentIntent({ status: 'requires_action' });
         const event = createMockStripeEvent('payment_intent.requires_action', mockPaymentIntent);
         const mockEnhancedPayment = createMockEnhancedPayment();
 
@@ -537,14 +537,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockCustomer = createMockCustomer();
         const event = createMockStripeEvent('customer.created', mockCustomer);
 
-        customerModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        customerModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(customerModel.updateOne).toHaveBeenCalledWith(
-          {stripeCustomerId: mockCustomer.id},
+          { stripeCustomerId: mockCustomer.id },
           {
             $set: {
               email: mockCustomer.email,
@@ -554,7 +554,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession, upsert: false}
+          { session: mockSession, upsert: false }
         );
       });
     });
@@ -568,14 +568,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         });
         const event = createMockStripeEvent('customer.updated', mockCustomer);
 
-        customerModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        customerModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(customerModel.updateOne).toHaveBeenCalledWith(
-          {stripeCustomerId: mockCustomer.id},
+          { stripeCustomerId: mockCustomer.id },
           {
             $set: {
               email: 'updated@savium.ai',
@@ -585,7 +585,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -593,17 +593,17 @@ describe('StripeWebhookService - Unit Tests', () => {
     describe('handleCustomerDeleted', () => {
       it('should handle customer deleted event', async () => {
         // Arrange
-        const mockCustomer = createMockCustomer({deleted: true});
+        const mockCustomer = createMockCustomer({ deleted: true });
         const event = createMockStripeEvent('customer.deleted', mockCustomer);
 
-        customerModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        customerModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(customerModel.updateOne).toHaveBeenCalledWith(
-          {stripeCustomerId: mockCustomer.id},
+          { stripeCustomerId: mockCustomer.id },
           {
             $set: {
               isActive: false,
@@ -611,7 +611,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -641,7 +641,7 @@ describe('StripeWebhookService - Unit Tests', () => {
         expect(existingSubscription.currentPeriodStart).toEqual(new Date(mockSubscription.current_period_start * 1000));
         expect(existingSubscription.currentPeriodEnd).toEqual(new Date(mockSubscription.current_period_end * 1000));
         expect(existingSubscription.isActive).toBe(true);
-        expect(existingSubscription.save).toHaveBeenCalledWith({session: mockSession});
+        expect(existingSubscription.save).toHaveBeenCalledWith({ session: mockSession });
       });
 
       it('should handle subscription created event when subscription not found', async () => {
@@ -672,14 +672,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         });
         const event = createMockStripeEvent('customer.subscription.updated', mockSubscription);
 
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: mockSubscription.id},
+          { stripeSubscriptionId: mockSubscription.id },
           {
             $set: {
               status: 'past_due',
@@ -693,7 +693,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
 
@@ -708,14 +708,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         });
         const event = createMockStripeEvent('customer.subscription.updated', mockSubscription);
 
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: mockSubscription.id},
+          { stripeSubscriptionId: mockSubscription.id },
           {
             $set: expect.objectContaining({
               status: 'trialing',
@@ -724,7 +724,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               isActive: true // trialing is active
             })
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -735,14 +735,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockSubscription = createMockSubscription();
         const event = createMockStripeEvent('customer.subscription.deleted', mockSubscription);
 
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: mockSubscription.id},
+          { stripeSubscriptionId: mockSubscription.id },
           {
             $set: {
               status: 'canceled',
@@ -751,7 +751,7 @@ describe('StripeWebhookService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -787,14 +787,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockInvoice = createMockInvoice();
         const event = createMockStripeEvent('invoice.created', mockInvoice);
 
-        enhancedPaymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        enhancedPaymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(enhancedPaymentModel.updateOne).toHaveBeenCalledWith(
-          {stripePaymentIntentId: mockInvoice.payment_intent},
+          { stripePaymentIntentId: mockInvoice.payment_intent },
           {
             $set: {
               stripeInvoiceId: mockInvoice.id,
@@ -802,13 +802,13 @@ describe('StripeWebhookService - Unit Tests', () => {
               invoiceUrl: mockInvoice.hosted_invoice_url
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
 
       it('should handle invoice created event without payment intent', async () => {
         // Arrange
-        const mockInvoice = createMockInvoice({payment_intent: null});
+        const mockInvoice = createMockInvoice({ payment_intent: null });
         const event = createMockStripeEvent('invoice.created', mockInvoice);
 
         // Act
@@ -825,21 +825,21 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockInvoice = createMockInvoice();
         const event = createMockStripeEvent('invoice.payment_succeeded', mockInvoice);
 
-        enhancedPaymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        enhancedPaymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(enhancedPaymentModel.updateOne).toHaveBeenCalledWith(
-          {stripePaymentIntentId: mockInvoice.payment_intent},
+          { stripePaymentIntentId: mockInvoice.payment_intent },
           {
             $set: {
               status: 'succeeded',
               processedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -850,21 +850,21 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockInvoice = createMockInvoice();
         const event = createMockStripeEvent('invoice.payment_failed', mockInvoice);
 
-        enhancedPaymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        enhancedPaymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(enhancedPaymentModel.updateOne).toHaveBeenCalledWith(
-          {stripePaymentIntentId: mockInvoice.payment_intent},
+          { stripePaymentIntentId: mockInvoice.payment_intent },
           {
             $set: {
               status: 'failed',
               failureMessage: 'Invoice payment failed'
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -897,14 +897,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockPaymentMethod = createMockPaymentMethod();
         const event = createMockStripeEvent('payment_method.attached', mockPaymentMethod);
 
-        customerModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        customerModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(customerModel.updateOne).toHaveBeenCalledWith(
-          {stripeCustomerId: mockPaymentMethod.customer},
+          { stripeCustomerId: mockPaymentMethod.customer },
           {
             $addToSet: {
               paymentMethods: {
@@ -922,9 +922,9 @@ describe('StripeWebhookService - Unit Tests', () => {
                 isDefault: false
               }
             },
-            $set: {updatedAt: expect.any(Date)}
+            $set: { updatedAt: expect.any(Date) }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -935,21 +935,21 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockPaymentMethod = createMockPaymentMethod();
         const event = createMockStripeEvent('payment_method.detached', mockPaymentMethod);
 
-        customerModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        customerModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(customerModel.updateOne).toHaveBeenCalledWith(
-          {stripeCustomerId: mockPaymentMethod.customer},
+          { stripeCustomerId: mockPaymentMethod.customer },
           {
             $pull: {
-              paymentMethods: {stripePaymentMethodId: mockPaymentMethod.id}
+              paymentMethods: { stripePaymentMethodId: mockPaymentMethod.id }
             },
-            $set: {updatedAt: expect.any(Date)}
+            $set: { updatedAt: expect.any(Date) }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -989,7 +989,7 @@ describe('StripeWebhookService - Unit Tests', () => {
             setupIntent: true
           }
         });
-        expect(mockSetupPayment.save).toHaveBeenCalledWith({session: mockSession});
+        expect(mockSetupPayment.save).toHaveBeenCalledWith({ session: mockSession });
       });
     });
   });
@@ -1001,14 +1001,14 @@ describe('StripeWebhookService - Unit Tests', () => {
         const mockCheckoutSession = createMockCheckoutSession();
         const event = createMockStripeEvent('checkout.session.completed', mockCheckoutSession);
 
-        enhancedPaymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        enhancedPaymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         await service.processWebhookEvent(event);
 
         // Assert
         expect(enhancedPaymentModel.updateOne).toHaveBeenCalledWith(
-          {stripePaymentIntentId: mockCheckoutSession.payment_intent},
+          { stripePaymentIntentId: mockCheckoutSession.payment_intent },
           {
             $set: {
               metadata: {
@@ -1018,13 +1018,13 @@ describe('StripeWebhookService - Unit Tests', () => {
               }
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
 
       it('should handle checkout session without payment intent', async () => {
         // Arrange
-        const mockCheckoutSession = createMockCheckoutSession({payment_intent: null});
+        const mockCheckoutSession = createMockCheckoutSession({ payment_intent: null });
         const event = createMockStripeEvent('checkout.session.completed', mockCheckoutSession);
 
         // Act
@@ -1123,7 +1123,7 @@ describe('StripeWebhookService - Unit Tests', () => {
             exp_year: 2025,
             country: 'US',
             fingerprint: 'test_fingerprint',
-            wallet: {type: 'apple_pay'}
+            wallet: { type: 'apple_pay' }
           }
         };
 
@@ -1296,7 +1296,7 @@ describe('StripeWebhookService - Unit Tests', () => {
       // Arrange
       const events = Array(5)
         .fill(null)
-        .map((_, index) => createMockStripeEvent('payment_intent.succeeded', {id: `pi_test_${index}`}));
+        .map((_, index) => createMockStripeEvent('payment_intent.succeeded', { id: `pi_test_${index}` }));
       const mockEnhancedPayment = createMockEnhancedPayment();
 
       enhancedPaymentModel.findOne.mockResolvedValue(mockEnhancedPayment as any);
@@ -1390,7 +1390,7 @@ describe('StripeWebhookService - Unit Tests', () => {
       // Arrange
       const events = Array(100)
         .fill(null)
-        .map((_, index) => createMockStripeEvent('payment_intent.succeeded', {id: `pi_test_${index}`}));
+        .map((_, index) => createMockStripeEvent('payment_intent.succeeded', { id: `pi_test_${index}` }));
       const mockEnhancedPayment = createMockEnhancedPayment();
 
       enhancedPaymentModel.findOne.mockResolvedValue(mockEnhancedPayment as any);

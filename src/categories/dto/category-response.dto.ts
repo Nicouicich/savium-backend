@@ -1,40 +1,40 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {ExpenseCategory} from '@common/constants/expense-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ExpenseCategory } from '@common/constants/expense-categories';
 
 export class SubcategoryResponseDto {
-  @ApiProperty({description: 'Subcategory internal name'})
+  @ApiProperty({ description: 'Subcategory internal name' })
   name: string;
 
-  @ApiProperty({description: 'Subcategory display name'})
+  @ApiProperty({ description: 'Subcategory display name' })
   displayName: string;
 
-  @ApiPropertyOptional({description: 'Subcategory description'})
+  @ApiPropertyOptional({ description: 'Subcategory description' })
   description?: string;
 
-  @ApiProperty({description: 'Whether the subcategory is active'})
+  @ApiProperty({ description: 'Whether the subcategory is active' })
   isActive: boolean;
 }
 
 export class CategoryResponseDto {
-  @ApiProperty({description: 'Category ID'})
+  @ApiProperty({ description: 'Category ID' })
   id: string;
 
-  @ApiProperty({description: 'Category internal name'})
+  @ApiProperty({ description: 'Category internal name' })
   name: string;
 
-  @ApiProperty({description: 'Category display name'})
+  @ApiProperty({ description: 'Category display name' })
   displayName: string;
 
-  @ApiPropertyOptional({enum: ExpenseCategory, description: 'Predefined category type'})
+  @ApiPropertyOptional({ enum: ExpenseCategory, description: 'Predefined category type' })
   type?: ExpenseCategory;
 
-  @ApiProperty({description: 'Category icon'})
+  @ApiProperty({ description: 'Category icon' })
   icon: string;
 
-  @ApiProperty({description: 'Category color'})
+  @ApiProperty({ description: 'Category color' })
   color: string;
 
-  @ApiPropertyOptional({description: 'Category description'})
+  @ApiPropertyOptional({ description: 'Category description' })
   description?: string;
 
   @ApiProperty({
@@ -43,19 +43,19 @@ export class CategoryResponseDto {
   })
   subcategories: SubcategoryResponseDto[];
 
-  @ApiPropertyOptional({description: 'Account ID (null for global categories)'})
+  @ApiPropertyOptional({ description: 'Account ID (null for global categories)' })
   accountId?: string;
 
-  @ApiPropertyOptional({description: 'Category creator ID'})
+  @ApiPropertyOptional({ description: 'Category creator ID' })
   createdBy?: string;
 
-  @ApiProperty({description: 'Whether this is a custom category'})
+  @ApiProperty({ description: 'Whether this is a custom category' })
   isCustom: boolean;
 
-  @ApiProperty({description: 'Whether the category is active'})
+  @ApiProperty({ description: 'Whether the category is active' })
   isActive: boolean;
 
-  @ApiProperty({description: 'Whether the category is visible'})
+  @ApiProperty({ description: 'Whether the category is visible' })
   isVisible: boolean;
 
   @ApiProperty({
@@ -64,27 +64,27 @@ export class CategoryResponseDto {
   })
   keywords: string[];
 
-  @ApiProperty({description: 'AI configuration', type: 'object'})
+  @ApiProperty({ description: 'AI configuration', type: 'object' })
   aiConfig: Record<string, any>;
 
-  @ApiProperty({description: 'Sort order'})
+  @ApiProperty({ description: 'Sort order' })
   sortOrder: number;
 
-  @ApiProperty({description: 'Additional metadata', type: 'object'})
+  @ApiProperty({ description: 'Additional metadata', type: 'object' })
   metadata: Record<string, any>;
 
-  @ApiProperty({description: 'Category creation date'})
+  @ApiProperty({ description: 'Category creation date' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Category update date'})
+  @ApiProperty({ description: 'Category update date' })
   updatedAt: Date;
 
-  @ApiProperty({description: 'Number of subcategories'})
+  @ApiProperty({ description: 'Number of subcategories' })
   subcategoryCount: number;
 
-  @ApiProperty({description: 'Whether category can be edited'})
+  @ApiProperty({ description: 'Whether category can be edited' })
   canEdit: boolean;
 
-  @ApiProperty({description: 'Whether category can be deleted'})
+  @ApiProperty({ description: 'Whether category can be deleted' })
   canDelete: boolean;
 }

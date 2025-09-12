@@ -1,62 +1,62 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Currency, PaymentMethod} from '@common/constants/expense-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Currency, PaymentMethod } from '@common/constants/expense-categories';
 
 export class AttachedFileResponseDto {
-  @ApiProperty({description: 'File ID'})
+  @ApiProperty({ description: 'File ID' })
   id: string;
 
-  @ApiProperty({description: 'Original filename'})
+  @ApiProperty({ description: 'Original filename' })
   filename: string;
 
-  @ApiProperty({description: 'Original name when uploaded'})
+  @ApiProperty({ description: 'Original name when uploaded' })
   originalName: string;
 
-  @ApiProperty({description: 'MIME type'})
+  @ApiProperty({ description: 'MIME type' })
   mimeType: string;
 
-  @ApiProperty({description: 'File size in bytes'})
+  @ApiProperty({ description: 'File size in bytes' })
   size: number;
 
-  @ApiPropertyOptional({description: 'Public URL to access file'})
+  @ApiPropertyOptional({ description: 'Public URL to access file' })
   url?: string;
 
-  @ApiProperty({description: 'Upload timestamp'})
+  @ApiProperty({ description: 'Upload timestamp' })
   uploadedAt: Date;
 }
 
 export class LocationResponseDto {
-  @ApiProperty({description: 'Latitude'})
+  @ApiProperty({ description: 'Latitude' })
   latitude: number;
 
-  @ApiProperty({description: 'Longitude'})
+  @ApiProperty({ description: 'Longitude' })
   longitude: number;
 
-  @ApiPropertyOptional({description: 'Address'})
+  @ApiPropertyOptional({ description: 'Address' })
   address?: string;
 }
 
 export class SplitResponseDto {
-  @ApiProperty({description: 'User ID'})
+  @ApiProperty({ description: 'User ID' })
   userId: string;
 
-  @ApiProperty({description: 'User name'})
+  @ApiProperty({ description: 'User name' })
   userName: string;
 
-  @ApiProperty({description: 'User email'})
+  @ApiProperty({ description: 'User email' })
   userEmail: string;
 
-  @ApiProperty({description: 'Amount for this user'})
+  @ApiProperty({ description: 'Amount for this user' })
   amount: number;
 
-  @ApiPropertyOptional({description: 'Percentage of total'})
+  @ApiPropertyOptional({ description: 'Percentage of total' })
   percentage?: number;
 
-  @ApiProperty({description: 'Whether user has paid'})
+  @ApiProperty({ description: 'Whether user has paid' })
   paid: boolean;
 }
 
 export class SplitDetailsResponseDto {
-  @ApiProperty({description: 'Total amount being split'})
+  @ApiProperty({ description: 'Total amount being split' })
   totalAmount: number;
 
   @ApiProperty({
@@ -79,67 +79,67 @@ export class RecurringPatternResponseDto {
   })
   frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
 
-  @ApiProperty({description: 'Interval between occurrences'})
+  @ApiProperty({ description: 'Interval between occurrences' })
   interval: number;
 
-  @ApiPropertyOptional({description: 'End date for recurrence'})
+  @ApiPropertyOptional({ description: 'End date for recurrence' })
   endDate?: Date;
 
-  @ApiPropertyOptional({description: 'Next occurrence date'})
+  @ApiPropertyOptional({ description: 'Next occurrence date' })
   nextOccurrence?: Date;
 }
 
 export class CategorySummaryDto {
-  @ApiProperty({description: 'Category ID'})
+  @ApiProperty({ description: 'Category ID' })
   id: string;
 
-  @ApiProperty({description: 'Category name'})
+  @ApiProperty({ description: 'Category name' })
   name: string;
 
-  @ApiProperty({description: 'Category display name'})
+  @ApiProperty({ description: 'Category display name' })
   displayName: string;
 
-  @ApiProperty({description: 'Category icon'})
+  @ApiProperty({ description: 'Category icon' })
   icon: string;
 
-  @ApiProperty({description: 'Category color'})
+  @ApiProperty({ description: 'Category color' })
   color: string;
 }
 
 export class UserSummaryDto {
-  @ApiProperty({description: 'User ID'})
+  @ApiProperty({ description: 'User ID' })
   id: string;
 
-  @ApiProperty({description: 'User email'})
+  @ApiProperty({ description: 'User email' })
   email: string;
 
-  @ApiProperty({description: 'User full name'})
+  @ApiProperty({ description: 'User full name' })
   name: string;
 }
 
 export class ExpenseResponseDto {
-  @ApiProperty({description: 'Expense ID'})
+  @ApiProperty({ description: 'Expense ID' })
   id: string;
 
-  @ApiProperty({description: 'Expense description'})
+  @ApiProperty({ description: 'Expense description' })
   description: string;
 
-  @ApiProperty({description: 'Expense amount'})
+  @ApiProperty({ description: 'Expense amount' })
   amount: number;
 
-  @ApiProperty({enum: Currency, description: 'Currency'})
+  @ApiProperty({ enum: Currency, description: 'Currency' })
   currency: Currency;
 
-  @ApiProperty({description: 'Expense date'})
+  @ApiProperty({ description: 'Expense date' })
   date: Date;
 
-  @ApiProperty({type: CategorySummaryDto, description: 'Category details'})
+  @ApiProperty({ type: CategorySummaryDto, description: 'Category details' })
   category: CategorySummaryDto;
 
-  @ApiPropertyOptional({description: 'Subcategory name'})
+  @ApiPropertyOptional({ description: 'Subcategory name' })
   subcategoryName?: string;
 
-  @ApiProperty({description: 'Account ID'})
+  @ApiProperty({ description: 'Account ID' })
   accountId: string;
 
   @ApiProperty({
@@ -148,13 +148,13 @@ export class ExpenseResponseDto {
   })
   user: UserSummaryDto;
 
-  @ApiProperty({enum: PaymentMethod, description: 'Payment method'})
+  @ApiProperty({ enum: PaymentMethod, description: 'Payment method' })
   paymentMethod: PaymentMethod;
 
-  @ApiPropertyOptional({description: 'Vendor name'})
+  @ApiPropertyOptional({ description: 'Vendor name' })
   vendor?: string;
 
-  @ApiPropertyOptional({description: 'Additional notes'})
+  @ApiPropertyOptional({ description: 'Additional notes' })
   notes?: string;
 
   @ApiProperty({
@@ -163,7 +163,7 @@ export class ExpenseResponseDto {
   })
   attachedFiles: AttachedFileResponseDto[];
 
-  @ApiProperty({description: 'Whether expense is recurring'})
+  @ApiProperty({ description: 'Whether expense is recurring' })
   isRecurring: boolean;
 
   @ApiPropertyOptional({
@@ -172,7 +172,7 @@ export class ExpenseResponseDto {
   })
   recurringPattern?: RecurringPatternResponseDto;
 
-  @ApiProperty({description: 'Whether expense is shared'})
+  @ApiProperty({ description: 'Whether expense is shared' })
   isSharedExpense: boolean;
 
   @ApiProperty({
@@ -187,16 +187,16 @@ export class ExpenseResponseDto {
   })
   splitDetails?: SplitDetailsResponseDto;
 
-  @ApiProperty({description: 'Whether expense needs review'})
+  @ApiProperty({ description: 'Whether expense needs review' })
   needsReview: boolean;
 
-  @ApiPropertyOptional({description: 'Review reason'})
+  @ApiPropertyOptional({ description: 'Review reason' })
   reviewReason?: string;
 
-  @ApiPropertyOptional({description: 'Who reviewed the expense'})
+  @ApiPropertyOptional({ description: 'Who reviewed the expense' })
   reviewedBy?: UserSummaryDto;
 
-  @ApiPropertyOptional({description: 'When expense was reviewed'})
+  @ApiPropertyOptional({ description: 'When expense was reviewed' })
   reviewedAt?: Date;
 
   @ApiProperty({
@@ -205,13 +205,13 @@ export class ExpenseResponseDto {
   })
   status: string;
 
-  @ApiProperty({description: 'Whether expense is private'})
+  @ApiProperty({ description: 'Whether expense is private' })
   isPrivate: boolean;
 
-  @ApiProperty({description: 'Whether expense is flagged'})
+  @ApiProperty({ description: 'Whether expense is flagged' })
   isFlagged: boolean;
 
-  @ApiPropertyOptional({description: 'Flag reason'})
+  @ApiPropertyOptional({ description: 'Flag reason' })
   flagReason?: string;
 
   @ApiPropertyOptional({
@@ -220,73 +220,73 @@ export class ExpenseResponseDto {
   })
   location?: LocationResponseDto;
 
-  @ApiProperty({type: [String], description: 'Expense tags'})
+  @ApiProperty({ type: [String], description: 'Expense tags' })
   tags: string[];
 
-  @ApiProperty({description: 'Data source'})
+  @ApiProperty({ description: 'Data source' })
   source: string;
 
-  @ApiPropertyOptional({description: 'AI confidence score'})
+  @ApiPropertyOptional({ description: 'AI confidence score' })
   confidence?: number;
 
-  @ApiProperty({description: 'Creation date'})
+  @ApiProperty({ description: 'Creation date' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Last update date'})
+  @ApiProperty({ description: 'Last update date' })
   updatedAt: Date;
 
-  @ApiProperty({description: 'Whether user can edit this expense'})
+  @ApiProperty({ description: 'Whether user can edit this expense' })
   canEdit: boolean;
 
-  @ApiProperty({description: 'Whether user can delete this expense'})
+  @ApiProperty({ description: 'Whether user can delete this expense' })
   canDelete: boolean;
 }
 
 export class ExpenseListResponseDto {
-  @ApiProperty({type: [ExpenseResponseDto], description: 'List of expenses'})
+  @ApiProperty({ type: [ExpenseResponseDto], description: 'List of expenses' })
   expenses: ExpenseResponseDto[];
 
-  @ApiProperty({description: 'Total number of expenses'})
+  @ApiProperty({ description: 'Total number of expenses' })
   total: number;
 
-  @ApiProperty({description: 'Current page number'})
+  @ApiProperty({ description: 'Current page number' })
   page: number;
 
-  @ApiProperty({description: 'Items per page'})
+  @ApiProperty({ description: 'Items per page' })
   limit: number;
 
-  @ApiProperty({description: 'Total number of pages'})
+  @ApiProperty({ description: 'Total number of pages' })
   totalPages: number;
 
-  @ApiProperty({description: 'Whether there are more pages'})
+  @ApiProperty({ description: 'Whether there are more pages' })
   hasNextPage: boolean;
 
-  @ApiProperty({description: 'Whether there are previous pages'})
+  @ApiProperty({ description: 'Whether there are previous pages' })
   hasPrevPage: boolean;
 }
 
 export class ExpenseStatsResponseDto {
-  @ApiProperty({description: 'Total amount spent'})
+  @ApiProperty({ description: 'Total amount spent' })
   totalAmount: number;
 
-  @ApiProperty({description: 'Number of expenses'})
+  @ApiProperty({ description: 'Number of expenses' })
   totalExpenses: number;
 
-  @ApiProperty({description: 'Average expense amount'})
+  @ApiProperty({ description: 'Average expense amount' })
   averageAmount: number;
 
-  @ApiProperty({description: 'Highest expense amount'})
+  @ApiProperty({ description: 'Highest expense amount' })
   maxAmount: number;
 
-  @ApiProperty({description: 'Lowest expense amount'})
+  @ApiProperty({ description: 'Lowest expense amount' })
   minAmount: number;
 
-  @ApiProperty({description: 'Currency of amounts'})
+  @ApiProperty({ description: 'Currency of amounts' })
   currency: Currency;
 
-  @ApiProperty({description: 'Date range start'})
+  @ApiProperty({ description: 'Date range start' })
   periodStart: Date;
 
-  @ApiProperty({description: 'Date range end'})
+  @ApiProperty({ description: 'Date range end' })
   periodEnd: Date;
 }

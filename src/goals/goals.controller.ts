@@ -1,11 +1,11 @@
-import {BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards} from '@nestjs/common';
-import {ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {GoalsService} from './goals.service';
-import {CreateGoalDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto} from './dto';
-import {GoalPriority, GoalStatus, GoalType} from './schemas/goal.schema';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
-import {ApiResponseDecorator} from '@common/decorators/api-response.decorator';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GoalsService } from './goals.service';
+import { CreateGoalDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto } from './dto';
+import { GoalPriority, GoalStatus, GoalType } from './schemas/goal.schema';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { ApiResponseDecorator } from '@common/decorators/api-response.decorator';
 
 @ApiTags('Goals')
 @Controller('goals')
@@ -82,11 +82,11 @@ export class GoalsController {
     summary: 'Archive a goal',
     description: 'Archive (pause) a goal to temporarily stop tracking it'
   })
-  @ApiParam({name: 'id', description: 'Goal ID'})
+  @ApiParam({ name: 'id', description: 'Goal ID' })
   @ApiResponseDecorator(GoalResponseDto, 200, 'Goal archived successfully')
-  @ApiResponse({status: 404, description: 'Goal not found'})
-  @ApiResponse({status: 400, description: 'Goal cannot be archived (already completed or archived)'})
-  @ApiResponse({status: 403, description: 'Access denied to this goal'})
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 400, description: 'Goal cannot be archived (already completed or archived)' })
+  @ApiResponse({ status: 403, description: 'Access denied to this goal' })
   async archiveGoal(@Param('id') id: string, @CurrentUser() user: any): Promise<GoalResponseDto> {
     return this.goalsService.archiveGoal(id, user.id);
   }
@@ -96,11 +96,11 @@ export class GoalsController {
     summary: 'Unarchive a goal',
     description: 'Unarchive (resume) a previously archived goal'
   })
-  @ApiParam({name: 'id', description: 'Goal ID'})
+  @ApiParam({ name: 'id', description: 'Goal ID' })
   @ApiResponseDecorator(GoalResponseDto, 200, 'Goal unarchived successfully')
-  @ApiResponse({status: 404, description: 'Goal not found'})
-  @ApiResponse({status: 400, description: 'Goal is not archived'})
-  @ApiResponse({status: 403, description: 'Access denied to this goal'})
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 400, description: 'Goal is not archived' })
+  @ApiResponse({ status: 403, description: 'Access denied to this goal' })
   async unarchiveGoal(@Param('id') id: string, @CurrentUser() user: any): Promise<GoalResponseDto> {
     return this.goalsService.unarchiveGoal(id, user.id);
   }
@@ -110,20 +110,20 @@ export class GoalsController {
     summary: 'Mark a goal as completed',
     description: 'Complete a goal and trigger completion celebrations/notifications'
   })
-  @ApiParam({name: 'id', description: 'Goal ID'})
+  @ApiParam({ name: 'id', description: 'Goal ID' })
   @ApiResponseDecorator(GoalResponseDto, 200, 'Goal completed successfully')
-  @ApiResponse({status: 404, description: 'Goal not found'})
-  @ApiResponse({status: 400, description: 'Goal is already completed'})
-  @ApiResponse({status: 403, description: 'Access denied to this goal'})
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 400, description: 'Goal is already completed' })
+  @ApiResponse({ status: 403, description: 'Access denied to this goal' })
   async completeGoal(@Param('id') id: string, @CurrentUser() user: any): Promise<GoalResponseDto> {
     return this.goalsService.completeGoal(id, user.id);
   }
 
   @Delete(':id')
-  @ApiOperation({summary: 'Delete a goal', description: 'Soft delete a goal'})
-  @ApiResponse({status: 200, description: 'Goal deleted successfully'})
+  @ApiOperation({ summary: 'Delete a goal', description: 'Soft delete a goal' })
+  @ApiResponse({ status: 200, description: 'Goal deleted successfully' })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.goalsService.remove(id, user.id);
-    return {message: 'Goal deleted successfully', deletedAt: new Date()};
+    return { message: 'Goal deleted successfully', deletedAt: new Date() };
   }
 }

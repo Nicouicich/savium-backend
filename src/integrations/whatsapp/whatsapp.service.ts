@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 interface WhatsAppMessage {
   from: string;
@@ -30,7 +30,7 @@ export class WhatsappService {
   // Note: This service structure is created but WhatsApp API integration is not implemented
   // In a real implementation, you would integrate with WhatsApp Business API
 
-  async handleWebhook(payload: WebhookPayload): Promise<{processed: boolean; message: string}> {
+  async handleWebhook(payload: WebhookPayload): Promise<{ processed: boolean; message: string }> {
     // Placeholder for webhook handling
     // In real implementation, this would:
     // 1. Verify webhook signature
@@ -42,7 +42,7 @@ export class WhatsappService {
     console.log('WhatsApp webhook received:', JSON.stringify(payload, null, 2));
 
     if (payload.entry?.[0]?.changes?.[0]?.value?.messages) {
-      const {messages} = payload.entry[0].changes[0].value;
+      const { messages } = payload.entry[0].changes[0].value;
 
       for (const message of messages) {
         await this.processMessage({
@@ -108,7 +108,7 @@ export class WhatsappService {
     const descMatch = text.match(/(?:spent|expense).*?on\s+(.+)/i);
     const description = descMatch ? descMatch[1].trim() : text;
 
-    return {amount, description};
+    return { amount, description };
   }
 
   private async processReceiptImage(message: WhatsAppMessage): Promise<void> {

@@ -1,15 +1,15 @@
-import {BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as crypto from 'crypto';
 
-import {AccountsRepository} from './accounts.repository';
-import {User, UserDocument} from '../users/schemas/user.schema';
-import {AccountResponseDto, CreateAccountDto, InviteMemberDto, UpdateAccountDto, UpdateMemberDto} from './dto';
+import { AccountsRepository } from './accounts.repository';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { AccountResponseDto, CreateAccountDto, InviteMemberDto, UpdateAccountDto, UpdateMemberDto } from './dto';
 
-import {ACCOUNT_TYPE_CONFIG, AccountType, DEFAULT_PRIVACY_SETTINGS, InvitationStatus} from '@common/constants/account-types';
-import {AccountRole, Permission, ROLE_PERMISSIONS} from '@common/constants/user-roles';
+import { ACCOUNT_TYPE_CONFIG, AccountType, DEFAULT_PRIVACY_SETTINGS, InvitationStatus } from '@common/constants/account-types';
+import { AccountRole, Permission, ROLE_PERMISSIONS } from '@common/constants/user-roles';
 
 @Injectable()
 export class AccountsService {
@@ -100,7 +100,7 @@ export class AccountsService {
     await this.accountsRepository.softDelete(id);
   }
 
-  async inviteMember(accountId: string, userId: string, inviteMemberDto: InviteMemberDto): Promise<{message: string; invitationId: string}> {
+  async inviteMember(accountId: string, userId: string, inviteMemberDto: InviteMemberDto): Promise<{ message: string; invitationId: string }> {
     const account = await this.accountsRepository.findById(accountId);
     if (!account) {
       throw new NotFoundException('Account not found');
@@ -157,7 +157,7 @@ export class AccountsService {
     };
   }
 
-  async acceptInvitation(token: string, userId: string): Promise<{message: string; account: AccountResponseDto}> {
+  async acceptInvitation(token: string, userId: string): Promise<{ message: string; account: AccountResponseDto }> {
     const account = await this.accountsRepository.findByInvitationToken(token);
     if (!account) {
       throw new NotFoundException('Invalid or expired invitation');
@@ -187,7 +187,7 @@ export class AccountsService {
     };
   }
 
-  async rejectInvitation(token: string): Promise<{message: string}> {
+  async rejectInvitation(token: string): Promise<{ message: string }> {
     const account = await this.accountsRepository.findByInvitationToken(token);
     if (!account) {
       throw new NotFoundException('Invalid or expired invitation');
@@ -195,7 +195,7 @@ export class AccountsService {
 
     await this.accountsRepository.updateInvitation((account as any)._id.toString(), token, InvitationStatus.REJECTED);
 
-    return {message: 'Invitation rejected successfully'};
+    return { message: 'Invitation rejected successfully' };
   }
 
   async updateMember(accountId: string, memberId: string, userId: string, updateMemberDto: UpdateMemberDto): Promise<AccountResponseDto> {
@@ -231,7 +231,7 @@ export class AccountsService {
     return this.mapToResponseDto(updatedAccount);
   }
 
-  async removeMember(accountId: string, memberId: string, userId: string): Promise<{message: string}> {
+  async removeMember(accountId: string, memberId: string, userId: string): Promise<{ message: string }> {
     const account = await this.accountsRepository.findById(accountId);
     if (!account) {
       throw new NotFoundException('Account not found');
@@ -249,7 +249,7 @@ export class AccountsService {
 
     await this.accountsRepository.removeMember(accountId, memberId);
 
-    return {message: 'Member removed successfully'};
+    return { message: 'Member removed successfully' };
   }
 
   async getUserRole(accountId: string, userId: string): Promise<AccountRole | null> {

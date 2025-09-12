@@ -1,7 +1,7 @@
-import {OmitType, PartialType} from '@nestjs/swagger';
-import {IsBoolean, IsOptional, IsString} from 'class-validator';
-import {ApiPropertyOptional} from '@nestjs/swagger';
-import {CreateExpenseDto} from './create-expense.dto';
+import { OmitType, PartialType } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateExpenseDto } from './create-expense.dto';
 
 export class UpdateExpenseDto extends PartialType(OmitType(CreateExpenseDto, ['accountId'] as const)) {
   @ApiPropertyOptional({

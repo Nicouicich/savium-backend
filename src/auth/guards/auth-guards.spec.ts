@@ -1,11 +1,11 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {ExecutionContext} from '@nestjs/common';
-import {Reflector} from '@nestjs/core';
-import {Observable, of} from 'rxjs';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Observable, of } from 'rxjs';
 
-import {JwtAuthGuard} from './jwt-auth.guard';
-import {JwtRefreshGuard} from './jwt-refresh.guard';
-import {LocalAuthGuard} from './local-auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtRefreshGuard } from './jwt-refresh.guard';
+import { LocalAuthGuard } from './local-auth.guard';
 
 describe('Auth Guards - Unit Tests', () => {
   let module: TestingModule;

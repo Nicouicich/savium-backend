@@ -1,16 +1,16 @@
-import {IsString, IsNumber, IsEnum, IsDateString, IsOptional} from 'class-validator';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { IsString, IsNumber, IsEnum, IsDateString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateSubscriptionDto {
   @ApiProperty()
   @IsString()
   userId: string;
 
-  @ApiProperty({enum: ['free', 'basic', 'premium', 'family', 'business']})
+  @ApiProperty({ enum: ['free', 'basic', 'premium', 'family', 'business'] })
   @IsEnum(['free', 'basic', 'premium', 'family', 'business'])
   plan: 'free' | 'basic' | 'premium' | 'family' | 'business';
 
-  @ApiProperty({enum: ['monthly', 'yearly', 'lifetime']})
+  @ApiProperty({ enum: ['monthly', 'yearly', 'lifetime'] })
   @IsEnum(['monthly', 'yearly', 'lifetime'])
   interval: 'monthly' | 'yearly' | 'lifetime';
 

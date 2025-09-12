@@ -1,6 +1,6 @@
-import {Body, Controller, Get, HttpCode, HttpStatus, Post} from '@nestjs/common';
-import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {TelegramService} from './telegram.service';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TelegramService } from './telegram.service';
 
 @ApiTags('Telegram Integration')
 @Controller('integrations/telegram')
@@ -26,7 +26,7 @@ export class TelegramController {
     summary: 'Handle Telegram webhook',
     description: 'Process incoming Telegram bot updates (structure only - not implemented)'
   })
-  @ApiResponse({status: 200, description: 'Webhook processed successfully'})
+  @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(@Body() update: any) {
     try {
       const result = await this.telegramService.handleWebhook(update);
@@ -50,8 +50,8 @@ export class TelegramController {
     status: 200,
     description: 'Webhook configured successfully (mock)'
   })
-  async setWebhook(@Body() body: {url: string}) {
-    const {url} = body;
+  async setWebhook(@Body() body: { url: string }) {
+    const { url } = body;
 
     if (!url) {
       throw new Error('Webhook URL is required');
@@ -70,9 +70,9 @@ export class TelegramController {
     summary: 'Send Telegram message',
     description: 'Send a message via Telegram Bot API (structure only - not implemented)'
   })
-  @ApiResponse({status: 200, description: 'Message sent successfully (mock)'})
-  async sendMessage(@Body() body: {chatId: number; message: string}) {
-    const {chatId, message} = body;
+  @ApiResponse({ status: 200, description: 'Message sent successfully (mock)' })
+  async sendMessage(@Body() body: { chatId: number; message: string }) {
+    const { chatId, message } = body;
 
     if (!chatId || !message) {
       throw new Error('Chat ID and message are required');

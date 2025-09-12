@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, PipelineStage, Types, ClientSession} from 'mongoose';
-import {Expense, ExpenseDocument} from './schemas/expense.schema';
-import {CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto} from './dto';
-import {Currency} from '@common/constants/expense-categories';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, PipelineStage, Types, ClientSession } from 'mongoose';
+import { Expense, ExpenseDocument } from './schemas/expense.schema';
+import { CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto } from './dto';
+import { Currency } from '@common/constants/expense-categories';
 
 export interface ExpenseStats {
   totalAmount: number;
@@ -62,7 +62,7 @@ export class ExpensesRepository {
       }
     });
 
-    return expense.save({session});
+    return expense.save({ session });
   }
 
   async findById(id: string): Promise<ExpenseDocument | null> {
@@ -78,7 +78,7 @@ export class ExpensesRepository {
   }
 
   async findManyOptimized(query: ExpenseQueryDto): Promise<PaginatedResult<ExpenseDocument>> {
-    const {page = 1, limit = 20, sortBy = 'date', sortOrder = 'desc', ...filters} = query;
+    const { page = 1, limit = 20, sortBy = 'date', sortOrder = 'desc', ...filters } = query;
 
     // Build MongoDB query for match stage
     const matchQuery = this.buildMongoQuery(filters);
@@ -93,7 +93,7 @@ export class ExpensesRepository {
     // Optimized aggregation pipeline to avoid N+1 queries
     const aggregationPipeline: PipelineStage[] = [
       // Match stage (filter documents early)
-      {$match: matchQuery},
+      { $match: matchQuery },
 
       // Lookup user information
       {
@@ -102,7 +102,7 @@ export class ExpensesRepository {
           localField: 'userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -113,7 +113,7 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
 
@@ -124,7 +124,7 @@ export class ExpensesRepository {
           localField: 'sharedWith',
           foreignField: '_id',
           as: 'sharedUsers',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -135,16 +135,16 @@ export class ExpensesRepository {
           localField: 'reviewedBy',
           foreignField: '_id',
           as: 'reviewer',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
       // Unwind single value lookups
       {
         $addFields: {
-          userId: {$arrayElemAt: ['$user', 0]},
-          categoryId: {$arrayElemAt: ['$category', 0]},
-          reviewedBy: {$arrayElemAt: ['$reviewer', 0]},
+          userId: { $arrayElemAt: ['$user', 0] },
+          categoryId: { $arrayElemAt: ['$category', 0] },
+          reviewedBy: { $arrayElemAt: ['$reviewer', 0] },
           sharedWith: '$sharedUsers'
         }
       },
@@ -160,13 +160,13 @@ export class ExpensesRepository {
       },
 
       // Sort the results
-      {$sort: sort},
+      { $sort: sort },
 
       // Facet for pagination and counting
       {
         $facet: {
-          data: [{$skip: skip}, {$limit: limit}],
-          totalCount: [{$count: 'count'}]
+          data: [{ $skip: skip }, { $limit: limit }],
+          totalCount: [{ $count: 'count' }]
         }
       }
     ];
@@ -189,7 +189,7 @@ export class ExpensesRepository {
   }
 
   async update(id: string, updateExpenseDto: UpdateExpenseDto): Promise<ExpenseDocument | null> {
-    const updateData: any = {...updateExpenseDto};
+    const updateData: any = { ...updateExpenseDto };
 
     if (updateExpenseDto.categoryId) {
       updateData.categoryId = new Types.ObjectId(updateExpenseDto.categoryId);
@@ -199,7 +199,7 @@ export class ExpensesRepository {
     }
 
     // Update the expense first
-    await this.expenseModel.findByIdAndUpdate(id, updateData, {new: true}).exec();
+    await this.expenseModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
 
     // Use optimized aggregation pipeline to get updated expense (PERF-001)
     const updatedExpenses = await this.getExpenseByIdWithAggregation(id);
@@ -215,7 +215,7 @@ export class ExpensesRepository {
           deletedAt: new Date(),
           deletedBy: new Types.ObjectId(deletedBy)
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -251,7 +251,7 @@ export class ExpensesRepository {
     }
 
     const pipeline: PipelineStage[] = [
-      {$match: matchQuery},
+      { $match: matchQuery },
 
       // Lookup user information
       {
@@ -260,7 +260,7 @@ export class ExpensesRepository {
           localField: 'userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -271,21 +271,21 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
 
       // Transform data
       {
         $addFields: {
-          userId: {$arrayElemAt: ['$user', 0]},
-          categoryId: {$arrayElemAt: ['$category', 0]}
+          userId: { $arrayElemAt: ['$user', 0] },
+          categoryId: { $arrayElemAt: ['$category', 0] }
         }
       },
 
-      {$project: {user: 0, category: 0}},
-      {$sort: {date: -1}},
-      {$limit: limit}
+      { $project: { user: 0, category: 0 } },
+      { $sort: { date: -1 } },
+      { $limit: limit }
     ];
 
     return this.expenseModel.aggregate(pipeline).exec();
@@ -303,7 +303,7 @@ export class ExpensesRepository {
     }
 
     const pipeline: PipelineStage[] = [
-      {$match: matchQuery},
+      { $match: matchQuery },
 
       // Lookup category information
       {
@@ -312,27 +312,27 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
 
       // Transform data
       {
         $addFields: {
-          categoryId: {$arrayElemAt: ['$category', 0]}
+          categoryId: { $arrayElemAt: ['$category', 0] }
         }
       },
 
-      {$project: {category: 0}},
-      {$sort: {date: -1}},
-      {$limit: limit}
+      { $project: { category: 0 } },
+      { $sort: { date: -1 } },
+      { $limit: limit }
     ];
 
     return this.expenseModel.aggregate(pipeline).exec();
   }
 
   async getExpenseStats(accountId?: string, userId?: string, startDate?: Date, endDate?: Date, currency?: Currency): Promise<ExpenseStats> {
-    const matchQuery: any = {isDeleted: false};
+    const matchQuery: any = { isDeleted: false };
 
     if (accountId) {
       matchQuery.accountId = new Types.ObjectId(accountId);
@@ -350,17 +350,17 @@ export class ExpensesRepository {
     }
 
     const pipeline: PipelineStage[] = [
-      {$match: matchQuery},
+      { $match: matchQuery },
       {
         $group: {
           _id: null,
-          totalAmount: {$sum: '$amount'},
-          totalExpenses: {$sum: 1},
-          averageAmount: {$avg: '$amount'},
-          maxAmount: {$max: '$amount'},
-          minAmount: {$min: '$amount'},
-          minDate: {$min: '$date'},
-          maxDate: {$max: '$date'}
+          totalAmount: { $sum: '$amount' },
+          totalExpenses: { $sum: 1 },
+          averageAmount: { $avg: '$amount' },
+          maxAmount: { $max: '$amount' },
+          minAmount: { $min: '$amount' },
+          minDate: { $min: '$date' },
+          maxDate: { $max: '$date' }
         }
       }
     ];
@@ -419,7 +419,7 @@ export class ExpensesRepository {
     }
 
     const pipeline: PipelineStage[] = [
-      {$match: matchQuery},
+      { $match: matchQuery },
       {
         $lookup: {
           from: 'categories',
@@ -428,21 +428,21 @@ export class ExpensesRepository {
           as: 'category'
         }
       },
-      {$unwind: '$category'},
+      { $unwind: '$category' },
       {
         $group: {
           _id: '$categoryId',
-          categoryName: {$first: '$category.displayName'},
-          categoryIcon: {$first: '$category.icon'},
-          categoryColor: {$first: '$category.color'},
-          totalAmount: {$sum: '$amount'},
-          expenseCount: {$sum: 1}
+          categoryName: { $first: '$category.displayName' },
+          categoryIcon: { $first: '$category.icon' },
+          categoryColor: { $first: '$category.color' },
+          totalAmount: { $sum: '$amount' },
+          expenseCount: { $sum: 1 }
         }
       },
       {
         $lookup: {
           from: 'expenses',
-          pipeline: [{$match: matchQuery}, {$group: {_id: null, grandTotal: {$sum: '$amount'}}}],
+          pipeline: [{ $match: matchQuery }, { $group: { _id: null, grandTotal: { $sum: '$amount' } } }],
           as: 'grandTotal'
         }
       },
@@ -451,14 +451,14 @@ export class ExpensesRepository {
           percentage: {
             $multiply: [
               {
-                $divide: ['$totalAmount', {$arrayElemAt: ['$grandTotal.grandTotal', 0]}]
+                $divide: ['$totalAmount', { $arrayElemAt: ['$grandTotal.grandTotal', 0] }]
               },
               100
             ]
           }
         }
       },
-      {$sort: {totalAmount: -1}}
+      { $sort: { totalAmount: -1 } }
     ];
 
     const results = await this.expenseModel.aggregate(pipeline);
@@ -494,22 +494,22 @@ export class ExpensesRepository {
         $match: {
           accountId: new Types.ObjectId(accountId),
           isDeleted: false,
-          date: {$gte: startDate}
+          date: { $gte: startDate }
         }
       },
       {
         $group: {
           _id: {
-            year: {$year: '$date'},
-            month: {$month: '$date'}
+            year: { $year: '$date' },
+            month: { $month: '$date' }
           },
-          totalAmount: {$sum: '$amount'},
-          expenseCount: {$sum: 1},
-          averageAmount: {$avg: '$amount'}
+          totalAmount: { $sum: '$amount' },
+          expenseCount: { $sum: 1 },
+          averageAmount: { $avg: '$amount' }
         }
       },
       {
-        $sort: {'_id.year': 1, '_id.month': 1}
+        $sort: { '_id.year': 1, '_id.month': 1 }
       }
     ];
 
@@ -531,7 +531,7 @@ export class ExpensesRepository {
         $match: {
           accountId: new Types.ObjectId(accountId),
           isRecurring: true,
-          'recurringPattern.nextOccurrence': {$lte: new Date()},
+          'recurringPattern.nextOccurrence': { $lte: new Date() },
           isDeleted: false
         }
       },
@@ -541,27 +541,27 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
       {
         $addFields: {
-          categoryId: {$arrayElemAt: ['$category', 0]}
+          categoryId: { $arrayElemAt: ['$category', 0] }
         }
       },
-      {$project: {category: 0}},
-      {$sort: {'recurringPattern.nextOccurrence': 1}}
+      { $project: { category: 0 } },
+      { $sort: { 'recurringPattern.nextOccurrence': 1 } }
     ];
 
     return this.expenseModel.aggregate(pipeline).exec();
   }
 
   async updateRecurringExpense(expenseId: string, nextOccurrence: Date): Promise<ExpenseDocument | null> {
-    return this.expenseModel.findByIdAndUpdate(expenseId, {'recurringPattern.nextOccurrence': nextOccurrence}, {new: true}).exec();
+    return this.expenseModel.findByIdAndUpdate(expenseId, { 'recurringPattern.nextOccurrence': nextOccurrence }, { new: true }).exec();
   }
 
   async updateRecurringExpenseWithSession(expenseId: string, nextOccurrence: Date, session: ClientSession): Promise<ExpenseDocument | null> {
-    return this.expenseModel.findByIdAndUpdate(expenseId, {'recurringPattern.nextOccurrence': nextOccurrence}, {new: true, session}).exec();
+    return this.expenseModel.findByIdAndUpdate(expenseId, { 'recurringPattern.nextOccurrence': nextOccurrence }, { new: true, session }).exec();
   }
 
   async findExpensesNeedingReview(accountId: string): Promise<ExpenseDocument[]> {
@@ -580,7 +580,7 @@ export class ExpensesRepository {
           localField: 'userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
       {
@@ -589,17 +589,17 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
       {
         $addFields: {
-          userId: {$arrayElemAt: ['$user', 0]},
-          categoryId: {$arrayElemAt: ['$category', 0]}
+          userId: { $arrayElemAt: ['$user', 0] },
+          categoryId: { $arrayElemAt: ['$category', 0] }
         }
       },
-      {$project: {user: 0, category: 0}},
-      {$sort: {createdAt: -1}}
+      { $project: { user: 0, category: 0 } },
+      { $sort: { createdAt: -1 } }
     ];
 
     return this.expenseModel.aggregate(pipeline).exec();
@@ -615,7 +615,7 @@ export class ExpensesRepository {
           reviewedAt: new Date(),
           status: approved ? 'approved' : 'rejected'
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -623,7 +623,7 @@ export class ExpensesRepository {
   async searchExpenses(searchTerm: string, accountId?: string, limit = 50): Promise<ExpenseDocument[]> {
     // Use MongoDB text search for better performance
     const query: any = {
-      $text: {$search: searchTerm},
+      $text: { $search: searchTerm },
       isDeleted: false
     };
 
@@ -638,7 +638,7 @@ export class ExpensesRepository {
       },
       {
         $addFields: {
-          score: {$meta: 'textScore'}
+          score: { $meta: 'textScore' }
         }
       },
       {
@@ -647,7 +647,7 @@ export class ExpensesRepository {
           localField: 'userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
       {
@@ -656,30 +656,30 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
       {
         $addFields: {
-          userId: {$arrayElemAt: ['$user', 0]},
-          categoryId: {$arrayElemAt: ['$category', 0]}
+          userId: { $arrayElemAt: ['$user', 0] },
+          categoryId: { $arrayElemAt: ['$category', 0] }
         }
       },
-      {$project: {user: 0, category: 0}},
+      { $project: { user: 0, category: 0 } },
       {
         $sort: {
           score: -1, // Sort by relevance first
           date: -1 // Then by date for equal scores
         }
       },
-      {$limit: limit}
+      { $limit: limit }
     ];
 
     return this.expenseModel.aggregate(pipeline).exec();
   }
 
   private buildMongoQuery(filters: Partial<ExpenseQueryDto>): any {
-    const query: any = {isDeleted: false};
+    const query: any = { isDeleted: false };
 
     if (filters.accountId) {
       query.accountId = new Types.ObjectId(filters.accountId);
@@ -727,12 +727,12 @@ export class ExpensesRepository {
 
     if (filters.search) {
       // Use MongoDB text search for better performance
-      query.$text = {$search: filters.search};
+      query.$text = { $search: filters.search };
     }
 
     if (filters.tags) {
       const tagArray = filters.tags.split(',').map(tag => tag.trim());
-      query['metadata.tags'] = {$in: tagArray};
+      query['metadata.tags'] = { $in: tagArray };
     }
 
     // Boolean filters
@@ -772,7 +772,7 @@ export class ExpensesRepository {
           localField: 'userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -783,7 +783,7 @@ export class ExpensesRepository {
           localField: 'categoryId',
           foreignField: '_id',
           as: 'category',
-          pipeline: [{$project: {name: 1, displayName: 1, icon: 1, color: 1}}]
+          pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
         }
       },
 
@@ -794,7 +794,7 @@ export class ExpensesRepository {
           localField: 'sharedWith',
           foreignField: '_id',
           as: 'sharedUsers',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -805,16 +805,16 @@ export class ExpensesRepository {
           localField: 'reviewedBy',
           foreignField: '_id',
           as: 'reviewer',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
       // Transform the data to match populate structure
       {
         $addFields: {
-          userId: {$arrayElemAt: ['$user', 0]},
-          categoryId: {$arrayElemAt: ['$category', 0]},
-          reviewedBy: {$arrayElemAt: ['$reviewer', 0]},
+          userId: { $arrayElemAt: ['$user', 0] },
+          categoryId: { $arrayElemAt: ['$category', 0] },
+          reviewedBy: { $arrayElemAt: ['$reviewer', 0] },
           sharedWith: '$sharedUsers'
         }
       },

@@ -1,8 +1,8 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {PassportStrategy} from '@nestjs/passport';
-import {ExtractJwt, Strategy} from 'passport-jwt';
-import {UsersService} from '../../users/users.service';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UsersService } from '../../users/users.service';
 
 export interface JwtPayload {
   sub: string; // User ID
@@ -57,7 +57,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         accounts: user.accounts,
         preferences: user.preferences
       };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid token');
     }
   }

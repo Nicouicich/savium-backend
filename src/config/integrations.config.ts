@@ -1,4 +1,4 @@
-import {registerAs} from '@nestjs/config';
+import { registerAs } from '@nestjs/config';
 
 export default registerAs('integrations', () => ({
   // OpenAI Configuration
@@ -26,10 +26,10 @@ export default registerAs('integrations', () => ({
     apiUrl: 'https://api.telegram.org/bot',
     timeout: 30000,
     commands: [
-      {command: 'start', description: 'Start using Savium AI bot'},
-      {command: 'expense', description: 'Record a new expense'},
-      {command: 'summary', description: 'Get expense summary'},
-      {command: 'help', description: 'Show available commands'}
+      { command: 'start', description: 'Start using Savium AI bot' },
+      { command: 'expense', description: 'Record a new expense' },
+      { command: 'summary', description: 'Get expense summary' },
+      { command: 'help', description: 'Show available commands' }
     ]
   },
 

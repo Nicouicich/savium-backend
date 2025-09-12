@@ -1,5 +1,5 @@
-import {ConfigService} from '@nestjs/config';
-import {stripeMockFactory} from './stripe-mock.factory';
+import { ConfigService } from '@nestjs/config';
+import { stripeMockFactory } from './stripe-mock.factory';
 
 /**
  * Stripe Testing Configuration
@@ -434,4 +434,4 @@ export class StripeTestConfig {
 }
 
 // Export commonly used test data
-export const {TEST_DATA, ERROR_SCENARIOS, PERFORMANCE_CONFIG, SECURITY_CONFIG} = StripeTestConfig;
+export const { TEST_DATA, ERROR_SCENARIOS, PERFORMANCE_CONFIG, SECURITY_CONFIG } = StripeTestConfig;

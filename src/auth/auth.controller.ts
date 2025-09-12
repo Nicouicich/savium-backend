@@ -1,14 +1,14 @@
-import {Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req} from '@nestjs/common';
-import {ApiBearerAuth, ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
-import type {Request, Response} from 'express';
-import {ConfigService} from '@nestjs/config';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
-import {AuthService} from './auth.service';
-import {AuthResponseDto, ChangePasswordDto, LoginDto, RefreshTokenDto, RegisterDto} from './dto';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
-import {Public} from '@common/decorators/public.decorator';
-import {ApiErrorResponse, ApiSuccessResponse} from '@common/decorators/api-response.decorator';
+import { AuthService } from './auth.service';
+import { AuthResponseDto, ChangePasswordDto, LoginDto, RefreshTokenDto, RegisterDto } from './dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { Public } from '@common/decorators/public.decorator';
+import { ApiErrorResponse, ApiSuccessResponse } from '@common/decorators/api-response.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -20,18 +20,19 @@ export class AuthController {
 
   @Post('register')
   @Public()
-  @ApiOperation({summary: 'Register a new user account'})
+  @ApiOperation({ summary: 'Register a new user account' })
   @ApiSuccessResponse(AuthResponseDto, 'User registered successfully')
   @ApiErrorResponse(400, 'Validation failed')
   @ApiErrorResponse(409, 'User already exists')
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
+    console.log('Register payload received:', registerDto);
     return this.authService.register(registerDto);
   }
 
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({summary: 'Login with email and password'})
+  @ApiOperation({ summary: 'Login with email and password' })
   @ApiSuccessResponse(AuthResponseDto, 'User logged in successfully')
   @ApiErrorResponse(401, 'Invalid credentials')
   @ApiErrorResponse(400, 'Validation failed')
@@ -42,15 +43,15 @@ export class AuthController {
   @Post('refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({summary: 'Refresh access token using refresh token'})
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({
     status: 200,
     description: 'Tokens refreshed successfully',
     schema: {
       properties: {
-        accessToken: {type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'},
-        refreshToken: {type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'},
-        expiresIn: {type: 'string', example: '2024-01-01T01:00:00.000Z'}
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        expiresIn: { type: 'string', example: '2024-01-01T01:00:00.000Z' }
       }
     }
   })
@@ -63,52 +64,52 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({summary: 'Logout user and invalidate refresh token'})
+  @ApiOperation({ summary: 'Logout user and invalidate refresh token' })
   @ApiResponse({
     status: 200,
     description: 'User logged out successfully',
-    schema: {properties: {message: {type: 'string', example: 'Logged out successfully'}}}
+    schema: { properties: { message: { type: 'string', example: 'Logged out successfully' } } }
   })
   @ApiErrorResponse(401, 'Unauthorized')
-  async logout(@CurrentUser() user: any, @Req() req: Request, @Body() body?: {refreshToken?: string}) {
+  async logout(@CurrentUser() user: any, @Req() req: Request, @Body() body?: { refreshToken?: string }) {
     const accessToken = this.extractTokenFromRequest(req);
     await this.authService.logout(user.id, accessToken || undefined, body?.refreshToken);
-    return {message: 'Logged out successfully'};
+    return { message: 'Logged out successfully' };
   }
 
   @Post('logout-all')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({summary: 'Logout from all devices (invalidate all refresh tokens)'})
+  @ApiOperation({ summary: 'Logout from all devices (invalidate all refresh tokens)' })
   @ApiResponse({
     status: 200,
     description: 'Logged out from all devices successfully',
-    schema: {properties: {message: {type: 'string', example: 'Logged out from all devices successfully'}}}
+    schema: { properties: { message: { type: 'string', example: 'Logged out from all devices successfully' } } }
   })
   @ApiErrorResponse(401, 'Unauthorized')
   async logoutAll(@CurrentUser() user: any, @Req() req: Request) {
     const accessToken = this.extractTokenFromRequest(req);
     await this.authService.logout(user.id, accessToken || undefined);
-    return {message: 'Logged out from all devices successfully'};
+    return { message: 'Logged out from all devices successfully' };
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({summary: 'Get current authenticated user profile'})
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
   @ApiResponse({
     status: 200,
     description: 'User profile retrieved successfully',
     schema: {
       properties: {
-        id: {type: 'string', example: '507f1f77bcf86cd799439011'},
-        email: {type: 'string', example: 'john.doe@example.com'},
-        firstName: {type: 'string', example: 'John'},
-        lastName: {type: 'string', example: 'Doe'},
-        role: {type: 'string', example: 'user'},
-        isActive: {type: 'boolean', example: true},
-        isEmailVerified: {type: 'boolean', example: true}
+        id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+        email: { type: 'string', example: 'john.doe@example.com' },
+        firstName: { type: 'string', example: 'John' },
+        lastName: { type: 'string', example: 'Doe' },
+        role: { type: 'string', example: 'user' },
+        isActive: { type: 'boolean', example: true },
+        isEmailVerified: { type: 'boolean', example: true }
       }
     }
   })
@@ -121,17 +122,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({summary: 'Change user password'})
+  @ApiOperation({ summary: 'Change user password' })
   @ApiResponse({
     status: 200,
     description: 'Password changed successfully',
-    schema: {properties: {message: {type: 'string', example: 'Password changed successfully'}}}
+    schema: { properties: { message: { type: 'string', example: 'Password changed successfully' } } }
   })
   @ApiErrorResponse(400, 'Current password is incorrect')
   @ApiErrorResponse(401, 'Unauthorized')
   async changePassword(@CurrentUser() user: any, @Body() changePasswordDto: ChangePasswordDto) {
     await this.authService.changePassword(user.id, changePasswordDto);
-    return {message: 'Password changed successfully'};
+    return { message: 'Password changed successfully' };
   }
 
   private extractTokenFromRequest(req: Request): string | null {

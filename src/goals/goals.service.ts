@@ -1,12 +1,12 @@
-import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
-import {v4 as uuidv4} from 'uuid';
-import {CreateGoalDto, GoalProgressDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto} from './dto';
-import {Goal, GoalDocument, GoalStatus, GoalType} from './schemas/goal.schema';
-import {AccountsService} from '../accounts/accounts.service';
-import {UsersService} from '../users/users.service';
-import {PaginatedResult} from '../expenses/expenses.repository';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+import { CreateGoalDto, GoalProgressDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto } from './dto';
+import { Goal, GoalDocument, GoalStatus, GoalType } from './schemas/goal.schema';
+import { AccountsService } from '../accounts/accounts.service';
+import { UsersService } from '../users/users.service';
+import { PaginatedResult } from '../expenses/expenses.repository';
 
 @Injectable()
 export class GoalsService {
@@ -74,10 +74,10 @@ export class GoalsService {
   }
 
   async findAll(query: GoalQueryDto, userId: string): Promise<PaginatedResult<GoalResponseDto>> {
-    const {page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', includeProgress = false, includeMilestones = false, ...filters} = query;
+    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', includeProgress = false, includeMilestones = false, ...filters } = query;
 
     // Build query
-    const mongoQuery: any = {isDeleted: false};
+    const mongoQuery: any = { isDeleted: false };
 
     // Account access filter
     if (filters.accountId) {
@@ -90,7 +90,7 @@ export class GoalsService {
       // Get user's accessible accounts
       const userAccounts = await this.accountsService.findByUser(userId);
       const accountIds = userAccounts.map(account => account.id);
-      mongoQuery.$or = [{accountId: {$in: accountIds}}, {participants: userId}, {createdBy: userId}];
+      mongoQuery.$or = [{ accountId: { $in: accountIds } }, { participants: userId }, { createdBy: userId }];
     }
 
     // Apply filters
@@ -114,7 +114,7 @@ export class GoalsService {
 
     if (filters.nearCompletionOnly) {
       mongoQuery.$expr = {
-        $gte: [{$divide: ['$currentAmount', '$targetAmount']}, 0.8]
+        $gte: [{ $divide: ['$currentAmount', '$targetAmount'] }, 0.8]
       };
     }
 
@@ -123,13 +123,13 @@ export class GoalsService {
       const searchRegex = new RegExp(filters.search, 'i');
       mongoQuery.$and = mongoQuery.$and || [];
       mongoQuery.$and.push({
-        $or: [{title: searchRegex}, {description: searchRegex}]
+        $or: [{ title: searchRegex }, { description: searchRegex }]
       });
     }
 
     if (filters.tags) {
       const tagArray = filters.tags.split(',').map(tag => tag.trim());
-      mongoQuery['metadata.tags'] = {$in: tagArray};
+      mongoQuery['metadata.tags'] = { $in: tagArray };
     }
 
     // Execute query
@@ -172,7 +172,7 @@ export class GoalsService {
   }
 
   async update(id: string, updateGoalDto: UpdateGoalDto, userId: string): Promise<GoalResponseDto> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -190,7 +190,7 @@ export class GoalsService {
     }
 
     // Prepare update data
-    const updateData: any = {...updateGoalDto};
+    const updateData: any = { ...updateGoalDto };
     if (updateGoalDto.participants) {
       updateData.participants = updateGoalDto.participants;
     }
@@ -199,7 +199,7 @@ export class GoalsService {
     }
 
     // Update the goal first
-    await this.goalModel.findOneAndUpdate({id: id}, updateData, {new: true}).exec();
+    await this.goalModel.findOneAndUpdate({ id: id }, updateData, { new: true }).exec();
 
     // Use optimized aggregation pipeline to get updated goal (PERF-001)
     const updatedGoals = await this.getGoalByIdWithAggregation(id);
@@ -209,7 +209,7 @@ export class GoalsService {
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -219,7 +219,7 @@ export class GoalsService {
 
     await this.goalModel
       .findOneAndUpdate(
-        {id: id},
+        { id: id },
         {
           isDeleted: true,
           deletedAt: new Date(),
@@ -295,7 +295,7 @@ export class GoalsService {
   }
 
   async updateProgress(id: string, progressAmount: number, userId: string): Promise<GoalResponseDto> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -323,7 +323,7 @@ export class GoalsService {
   }
 
   async archiveGoal(id: string, userId: string): Promise<GoalResponseDto> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -346,7 +346,7 @@ export class GoalsService {
   }
 
   async unarchiveGoal(id: string, userId: string): Promise<GoalResponseDto> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -372,7 +372,7 @@ export class GoalsService {
   }
 
   async completeGoal(id: string, userId: string): Promise<GoalResponseDto> {
-    const goal = await this.goalModel.findOne({id: id, isDeleted: false}).exec();
+    const goal = await this.goalModel.findOne({ id: id, isDeleted: false }).exec();
 
     if (!goal) {
       throw new NotFoundException('Goal not found');
@@ -520,10 +520,10 @@ export class GoalsService {
    * PERF-001: Optimized aggregation pipeline to avoid N+1 queries
    * Replaces multiple populate() calls with efficient $lookup operations
    */
-  private async getGoalsWithAggregation(matchQuery: any, sort: any, skip: number, limit: number): Promise<{data: any[]; total: number}> {
+  private async getGoalsWithAggregation(matchQuery: any, sort: any, skip: number, limit: number): Promise<{ data: any[]; total: number }> {
     const pipeline = [
       // Match stage - filter documents early
-      {$match: matchQuery},
+      { $match: matchQuery },
 
       // Lookup account information
       {
@@ -532,7 +532,7 @@ export class GoalsService {
           localField: 'accountId',
           foreignField: 'id',
           as: 'account',
-          pipeline: [{$project: {name: 1, type: 1}}]
+          pipeline: [{ $project: { name: 1, type: 1 } }]
         }
       },
 
@@ -543,7 +543,7 @@ export class GoalsService {
           localField: 'createdBy',
           foreignField: 'id',
           as: 'creator',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
@@ -554,15 +554,15 @@ export class GoalsService {
           localField: 'participants',
           foreignField: 'id',
           as: 'participantsData',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: {$arrayElemAt: ['$account', 0]},
-          createdBy: {$arrayElemAt: ['$creator', 0]},
+          accountId: { $arrayElemAt: ['$account', 0] },
+          createdBy: { $arrayElemAt: ['$creator', 0] },
           participants: '$participantsData'
         }
       },
@@ -577,13 +577,13 @@ export class GoalsService {
       },
 
       // Sort the results
-      {$sort: sort},
+      { $sort: sort },
 
       // Facet for pagination and counting
       {
         $facet: {
-          data: [{$skip: skip}, {$limit: limit}],
-          totalCount: [{$count: 'count'}]
+          data: [{ $skip: skip }, { $limit: limit }],
+          totalCount: [{ $count: 'count' }]
         }
       }
     ];
@@ -622,7 +622,7 @@ export class GoalsService {
           localField: 'accountId',
           foreignField: 'id',
           as: 'account',
-          pipeline: [{$project: {name: 1, type: 1}}]
+          pipeline: [{ $project: { name: 1, type: 1 } }]
         }
       },
 
@@ -633,7 +633,7 @@ export class GoalsService {
           localField: 'createdBy',
           foreignField: 'id',
           as: 'creator',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
@@ -644,15 +644,15 @@ export class GoalsService {
           localField: 'participants',
           foreignField: 'id',
           as: 'participantsData',
-          pipeline: [{$project: {firstName: 1, lastName: 1, email: 1}}]
+          pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1 } }]
         }
       },
 
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: {$arrayElemAt: ['$account', 0]},
-          createdBy: {$arrayElemAt: ['$creator', 0]},
+          accountId: { $arrayElemAt: ['$account', 0] },
+          createdBy: { $arrayElemAt: ['$creator', 0] },
           participants: '$participantsData'
         }
       },

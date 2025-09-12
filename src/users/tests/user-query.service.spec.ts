@@ -1,9 +1,9 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {getModelToken} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {UserQueryService} from '../services/user-query.service';
-import {User, UserDocument} from '../schemas/user.schema';
-import {UserProfile, UserProfileDocument} from '../schemas/user-profile.schema';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { UserQueryService } from '../services/user-query.service';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 
 describe('UserQueryService', () => {
   let service: UserQueryService;
@@ -21,10 +21,10 @@ describe('UserQueryService', () => {
     accounts: [],
     refreshTokens: [],
     preferences: {
-      notifications: {email: true, push: true, sms: false, marketing: false},
-      privacy: {dataCollection: true, analytics: true, thirdPartySharing: false},
-      display: {currency: 'USD', language: 'en', theme: 'light', dateFormat: 'MM/DD/YYYY', timeFormat: '12h'},
-      security: {twoFactorEnabled: false, sessionTimeout: 30, requirePasswordChange: false}
+      notifications: { email: true, push: true, sms: false, marketing: false },
+      privacy: { dataCollection: true, analytics: true, thirdPartySharing: false },
+      display: { currency: 'USD', language: 'en', theme: 'light', dateFormat: 'MM/DD/YYYY', timeFormat: '12h' },
+      security: { twoFactorEnabled: false, sessionTimeout: 30, requirePasswordChange: false }
     },
     createdAt: new Date(),
     updatedAt: new Date()
@@ -93,7 +93,7 @@ describe('UserQueryService', () => {
 
       const result = await service.findById(userId, populate);
 
-      expect(mockUserModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({$match: expect.any(Object)})]));
+      expect(mockUserModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ $match: expect.any(Object) })]));
       expect(result).toEqual(mockUser);
     });
 
@@ -118,7 +118,7 @@ describe('UserQueryService', () => {
 
       const result = await service.findByEmail(email);
 
-      expect(mockUserModel.findOne).toHaveBeenCalledWith({email: email.toLowerCase()});
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({ email: email.toLowerCase() });
       expect(result).toEqual(mockUser);
     });
 
@@ -219,7 +219,7 @@ describe('UserQueryService', () => {
       const result = await service.searchUsers(query, limit);
 
       expect(mockUserModel.find).toHaveBeenCalledWith({
-        $or: [{firstName: new RegExp(query, 'i')}, {lastName: new RegExp(query, 'i')}, {email: new RegExp(query, 'i')}],
+        $or: [{ firstName: new RegExp(query, 'i') }, { lastName: new RegExp(query, 'i') }, { email: new RegExp(query, 'i') }],
         isActive: true
       });
       expect(mockQuery.limit).toHaveBeenCalledWith(limit);
@@ -229,8 +229,8 @@ describe('UserQueryService', () => {
 
   describe('getUserStats', () => {
     it('should return user statistics', async () => {
-      const mockRoleStats = [{_id: 'USER', count: 5}];
-      const mockStatusStats = [{_id: 'active', count: 3}];
+      const mockRoleStats = [{ _id: 'USER', count: 5 }];
+      const mockStatusStats = [{ _id: 'active', count: 3 }];
 
       mockUserModel.countDocuments.mockImplementation(filter => {
         if (!filter) return Promise.resolve(10);
@@ -255,8 +255,8 @@ describe('UserQueryService', () => {
         total: 10,
         active: 8,
         verified: 7,
-        byRole: {USER: 5},
-        byStatus: {active: 3}
+        byRole: { USER: 5 },
+        byStatus: { active: 3 }
       });
     });
   });

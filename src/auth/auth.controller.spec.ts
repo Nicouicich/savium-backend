@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigService} from '@nestjs/config';
-import {BadRequestException, ConflictException, UnauthorizedException} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 
-import {AuthController} from './auth.controller';
-import {AuthService} from './auth.service';
-import {RegisterDto, LoginDto, ChangePasswordDto, RefreshTokenDto, AuthResponseDto} from './dto';
-import {UserRole} from '../../common/constants/user-roles';
-import {Request} from 'express';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { RegisterDto, LoginDto, ChangePasswordDto, RefreshTokenDto, AuthResponseDto } from './dto';
+import { UserRole } from '../../common/constants/user-roles';
+import { Request } from 'express';
 
 describe('AuthController - Unit Tests', () => {
   let controller: AuthController;
@@ -233,7 +233,7 @@ describe('AuthController - Unit Tests', () => {
       it('should logout user successfully with refresh token', async () => {
         // Arrange
         const mockUser = createMockUser();
-        const body = {refreshToken: 'specific.refresh.token'};
+        const body = { refreshToken: 'specific.refresh.token' };
 
         authService.logout.mockResolvedValue(undefined);
 
@@ -241,7 +241,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.logout(mockUser, createMockRequest(), body);
 
         // Assert
-        expect(result).toEqual({message: 'Logged out successfully'});
+        expect(result).toEqual({ message: 'Logged out successfully' });
         expect(authService.logout).toHaveBeenCalledWith(mockUser.id, 'mock.access.token', body.refreshToken);
         expect(authService.logout).toHaveBeenCalledTimes(1);
       });
@@ -256,7 +256,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.logout(mockUser, createMockRequest());
 
         // Assert
-        expect(result).toEqual({message: 'Logged out successfully'});
+        expect(result).toEqual({ message: 'Logged out successfully' });
         expect(authService.logout).toHaveBeenCalledWith(mockUser.id, 'mock.access.token', undefined);
         expect(authService.logout).toHaveBeenCalledTimes(1);
       });
@@ -272,7 +272,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.logout(mockUser, createMockRequest(), body);
 
         // Assert
-        expect(result).toEqual({message: 'Logged out successfully'});
+        expect(result).toEqual({ message: 'Logged out successfully' });
         expect(authService.logout).toHaveBeenCalledWith(mockUser.id, 'mock.access.token', undefined);
       });
     });
@@ -288,7 +288,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.logoutAll(mockUser, createMockRequest());
 
         // Assert
-        expect(result).toEqual({message: 'Logged out from all devices successfully'});
+        expect(result).toEqual({ message: 'Logged out from all devices successfully' });
         expect(authService.logout).toHaveBeenCalledWith(mockUser.id, 'mock.access.token');
         expect(authService.logout).toHaveBeenCalledTimes(1);
       });
@@ -351,7 +351,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.changePassword(mockUser, changePasswordDto);
 
         // Assert
-        expect(result).toEqual({message: 'Password changed successfully'});
+        expect(result).toEqual({ message: 'Password changed successfully' });
         expect(authService.changePassword).toHaveBeenCalledWith(mockUser.id, changePasswordDto);
         expect(authService.changePassword).toHaveBeenCalledTimes(1);
       });
@@ -370,7 +370,7 @@ describe('AuthController - Unit Tests', () => {
         const result = await controller.changePassword(mockUser, changePasswordDto);
 
         // Assert
-        expect(result).toEqual({message: 'Password changed successfully'});
+        expect(result).toEqual({ message: 'Password changed successfully' });
         expect(authService.changePassword).toHaveBeenCalledWith(mockUser.id, changePasswordDto);
       });
     });
@@ -478,7 +478,7 @@ describe('AuthController - Unit Tests', () => {
       it('should handle errors during logout', async () => {
         // Arrange
         const mockUser = createMockUser();
-        const body = {refreshToken: 'some.token'};
+        const body = { refreshToken: 'some.token' };
         const logoutError = new Error('Logout failed');
 
         authService.logout.mockRejectedValue(logoutError);
@@ -576,7 +576,7 @@ describe('AuthController - Unit Tests', () => {
       // Act
       const promises = Array(10)
         .fill(null)
-        .map(() => controller.login({...loginDto, email: `test${Math.random()}@example.com`}));
+        .map(() => controller.login({ ...loginDto, email: `test${Math.random()}@example.com` }));
 
       const results = await Promise.all(promises);
 
@@ -608,7 +608,7 @@ describe('AuthController - Unit Tests', () => {
       // Act
       const promises = Array(5)
         .fill(null)
-        .map(() => controller.refresh({...refreshTokenDto, refreshToken: `token${Math.random()}`}));
+        .map(() => controller.refresh({ ...refreshTokenDto, refreshToken: `token${Math.random()}` }));
 
       const results = await Promise.all(promises);
 
@@ -695,7 +695,7 @@ describe('AuthController - Unit Tests', () => {
 
       // Act & Assert
       for (const email of edgeCaseEmails) {
-        const registerDto = createMockRegisterDto({email});
+        const registerDto = createMockRegisterDto({ email });
         const result = await controller.register(registerDto);
         expect(result).toEqual(mockResponse);
         expect(authService.register).toHaveBeenCalledWith(registerDto);
@@ -826,8 +826,8 @@ describe('AuthController - Unit Tests', () => {
       const logoutAllResult = await controller.logoutAll(mockUser, createMockRequest());
 
       // Assert
-      expect(logoutResult).toEqual({message: 'Logged out successfully'});
-      expect(logoutAllResult).toEqual({message: 'Logged out from all devices successfully'});
+      expect(logoutResult).toEqual({ message: 'Logged out successfully' });
+      expect(logoutAllResult).toEqual({ message: 'Logged out from all devices successfully' });
     });
 
     it('should return properly formatted password change response', async () => {
@@ -841,7 +841,7 @@ describe('AuthController - Unit Tests', () => {
       const result = await controller.changePassword(mockUser, changePasswordDto);
 
       // Assert
-      expect(result).toEqual({message: 'Password changed successfully'});
+      expect(result).toEqual({ message: 'Password changed successfully' });
     });
   });
 });

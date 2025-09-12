@@ -1,6 +1,6 @@
-import {IsString, IsNumber, IsOptional, IsArray, IsEnum, Min, MaxLength, IsIn} from 'class-validator';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Transform} from 'class-transformer';
+import { IsString, IsNumber, IsOptional, IsArray, IsEnum, Min, MaxLength, IsIn } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreatePaymentIntentDto {
   @ApiProperty({
@@ -24,7 +24,7 @@ export class CreatePaymentIntentDto {
   })
   @IsNumber()
   @Min(1)
-  @Transform(({value}) => Math.round(value * 100) / 100) // Ensure 2 decimal places
+  @Transform(({ value }) => Math.round(value * 100) / 100) // Ensure 2 decimal places
   amount: number;
 
   @ApiPropertyOptional({
@@ -54,7 +54,7 @@ export class CreatePaymentIntentDto {
   })
   @IsOptional()
   @IsArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   paymentMethodTypes?: string[];
 
   @ApiPropertyOptional({
@@ -69,7 +69,7 @@ export class CreatePaymentIntentDto {
 
   @ApiPropertyOptional({
     description: 'Additional metadata for the payment',
-    example: {orderId: 'order_123', customField: 'value'}
+    example: { orderId: 'order_123', customField: 'value' }
   })
   @IsOptional()
   metadata?: Record<string, any>;

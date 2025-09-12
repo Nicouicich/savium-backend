@@ -1,88 +1,88 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Currency} from '@common/constants/expense-categories';
-import {GoalPriority, GoalStatus, GoalType, RecurrenceType} from '../schemas/goal.schema';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Currency } from '@common/constants/expense-categories';
+import { GoalPriority, GoalStatus, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class GoalMilestoneResponseDto {
-  @ApiProperty({description: 'Milestone title'})
+  @ApiProperty({ description: 'Milestone title' })
   title: string;
 
-  @ApiPropertyOptional({description: 'Milestone description'})
+  @ApiPropertyOptional({ description: 'Milestone description' })
   description?: string;
 
-  @ApiProperty({description: 'Target amount for this milestone'})
+  @ApiProperty({ description: 'Target amount for this milestone' })
   targetAmount: number;
 
-  @ApiProperty({description: 'Current progress amount'})
+  @ApiProperty({ description: 'Current progress amount' })
   currentAmount: number;
 
-  @ApiProperty({description: 'Target date for this milestone'})
+  @ApiProperty({ description: 'Target date for this milestone' })
   targetDate: Date;
 
-  @ApiProperty({description: 'Whether milestone is completed'})
+  @ApiProperty({ description: 'Whether milestone is completed' })
   isCompleted: boolean;
 
-  @ApiPropertyOptional({description: 'Completion date'})
+  @ApiPropertyOptional({ description: 'Completion date' })
   completedAt?: Date;
 
-  @ApiProperty({description: 'Milestone order'})
+  @ApiProperty({ description: 'Milestone order' })
   order: number;
 
-  @ApiProperty({description: 'Progress percentage (0-100)'})
+  @ApiProperty({ description: 'Progress percentage (0-100)' })
   progressPercentage: number;
 
-  @ApiProperty({description: 'Days remaining until target date'})
+  @ApiProperty({ description: 'Days remaining until target date' })
   daysRemaining: number;
 
-  @ApiProperty({description: 'Whether milestone is overdue'})
+  @ApiProperty({ description: 'Whether milestone is overdue' })
   isOverdue: boolean;
 }
 
 export class GoalSettingsResponseDto {
-  @ApiProperty({description: 'Send reminder notifications'})
+  @ApiProperty({ description: 'Send reminder notifications' })
   sendReminders: boolean;
 
-  @ApiProperty({description: 'Days before target date to send reminder'})
+  @ApiProperty({ description: 'Days before target date to send reminder' })
   reminderDaysBefore: number;
 
-  @ApiProperty({description: 'Automatically track progress'})
+  @ApiProperty({ description: 'Automatically track progress' })
   trackAutomatically: boolean;
 
-  @ApiProperty({description: 'Allow going over target amount'})
+  @ApiProperty({ description: 'Allow going over target amount' })
   allowOverage: boolean;
 
-  @ApiProperty({description: 'Show this goal in dashboard'})
+  @ApiProperty({ description: 'Show this goal in dashboard' })
   showInDashboard: boolean;
 
-  @ApiProperty({description: 'Goal is private in shared accounts'})
+  @ApiProperty({ description: 'Goal is private in shared accounts' })
   isPrivate: boolean;
 
-  @ApiProperty({description: 'Linked category IDs', type: [String]})
+  @ApiProperty({ description: 'Linked category IDs', type: [String] })
   linkedCategories: string[];
 
-  @ApiProperty({description: 'Excluded category IDs', type: [String]})
+  @ApiProperty({ description: 'Excluded category IDs', type: [String] })
   excludeCategories: string[];
 }
 
 export class GoalProgressDto {
-  @ApiProperty({description: 'Progress percentage (0-100)'})
+  @ApiProperty({ description: 'Progress percentage (0-100)' })
   progressPercentage: number;
 
-  @ApiProperty({description: 'Days elapsed since goal start'})
+  @ApiProperty({ description: 'Days elapsed since goal start' })
   daysElapsed: number;
 
-  @ApiProperty({description: 'Total days from start to target date'})
+  @ApiProperty({ description: 'Total days from start to target date' })
   totalDays: number;
 
-  @ApiProperty({description: 'Days remaining until target date'})
+  @ApiProperty({ description: 'Days remaining until target date' })
   daysRemaining: number;
 
-  @ApiProperty({description: 'Average progress per day'})
+  @ApiProperty({ description: 'Average progress per day' })
   averageProgressPerDay: number;
 
-  @ApiProperty({description: 'Required daily progress to meet target'})
+  @ApiProperty({ description: 'Required daily progress to meet target' })
   requiredDailyProgress: number;
 
-  @ApiProperty({description: 'Whether goal is on track to completion'})
+  @ApiProperty({ description: 'Whether goal is on track to completion' })
   onTrack: boolean;
 
   @ApiProperty({
@@ -90,13 +90,13 @@ export class GoalProgressDto {
   })
   estimatedCompletion?: Date;
 
-  @ApiProperty({description: 'Whether goal is overdue'})
+  @ApiProperty({ description: 'Whether goal is overdue' })
   isOverdue: boolean;
 
-  @ApiProperty({description: 'Goal health status'})
+  @ApiProperty({ description: 'Goal health status' })
   healthStatus: 'excellent' | 'good' | 'warning' | 'danger';
 
-  @ApiProperty({description: 'Next milestone information'})
+  @ApiProperty({ description: 'Next milestone information' })
   nextMilestone?: {
     title: string;
     targetAmount: number;
@@ -107,107 +107,107 @@ export class GoalProgressDto {
 }
 
 export class GoalStatisticsDto {
-  @ApiProperty({description: 'Number of completed milestones'})
+  @ApiProperty({ description: 'Number of completed milestones' })
   completedMilestones: number;
 
-  @ApiProperty({description: 'Total number of milestones'})
+  @ApiProperty({ description: 'Total number of milestones' })
   totalMilestones: number;
 
-  @ApiProperty({description: 'Best day of progress'})
+  @ApiProperty({ description: 'Best day of progress' })
   bestProgressDay?: {
     date: Date;
     amount: number;
   };
 
-  @ApiProperty({description: 'Longest streak of progress (days)'})
+  @ApiProperty({ description: 'Longest streak of progress (days)' })
   longestStreak: number;
 
-  @ApiProperty({description: 'Current streak of progress (days)'})
+  @ApiProperty({ description: 'Current streak of progress (days)' })
   currentStreak: number;
 
-  @ApiProperty({description: 'Average monthly progress'})
+  @ApiProperty({ description: 'Average monthly progress' })
   averageMonthlyProgress: number;
 
-  @ApiProperty({description: 'Time to complete at current rate (days)'})
+  @ApiProperty({ description: 'Time to complete at current rate (days)' })
   timeToCompletionDays?: number;
 }
 
 export class GoalResponseDto {
-  @ApiProperty({description: 'Goal ID'})
+  @ApiProperty({ description: 'Goal ID' })
   id: string;
 
-  @ApiProperty({description: 'Goal title'})
+  @ApiProperty({ description: 'Goal title' })
   title: string;
 
-  @ApiPropertyOptional({description: 'Goal description'})
+  @ApiPropertyOptional({ description: 'Goal description' })
   description?: string;
 
-  @ApiProperty({description: 'Account ID'})
+  @ApiProperty({ description: 'Account ID' })
   accountId: string;
 
-  @ApiProperty({description: 'Account name'})
+  @ApiProperty({ description: 'Account name' })
   accountName: string;
 
-  @ApiProperty({description: 'User who created the goal'})
+  @ApiProperty({ description: 'User who created the goal' })
   createdBy: {
     id: string;
     name: string;
     email: string;
   };
 
-  @ApiProperty({description: 'Goal type'})
+  @ApiProperty({ description: 'Goal type' })
   type: GoalType;
 
-  @ApiProperty({description: 'Currency'})
+  @ApiProperty({ description: 'Currency' })
   currency: Currency;
 
-  @ApiProperty({description: 'Target amount'})
+  @ApiProperty({ description: 'Target amount' })
   targetAmount: number;
 
-  @ApiProperty({description: 'Current progress amount'})
+  @ApiProperty({ description: 'Current progress amount' })
   currentAmount: number;
 
-  @ApiProperty({description: 'Remaining amount to reach target'})
+  @ApiProperty({ description: 'Remaining amount to reach target' })
   remainingAmount: number;
 
-  @ApiProperty({description: 'Target date for completion'})
+  @ApiProperty({ description: 'Target date for completion' })
   targetDate: Date;
 
-  @ApiPropertyOptional({description: 'Goal start date'})
+  @ApiPropertyOptional({ description: 'Goal start date' })
   startDate?: Date;
 
-  @ApiProperty({description: 'Goal status'})
+  @ApiProperty({ description: 'Goal status' })
   status: GoalStatus;
 
-  @ApiProperty({description: 'Goal priority'})
+  @ApiProperty({ description: 'Goal priority' })
   priority: GoalPriority;
 
-  @ApiProperty({description: 'Recurrence type'})
+  @ApiProperty({ description: 'Recurrence type' })
   recurrence: RecurrenceType;
 
-  @ApiPropertyOptional({description: 'Recurring contribution amount'})
+  @ApiPropertyOptional({ description: 'Recurring contribution amount' })
   recurringAmount?: number;
 
-  @ApiProperty({description: 'Goal settings'})
+  @ApiProperty({ description: 'Goal settings' })
   settings: GoalSettingsResponseDto;
 
-  @ApiProperty({description: 'Participating users'})
+  @ApiProperty({ description: 'Participating users' })
   participants: Array<{
     id: string;
     name: string;
     email: string;
   }>;
 
-  @ApiPropertyOptional({description: 'Linked budget ID'})
+  @ApiPropertyOptional({ description: 'Linked budget ID' })
   linkedBudgetId?: string;
 
-  @ApiPropertyOptional({description: 'Linked budget name'})
+  @ApiPropertyOptional({ description: 'Linked budget name' })
   linkedBudgetName?: string;
 
-  @ApiProperty({description: 'Whether this is a template'})
+  @ApiProperty({ description: 'Whether this is a template' })
   isTemplate: boolean;
 
-  @ApiProperty({description: 'Goal metadata'})
+  @ApiProperty({ description: 'Goal metadata' })
   metadata: {
     source?: string;
     tags?: string[];
@@ -218,10 +218,10 @@ export class GoalResponseDto {
     estimatedCompletion?: Date;
   };
 
-  @ApiProperty({description: 'Created at'})
+  @ApiProperty({ description: 'Created at' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Updated at'})
+  @ApiProperty({ description: 'Updated at' })
   updatedAt: Date;
 
   @ApiPropertyOptional({
@@ -230,42 +230,42 @@ export class GoalResponseDto {
   })
   milestones?: GoalMilestoneResponseDto[];
 
-  @ApiPropertyOptional({description: 'Goal progress information'})
+  @ApiPropertyOptional({ description: 'Goal progress information' })
   progress?: GoalProgressDto;
 
-  @ApiPropertyOptional({description: 'Goal statistics'})
+  @ApiPropertyOptional({ description: 'Goal statistics' })
   statistics?: GoalStatisticsDto;
 }
 
 export class GoalSummaryDto {
-  @ApiProperty({description: 'Total active goals'})
+  @ApiProperty({ description: 'Total active goals' })
   totalActiveGoals: number;
 
-  @ApiProperty({description: 'Total completed goals'})
+  @ApiProperty({ description: 'Total completed goals' })
   totalCompletedGoals: number;
 
-  @ApiProperty({description: 'Total target amount across all goals'})
+  @ApiProperty({ description: 'Total target amount across all goals' })
   totalTargetAmount: number;
 
-  @ApiProperty({description: 'Total progress amount across all goals'})
+  @ApiProperty({ description: 'Total progress amount across all goals' })
   totalProgressAmount: number;
 
-  @ApiProperty({description: 'Overall progress percentage'})
+  @ApiProperty({ description: 'Overall progress percentage' })
   overallProgress: number;
 
-  @ApiProperty({description: 'Number of overdue goals'})
+  @ApiProperty({ description: 'Number of overdue goals' })
   overdueGoalsCount: number;
 
-  @ApiProperty({description: 'Number of goals near completion (>80%)'})
+  @ApiProperty({ description: 'Number of goals near completion (>80%)' })
   nearCompletionCount: number;
 
-  @ApiProperty({description: 'Goals by status'})
+  @ApiProperty({ description: 'Goals by status' })
   goalsByStatus: Record<GoalStatus, number>;
 
-  @ApiProperty({description: 'Goals by type'})
+  @ApiProperty({ description: 'Goals by type' })
   goalsByType: Record<GoalType, number>;
 
-  @ApiProperty({description: 'Goals by priority'})
+  @ApiProperty({ description: 'Goals by priority' })
   goalsByPriority: Record<GoalPriority, number>;
 
   @ApiProperty({
@@ -277,7 +277,7 @@ export class GoalSummaryDto {
     progressThisMonth: number;
   };
 
-  @ApiProperty({description: 'Next goal to complete'})
+  @ApiProperty({ description: 'Next goal to complete' })
   nextToComplete?: {
     id: string;
     title: string;

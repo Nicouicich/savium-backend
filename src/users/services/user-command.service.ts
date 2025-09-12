@@ -1,10 +1,10 @@
-import {Injectable, Logger, ConflictException, InternalServerErrorException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
+import { Injectable, Logger, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import {User, UserDocument} from '../schemas/user.schema';
-import {CreateUserDto} from '../dto/create-user.dto';
-import {UpdateUserDto} from '../dto/update-user.dto';
+import { User, UserDocument } from '../schemas/user.schema';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 /**
  * UserCommandService - Handles all write operations for User entities
@@ -154,7 +154,7 @@ export class UserCommandService {
    */
   async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument | null> {
     try {
-      const updateData: any = {...updateUserDto};
+      const updateData: any = { ...updateUserDto };
 
       // Hash password if being updated
       if (updateUserDto.password) {
@@ -166,7 +166,7 @@ export class UserCommandService {
         updateData.email = updateUserDto.email.toLowerCase();
       }
 
-      const user = await this.userModel.findByIdAndUpdate(id, updateData, {new: true}).exec();
+      const user = await this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
 
       if (user) {
         this.logger.log(`User updated successfully: ${user.email}`);
@@ -193,7 +193,7 @@ export class UserCommandService {
           isActive: false,
           status: 'deactivated'
         },
-        {new: true}
+        { new: true }
       )
       .exec();
 
@@ -224,7 +224,7 @@ export class UserCommandService {
   async updatePassword(id: string, newPassword: string): Promise<UserDocument | null> {
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    return this.userModel.findByIdAndUpdate(id, {password: hashedPassword}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(id, { password: hashedPassword }, { new: true }).exec();
   }
 
   /**
@@ -238,7 +238,7 @@ export class UserCommandService {
           isEmailVerified: true,
           status: 'active'
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -249,7 +249,7 @@ export class UserCommandService {
   async addRefreshToken(id: string, refreshToken: string): Promise<void> {
     await this.userModel
       .findByIdAndUpdate(id, {
-        $push: {refreshTokens: refreshToken}
+        $push: { refreshTokens: refreshToken }
       })
       .exec();
   }
@@ -260,7 +260,7 @@ export class UserCommandService {
   async removeRefreshToken(id: string, refreshToken: string): Promise<void> {
     await this.userModel
       .findByIdAndUpdate(id, {
-        $pull: {refreshTokens: refreshToken}
+        $pull: { refreshTokens: refreshToken }
       })
       .exec();
   }
@@ -280,49 +280,49 @@ export class UserCommandService {
    * Add profile to user
    */
   async addProfile(userId: string, profileId: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(userId, {$addToSet: {profiles: new Types.ObjectId(profileId)}}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(userId, { $addToSet: { profiles: new Types.ObjectId(profileId) } }, { new: true }).exec();
   }
 
   /**
    * Remove profile from user
    */
   async removeProfile(userId: string, profileId: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(userId, {$pull: {profiles: new Types.ObjectId(profileId)}}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(userId, { $pull: { profiles: new Types.ObjectId(profileId) } }, { new: true }).exec();
   }
 
   /**
    * Set active profile
    */
   async setActiveProfile(userId: string, profileId: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(userId, {activeProfileId: new Types.ObjectId(profileId)}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(userId, { activeProfileId: new Types.ObjectId(profileId) }, { new: true }).exec();
   }
 
   /**
    * Add account to user
    */
   async addAccount(userId: string, accountId: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(userId, {$addToSet: {accounts: new Types.ObjectId(accountId)}}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(userId, { $addToSet: { accounts: new Types.ObjectId(accountId) } }, { new: true }).exec();
   }
 
   /**
    * Remove account from user
    */
   async removeAccount(userId: string, accountId: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(userId, {$pull: {accounts: new Types.ObjectId(accountId)}}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(userId, { $pull: { accounts: new Types.ObjectId(accountId) } }, { new: true }).exec();
   }
 
   /**
    * Update user preferences
    */
   async updatePreferences(id: string, preferences: any): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(id, {$set: {preferences}}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(id, { $set: { preferences } }, { new: true }).exec();
   }
 
   /**
    * Update user status
    */
   async updateStatus(id: string, status: string): Promise<UserDocument | null> {
-    return this.userModel.findByIdAndUpdate(id, {status}, {new: true}).exec();
+    return this.userModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
   }
 
   /**
@@ -330,7 +330,7 @@ export class UserCommandService {
    */
   async updateInternal(id: string, updateData: any): Promise<UserDocument | null> {
     try {
-      const user = await this.userModel.findByIdAndUpdate(id, updateData, {new: true}).exec();
+      const user = await this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
 
       if (user) {
         this.logger.log(`User updated internally: ${user.email}`);
@@ -347,7 +347,7 @@ export class UserCommandService {
    * Update last login timestamp
    */
   async updateLastLogin(id: string): Promise<void> {
-    await this.updateInternal(id, {updatedAt: new Date()});
+    await this.updateInternal(id, { updatedAt: new Date() });
   }
 
   /**

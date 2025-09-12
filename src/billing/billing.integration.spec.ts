@@ -1,21 +1,21 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {MongooseModule} from '@nestjs/mongoose';
-import {MongoMemoryServer} from 'mongodb-memory-server';
-import {Connection} from 'mongoose';
-import {getConnectionToken} from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { Connection } from 'mongoose';
+import { getConnectionToken } from '@nestjs/mongoose';
 
-import {StripeService} from './services/stripe.service';
-import {StripeWebhookService} from './services/stripe-webhook.service';
-import {PaymentSecurityService} from './services/payment-security.service';
-import {DatabaseService} from '../database/database.service';
+import { StripeService } from './services/stripe.service';
+import { StripeWebhookService } from './services/stripe-webhook.service';
+import { PaymentSecurityService } from './services/payment-security.service';
+import { DatabaseService } from '../database/database.service';
 
-import {BillingCustomer, BillingCustomerSchema} from './schemas/billing-customer.schema';
-import {Subscription, SubscriptionSchema} from './schemas/subscription.schema';
-import {Payment, PaymentSchema} from './schemas/payment.schema';
-import {EnhancedPayment, EnhancedPaymentSchema} from './schemas/enhanced-payment.schema';
+import { BillingCustomer, BillingCustomerSchema } from './schemas/billing-customer.schema';
+import { Subscription, SubscriptionSchema } from './schemas/subscription.schema';
+import { Payment, PaymentSchema } from './schemas/payment.schema';
+import { EnhancedPayment, EnhancedPaymentSchema } from './schemas/enhanced-payment.schema';
 
-import {stripeConfig} from '../config';
+import { stripeConfig } from '../config';
 
 describe('Billing Integration Tests', () => {
   let module: TestingModule;
@@ -39,10 +39,10 @@ describe('Billing Integration Tests', () => {
         }),
         MongooseModule.forRoot(mongoUri),
         MongooseModule.forFeature([
-          {name: BillingCustomer.name, schema: BillingCustomerSchema},
-          {name: Subscription.name, schema: SubscriptionSchema},
-          {name: Payment.name, schema: PaymentSchema},
-          {name: EnhancedPayment.name, schema: EnhancedPaymentSchema}
+          { name: BillingCustomer.name, schema: BillingCustomerSchema },
+          { name: Subscription.name, schema: SubscriptionSchema },
+          { name: Payment.name, schema: PaymentSchema },
+          { name: EnhancedPayment.name, schema: EnhancedPaymentSchema }
         ])
       ],
       providers: [
@@ -250,7 +250,7 @@ describe('Billing Integration Tests', () => {
           accountType: 'personal'
         });
 
-        await customer.save({session});
+        await customer.save({ session });
         return customer;
       });
 
@@ -275,7 +275,7 @@ describe('Billing Integration Tests', () => {
             accountType: 'personal'
           });
 
-          await customer.save({session});
+          await customer.save({ session });
 
           // Force an error to trigger rollback
           throw new Error('Transaction test error');

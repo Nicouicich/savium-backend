@@ -14,10 +14,10 @@ import {
   MinLength,
   ValidateNested
 } from 'class-validator';
-import {Transform, Type} from 'class-transformer';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Currency} from '@common/constants/expense-categories';
-import {GoalPriority, GoalType, RecurrenceType} from '../schemas/goal.schema';
+import { Transform, Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Currency } from '@common/constants/expense-categories';
+import { GoalPriority, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class CreateGoalMilestoneDto {
   @ApiProperty({
@@ -129,7 +129,7 @@ export class CreateGoalSettingsDto {
   })
   @IsOptional()
   @IsArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   @ArrayMaxSize(20)
   linkedCategories?: string[];
 
@@ -140,7 +140,7 @@ export class CreateGoalSettingsDto {
   })
   @IsOptional()
   @IsArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   @ArrayMaxSize(20)
   excludeCategories?: string[];
 }
@@ -263,7 +263,7 @@ export class CreateGoalDto {
   })
   @IsOptional()
   @IsArray()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => CreateGoalMilestoneDto)
   @ArrayMaxSize(10)
   milestones?: CreateGoalMilestoneDto[];
@@ -284,7 +284,7 @@ export class CreateGoalDto {
   })
   @IsOptional()
   @IsArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   @ArrayMaxSize(50)
   participants?: string[];
 

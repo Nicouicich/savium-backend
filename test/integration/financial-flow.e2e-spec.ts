@@ -1,9 +1,9 @@
-import {INestApplication} from '@nestjs/common';
-import {MongoMemoryServer} from 'mongodb-memory-server';
+import { INestApplication } from '@nestjs/common';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
 
-import {AppModule} from '../../src/app.module';
-import {TestSetup, TestDataFactory, TestUtils} from '../helpers/test-helpers';
+import { AppModule } from '../../src/app.module';
+import { TestSetup, TestDataFactory, TestUtils } from '../helpers/test-helpers';
 
 describe('Financial Flow Integration Tests (e2e)', () => {
   let app: INestApplication;
@@ -81,9 +81,9 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       // Step 5: Add Multiple Expenses
       const expenses = [
-        {amount: 45.5, description: 'Weekly grocery shopping', categoryId},
-        {amount: 12.75, description: 'Coffee and snacks', categoryId},
-        {amount: 89.2, description: 'Monthly grocery haul', categoryId}
+        { amount: 45.5, description: 'Weekly grocery shopping', categoryId },
+        { amount: 12.75, description: 'Coffee and snacks', categoryId },
+        { amount: 89.2, description: 'Monthly grocery haul', categoryId }
       ];
 
       const expenseIds: string[] = [];
@@ -156,7 +156,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
     it('should handle multi-user account scenarios', async () => {
       // Create first user (account owner)
-      const owner = TestDataFactory.createUserData({email: 'owner@test.com'});
+      const owner = TestDataFactory.createUserData({ email: 'owner@test.com' });
       const ownerRegisterResponse = await request(app.getHttpServer()).post('/api/v1/auth/register').send(owner).expect(201);
 
       const ownerToken = ownerRegisterResponse.body.tokens.accessToken;
@@ -173,7 +173,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       const familyAccountId = accountResponse.body.id;
 
       // Create second user (to be invited)
-      const member = TestDataFactory.createUserData({email: 'member@test.com'});
+      const member = TestDataFactory.createUserData({ email: 'member@test.com' });
       const memberRegisterResponse = await request(app.getHttpServer()).post('/api/v1/auth/register').send(member).expect(201);
 
       const memberToken = memberRegisterResponse.body.tokens.accessToken;
@@ -241,14 +241,17 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/expenses').send(overLimitExpense).expect(400); // Should be rejected due to expense limit
 
       // Owner can view all expenses
-      const allExpensesResponse = await TestUtils.authenticatedRequest(app, ownerToken).get('/api/v1/expenses').query({accountId: familyAccountId}).expect(200);
+      const allExpensesResponse = await TestUtils.authenticatedRequest(app, ownerToken)
+        .get('/api/v1/expenses')
+        .query({ accountId: familyAccountId })
+        .expect(200);
 
       expect(allExpensesResponse.body.data).toHaveLength(2);
 
       // Member can view all expenses too (in a family account)
       const memberExpensesResponse = await TestUtils.authenticatedRequest(app, memberToken)
         .get('/api/v1/expenses')
-        .query({accountId: familyAccountId})
+        .query({ accountId: familyAccountId })
         .expect(200);
 
       expect(memberExpensesResponse.body.data).toHaveLength(2);
@@ -355,13 +358,13 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       const accountId = accountResponse.body.id;
 
       const invalidAmounts = [
-        {amount: -10, expectedError: 'negative amounts'},
-        {amount: 1000000000, expectedError: 'too large'},
-        {amount: 10.999, expectedError: 'too many decimal places'},
-        {amount: 'invalid', expectedError: 'not a number'}
+        { amount: -10, expectedError: 'negative amounts' },
+        { amount: 1000000000, expectedError: 'too large' },
+        { amount: 10.999, expectedError: 'too many decimal places' },
+        { amount: 'invalid', expectedError: 'not a number' }
       ];
 
-      for (const {amount} of invalidAmounts) {
+      for (const { amount } of invalidAmounts) {
         const expenseData = {
           amount,
           description: 'Test expense',
@@ -411,7 +414,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       });
 
       // Verify all expenses were created
-      const expensesResponse = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/expenses').query({accountId}).expect(200);
+      const expensesResponse = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/expenses').query({ accountId }).expect(200);
 
       expect(expensesResponse.body.data).toHaveLength(5);
     });

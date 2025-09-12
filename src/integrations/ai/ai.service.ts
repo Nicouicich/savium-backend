@@ -1,5 +1,5 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 
 export interface TicketProcessingResult {
@@ -288,13 +288,13 @@ Provide analysis in JSON format with:
         (acc, expense) => {
           const category = expense.category?.name || 'Other';
           if (!acc[category]) {
-            acc[category] = {total: 0, count: 0};
+            acc[category] = { total: 0, count: 0 };
           }
           acc[category].total += expense.amount;
           acc[category].count += 1;
           return acc;
         },
-        {} as Record<string, {total: number; count: number}>
+        {} as Record<string, { total: number; count: number }>
       );
 
       const budgetData = Object.entries(categoryAverages)
@@ -416,9 +416,9 @@ Return JSON with suggestedBudgets array containing:
 
   private getMockCategorySuggestions(description: string): CategorySuggestion[] {
     const mockCategories = [
-      {name: 'Food & Dining', confidence: 0.8},
-      {name: 'Shopping', confidence: 0.6},
-      {name: 'Other', confidence: 0.4}
+      { name: 'Food & Dining', confidence: 0.8 },
+      { name: 'Shopping', confidence: 0.6 },
+      { name: 'Other', confidence: 0.4 }
     ];
 
     return mockCategories.map((cat, index) => ({

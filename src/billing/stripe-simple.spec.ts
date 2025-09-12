@@ -1,12 +1,12 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigService} from '@nestjs/config';
-import {getModelToken} from '@nestjs/mongoose';
-import {Logger} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { getModelToken } from '@nestjs/mongoose';
+import { Logger } from '@nestjs/common';
 
-import {StripeService} from './services/stripe.service';
-import {Payment} from './schemas/payment.schema';
-import {Subscription} from './schemas/subscription.schema';
-import {BillingCustomer} from './schemas/billing-customer.schema';
+import { StripeService } from './services/stripe.service';
+import { Payment } from './schemas/payment.schema';
+import { Subscription } from './schemas/subscription.schema';
+import { BillingCustomer } from './schemas/billing-customer.schema';
 
 describe('Stripe Services - Basic Test', () => {
   let stripeService: StripeService;

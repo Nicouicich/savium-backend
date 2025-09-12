@@ -1,13 +1,13 @@
-import {Injectable, Logger, NotFoundException, ConflictException, InternalServerErrorException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
+import { Injectable, Logger, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import {CreateUserDto, UpdateUserDto} from './dto';
-import {UserDocument} from './schemas/user.schema';
-import {PaginationDto} from '@common/utils/pagination.util';
-import {UserAuthService} from './services/user-auth.service';
-import {UserProfileService, CreateProfileDto} from './services/user-profile.service';
-import {UserQueryService} from './services/user-query.service';
-import {UserCommandService} from './services/user-command.service';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { UserDocument } from './schemas/user.schema';
+import { PaginationDto } from '@common/utils/pagination.util';
+import { UserAuthService } from './services/user-auth.service';
+import { UserProfileService, CreateProfileDto } from './services/user-profile.service';
+import { UserQueryService } from './services/user-query.service';
+import { UserCommandService } from './services/user-command.service';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +21,7 @@ export class UsersService {
     private readonly userCommandService: UserCommandService
   ) {}
 
-  async create(createUserDto: CreateUserDto & {profile?: CreateProfileDto}): Promise<UserDocument> {
+  async create(createUserDto: CreateUserDto & { profile?: CreateProfileDto }): Promise<UserDocument> {
     // Check if user already exists
     const existingUser = await this.userQueryService.findByEmail(createUserDto.email);
     if (existingUser) {
@@ -117,7 +117,7 @@ export class UsersService {
     await this.userCommandService.updateLastLogin(id);
   }
 
-  async addRefreshToken(id: string, refreshToken: string, deviceInfo?: {userAgent?: string; ipAddress?: string; deviceId?: string}): Promise<void> {
+  async addRefreshToken(id: string, refreshToken: string, deviceInfo?: { userAgent?: string; ipAddress?: string; deviceId?: string }): Promise<void> {
     await this.userAuthService.addRefreshToken(id, refreshToken, deviceInfo);
   }
 

@@ -1,18 +1,18 @@
-import {BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {InjectConnection} from '@nestjs/mongoose';
-import {Connection, ClientSession} from 'mongoose';
-import {ExpenseStats, ExpensesRepository, PaginatedResult} from './expenses.repository';
-import {CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto} from './dto';
-import {ExpenseDocument} from './schemas/expense.schema';
-import {AccountsService} from '../accounts/accounts.service';
-import {CategoriesService} from '../categories/categories.service';
-import {UsersService} from '../users/users.service';
-import {UserRole} from '@common/constants/user-roles';
-import {FileUploadService, UploadedFile} from './file-upload.service';
-import {Currency} from '@common/constants/expense-categories';
-import {AccountNotFoundException, ExpenseNotFoundException, UnauthorizedAccessException, ValidationException} from '@common/exceptions';
-import {EnhancedCacheService} from '@common/services/enhanced-cache.service';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection, ClientSession } from 'mongoose';
+import { ExpenseStats, ExpensesRepository, PaginatedResult } from './expenses.repository';
+import { CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto } from './dto';
+import { ExpenseDocument } from './schemas/expense.schema';
+import { AccountsService } from '../accounts/accounts.service';
+import { CategoriesService } from '../categories/categories.service';
+import { UsersService } from '../users/users.service';
+import { UserRole } from '@common/constants/user-roles';
+import { FileUploadService, UploadedFile } from './file-upload.service';
+import { Currency } from '@common/constants/expense-categories';
+import { AccountNotFoundException, ExpenseNotFoundException, UnauthorizedAccessException, ValidationException } from '@common/exceptions';
+import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
 @Injectable()
 export class ExpensesService {
@@ -425,7 +425,7 @@ export class ExpensesService {
     }
 
     // Set cooldown
-    await this.cacheService.set(`last_process:${operationKey}`, Date.now(), {ttl: 600}); // 10 minutes TTL
+    await this.cacheService.set(`last_process:${operationKey}`, Date.now(), { ttl: 600 }); // 10 minutes TTL
 
     this.logger.log('Starting automated recurring expenses processing', {
       authorizedBy: adminUserId ? `admin:${adminUserId}` : 'system',

@@ -1,9 +1,9 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {Category, CategoryDocument} from './schemas/category.schema';
-import {CreateCategoryDto, UpdateCategoryDto} from './dto';
-import {ExpenseCategory} from '@common/constants/expense-categories';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Category, CategoryDocument } from './schemas/category.schema';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto';
+import { ExpenseCategory } from '@common/constants/expense-categories';
 
 @Injectable()
 export class CategoriesRepository {
@@ -24,24 +24,24 @@ export class CategoriesRepository {
   }
 
   async findAll(accountId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
-    const query: any = {isDeleted: false, isActive: true};
+    const query: any = { isDeleted: false, isActive: true };
 
     if (accountId && includeGlobal) {
       // Include both account-specific and global categories
-      query.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     } else if (accountId) {
       // Only account-specific categories
       query.accountId = new Types.ObjectId(accountId);
     } else {
       // Only global categories
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    return this.categoryModel.find(query).sort({sortOrder: 1, displayName: 1}).exec();
+    return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
   async findById(id: string): Promise<CategoryDocument | null> {
-    return this.categoryModel.findOne({_id: id, isDeleted: false}).populate('createdBy', 'email firstName lastName').exec();
+    return this.categoryModel.findOne({ _id: id, isDeleted: false }).populate('createdBy', 'email firstName lastName').exec();
   }
 
   async findByName(name: string, accountId?: string): Promise<CategoryDocument | null> {
@@ -53,7 +53,7 @@ export class CategoriesRepository {
     if (accountId) {
       query.accountId = new Types.ObjectId(accountId);
     } else {
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
     return this.categoryModel.findOne(query).exec();
@@ -67,32 +67,32 @@ export class CategoriesRepository {
     };
 
     if (accountId) {
-      query.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     } else {
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    return this.categoryModel.find(query).sort({sortOrder: 1, displayName: 1}).exec();
+    return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
   async findByKeywords(keywords: string[], accountId?: string): Promise<CategoryDocument[]> {
     const query: any = {
-      keywords: {$in: keywords},
+      keywords: { $in: keywords },
       isDeleted: false,
       isActive: true
     };
 
     if (accountId) {
-      query.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     } else {
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    return this.categoryModel.find(query).sort({sortOrder: 1, displayName: 1}).exec();
+    return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryDocument | null> {
-    return this.categoryModel.findByIdAndUpdate(id, updateCategoryDto, {new: true}).populate('createdBy', 'email firstName lastName').exec();
+    return this.categoryModel.findByIdAndUpdate(id, updateCategoryDto, { new: true }).populate('createdBy', 'email firstName lastName').exec();
   }
 
   async softDelete(id: string): Promise<CategoryDocument | null> {
@@ -104,7 +104,7 @@ export class CategoriesRepository {
           deletedAt: new Date(),
           isActive: false
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -129,7 +129,7 @@ export class CategoriesRepository {
             }
           }
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -161,8 +161,8 @@ export class CategoriesRepository {
           _id: categoryId,
           'subcategories.name': subcategoryName
         },
-        {$set: updateFields},
-        {new: true}
+        { $set: updateFields },
+        { new: true }
       )
       .exec();
   }
@@ -172,19 +172,19 @@ export class CategoriesRepository {
       .findByIdAndUpdate(
         categoryId,
         {
-          $pull: {subcategories: {name: subcategoryName}}
+          $pull: { subcategories: { name: subcategoryName } }
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
 
   async updateSortOrder(categoryId: string, sortOrder: number): Promise<CategoryDocument | null> {
-    return this.categoryModel.findByIdAndUpdate(categoryId, {sortOrder}, {new: true}).exec();
+    return this.categoryModel.findByIdAndUpdate(categoryId, { sortOrder }, { new: true }).exec();
   }
 
   async toggleVisibility(categoryId: string, isVisible: boolean): Promise<CategoryDocument | null> {
-    return this.categoryModel.findByIdAndUpdate(categoryId, {isVisible}, {new: true}).exec();
+    return this.categoryModel.findByIdAndUpdate(categoryId, { isVisible }, { new: true }).exec();
   }
 
   async getCustomCategories(accountId: string): Promise<CategoryDocument[]> {
@@ -194,26 +194,32 @@ export class CategoriesRepository {
         isCustom: true,
         isDeleted: false
       })
-      .sort({sortOrder: 1, displayName: 1})
+      .sort({ sortOrder: 1, displayName: 1 })
       .exec();
   }
 
   async getGlobalCategories(): Promise<CategoryDocument[]> {
     return this.categoryModel
       .find({
-        accountId: {$exists: false},
+        accountId: { $exists: false },
         isCustom: false,
         isDeleted: false,
         isActive: true
       })
-      .sort({sortOrder: 1, displayName: 1})
+      .sort({ sortOrder: 1, displayName: 1 })
       .exec();
   }
 
   async searchCategories(searchTerm: string, accountId?: string): Promise<CategoryDocument[]> {
     const regex = new RegExp(searchTerm, 'i');
     const query: any = {
-      $or: [{displayName: regex}, {description: regex}, {keywords: regex}, {'subcategories.displayName': regex}, {'subcategories.description': regex}],
+      $or: [
+        { displayName: regex },
+        { description: regex },
+        { keywords: regex },
+        { 'subcategories.displayName': regex },
+        { 'subcategories.description': regex }
+      ],
       isDeleted: false,
       isActive: true,
       isVisible: true
@@ -222,14 +228,14 @@ export class CategoriesRepository {
     if (accountId) {
       query.$and = [
         {
-          $or: [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}]
+          $or: [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }]
         }
       ];
     } else {
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    return this.categoryModel.find(query).sort({sortOrder: 1, displayName: 1}).exec();
+    return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
   async getCategoryStats(accountId?: string): Promise<{
@@ -239,43 +245,43 @@ export class CategoriesRepository {
     active: number;
     inactive: number;
   }> {
-    const baseQuery: any = {isDeleted: false};
+    const baseQuery: any = { isDeleted: false };
 
     if (accountId) {
-      baseQuery.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      baseQuery.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     }
 
     const [stats] = await this.categoryModel.aggregate([
-      {$match: baseQuery},
+      { $match: baseQuery },
       {
         $group: {
           _id: null,
-          total: {$sum: 1},
+          total: { $sum: 1 },
           custom: {
             $sum: {
-              $cond: [{$eq: ['$isCustom', true]}, 1, 0]
+              $cond: [{ $eq: ['$isCustom', true] }, 1, 0]
             }
           },
           global: {
             $sum: {
-              $cond: [{$eq: ['$isCustom', false]}, 1, 0]
+              $cond: [{ $eq: ['$isCustom', false] }, 1, 0]
             }
           },
           active: {
             $sum: {
-              $cond: [{$eq: ['$isActive', true]}, 1, 0]
+              $cond: [{ $eq: ['$isActive', true] }, 1, 0]
             }
           },
           inactive: {
             $sum: {
-              $cond: [{$eq: ['$isActive', false]}, 1, 0]
+              $cond: [{ $eq: ['$isActive', false] }, 1, 0]
             }
           }
         }
       }
     ]);
 
-    return stats || {total: 0, custom: 0, global: 0, active: 0, inactive: 0};
+    return stats || { total: 0, custom: 0, global: 0, active: 0, inactive: 0 };
   }
 
   async getPopularCategories(
@@ -298,12 +304,12 @@ export class CategoriesRepository {
     };
 
     if (accountId) {
-      query.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     } else {
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    const categories = await this.categoryModel.find(query).sort({createdAt: -1}).limit(limit).select('name displayName').exec();
+    const categories = await this.categoryModel.find(query).sort({ createdAt: -1 }).limit(limit).select('name displayName').exec();
 
     return categories.map(cat => ({
       categoryId: (cat as any)._id.toString(),
@@ -314,42 +320,42 @@ export class CategoriesRepository {
   }
 
   async findAllHierarchy(accountId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
-    const query: any = {isDeleted: false};
+    const query: any = { isDeleted: false };
 
     if (accountId && includeGlobal) {
       // Include both account-specific and global categories
-      query.$or = [{accountId: new Types.ObjectId(accountId)}, {accountId: {$exists: false}}];
+      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
     } else if (accountId) {
       // Only account-specific categories
       query.accountId = new Types.ObjectId(accountId);
     } else {
       // Only global categories
-      query.accountId = {$exists: false};
+      query.accountId = { $exists: false };
     }
 
-    return this.categoryModel.find(query).populate('createdBy', 'email firstName lastName').sort({sortOrder: 1, displayName: 1}).exec();
+    return this.categoryModel.find(query).populate('createdBy', 'email firstName lastName').sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
-  async bulkUpdate(categoryIds: string[], updateData: Partial<CategoryDocument>): Promise<{modifiedCount: number}> {
+  async bulkUpdate(categoryIds: string[], updateData: Partial<CategoryDocument>): Promise<{ modifiedCount: number }> {
     const objectIds = categoryIds.map(id => new Types.ObjectId(id));
 
     const result = await this.categoryModel.updateMany(
       {
-        _id: {$in: objectIds},
+        _id: { $in: objectIds },
         isDeleted: false
       },
-      {$set: updateData}
+      { $set: updateData }
     );
 
-    return {modifiedCount: result.modifiedCount};
+    return { modifiedCount: result.modifiedCount };
   }
 
-  async bulkSoftDelete(categoryIds: string[]): Promise<{modifiedCount: number}> {
+  async bulkSoftDelete(categoryIds: string[]): Promise<{ modifiedCount: number }> {
     const objectIds = categoryIds.map(id => new Types.ObjectId(id));
 
     const result = await this.categoryModel.updateMany(
       {
-        _id: {$in: objectIds},
+        _id: { $in: objectIds },
         isDeleted: false
       },
       {
@@ -361,7 +367,7 @@ export class CategoriesRepository {
       }
     );
 
-    return {modifiedCount: result.modifiedCount};
+    return { modifiedCount: result.modifiedCount };
   }
 
   async findByIds(categoryIds: string[]): Promise<CategoryDocument[]> {
@@ -369,7 +375,7 @@ export class CategoriesRepository {
 
     return this.categoryModel
       .find({
-        _id: {$in: objectIds},
+        _id: { $in: objectIds },
         isDeleted: false
       })
       .exec();

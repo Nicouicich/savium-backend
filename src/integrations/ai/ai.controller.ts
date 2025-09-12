@@ -1,9 +1,9 @@
-import {BadRequestException, Body, Controller, Get, Post, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
-import {FileInterceptor} from '@nestjs/platform-express';
-import {ApiConsumes, ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {AiService} from './ai.service';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
+import { BadRequestException, Body, Controller, Get, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AiService } from './ai.service';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('AI Integration')
 @Controller('integrations/ai')
@@ -16,7 +16,7 @@ export class AiController {
     summary: 'Get AI service status',
     description: 'Get current AI integration status and available features'
   })
-  @ApiResponse({status: 200, description: 'AI service status retrieved'})
+  @ApiResponse({ status: 200, description: 'AI service status retrieved' })
   async getStatus() {
     return this.aiService.getServiceStatus();
   }
@@ -57,8 +57,8 @@ export class AiController {
     status: 200,
     description: 'Categorization suggestions provided (mock response)'
   })
-  async categorizeExpense(@Body() body: {description: string; amount: number; vendor?: string}, @CurrentUser() user: any) {
-    const {description, amount, vendor} = body;
+  async categorizeExpense(@Body() body: { description: string; amount: number; vendor?: string }, @CurrentUser() user: any) {
+    const { description, amount, vendor } = body;
 
     if (!description || !amount) {
       throw new BadRequestException('Description and amount are required');
@@ -84,8 +84,8 @@ export class AiController {
     status: 200,
     description: 'Spending analysis provided (mock response)'
   })
-  async analyzeSpending(@Body() body: {accountId: string; timeframe?: string}, @CurrentUser() user: any) {
-    const {accountId} = body;
+  async analyzeSpending(@Body() body: { accountId: string; timeframe?: string }, @CurrentUser() user: any) {
+    const { accountId } = body;
 
     if (!accountId) {
       throw new BadRequestException('Account ID is required');
@@ -112,8 +112,8 @@ export class AiController {
     status: 200,
     description: 'Budget suggestions provided (mock response)'
   })
-  async suggestBudgets(@Body() body: {accountId: string; accountType?: string}, @CurrentUser() user: any) {
-    const {accountId, accountType} = body;
+  async suggestBudgets(@Body() body: { accountId: string; accountType?: string }, @CurrentUser() user: any) {
+    const { accountId, accountType } = body;
 
     if (!accountId) {
       throw new BadRequestException('Account ID is required');

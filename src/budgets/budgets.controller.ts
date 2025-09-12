@@ -1,11 +1,11 @@
-import {BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards} from '@nestjs/common';
-import {ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {BudgetsService} from './budgets.service';
-import {BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto, CreateBudgetDto, UpdateBudgetDto} from './dto';
-import {BudgetPeriod, BudgetStatus} from './schemas/budget.schema';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
-import {ApiResponseDecorator} from '@common/decorators/api-response.decorator';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BudgetsService } from './budgets.service';
+import { BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto, CreateBudgetDto, UpdateBudgetDto } from './dto';
+import { BudgetPeriod, BudgetStatus } from './schemas/budget.schema';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { ApiResponseDecorator } from '@common/decorators/api-response.decorator';
 
 @ApiTags('Budgets')
 @Controller('budgets')
@@ -28,7 +28,7 @@ export class BudgetsController {
     summary: 'Create budget from template',
     description: 'Create a new budget based on an existing template'
   })
-  @ApiParam({name: 'templateId', description: 'Template budget ID'})
+  @ApiParam({ name: 'templateId', description: 'Template budget ID' })
   @ApiResponseDecorator(BudgetResponseDto, 201, 'Budget created from template successfully')
   async createFromTemplate(
     @Param('templateId') templateId: string,
@@ -174,7 +174,7 @@ export class BudgetsController {
     summary: 'Get budget by ID',
     description: 'Get detailed information about a specific budget including progress and breakdowns'
   })
-  @ApiParam({name: 'id', description: 'Budget ID'})
+  @ApiParam({ name: 'id', description: 'Budget ID' })
   @ApiResponseDecorator(BudgetResponseDto, 200, 'Budget retrieved successfully')
   async findOne(@Param('id') id: string, @CurrentUser() user: any): Promise<BudgetResponseDto> {
     return this.budgetsService.findOne(id, user.id);
@@ -185,7 +185,7 @@ export class BudgetsController {
     summary: 'Update a budget',
     description: 'Update budget details, allocations, and settings'
   })
-  @ApiParam({name: 'id', description: 'Budget ID'})
+  @ApiParam({ name: 'id', description: 'Budget ID' })
   @ApiResponseDecorator(BudgetResponseDto, 200, 'Budget updated successfully')
   async update(@Param('id') id: string, @Body() updateBudgetDto: UpdateBudgetDto, @CurrentUser() user: any): Promise<BudgetResponseDto> {
     return this.budgetsService.update(id, updateBudgetDto, user.id);
@@ -196,8 +196,8 @@ export class BudgetsController {
     summary: 'Recalculate budget spending',
     description: 'Manually trigger recalculation of budget spending and progress'
   })
-  @ApiParam({name: 'id', description: 'Budget ID'})
-  @ApiResponse({status: 200, description: 'Budget recalculated successfully'})
+  @ApiParam({ name: 'id', description: 'Budget ID' })
+  @ApiResponse({ status: 200, description: 'Budget recalculated successfully' })
   async recalculateBudget(@Param('id') id: string, @CurrentUser() user: any) {
     // Verify user has access to this budget first
     await this.budgetsService.findOne(id, user.id);
@@ -216,8 +216,8 @@ export class BudgetsController {
     summary: 'Delete a budget',
     description: 'Soft delete a budget (marks as deleted but preserves data)'
   })
-  @ApiParam({name: 'id', description: 'Budget ID'})
-  @ApiResponse({status: 200, description: 'Budget deleted successfully'})
+  @ApiParam({ name: 'id', description: 'Budget ID' })
+  @ApiResponse({ status: 200, description: 'Budget deleted successfully' })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.budgetsService.remove(id, user.id);
     return {
@@ -248,7 +248,7 @@ export class BudgetsController {
     summary: 'Get active budgets for account',
     description: 'Get all active budgets for a specific account with progress information'
   })
-  @ApiParam({name: 'accountId', description: 'Account ID'})
+  @ApiParam({ name: 'accountId', description: 'Account ID' })
   @ApiResponseDecorator([BudgetResponseDto], 200, 'Active budgets retrieved successfully')
   async getActiveBudgets(@Param('accountId') accountId: string, @CurrentUser() user: any) {
     const query: BudgetQueryDto = {
@@ -265,7 +265,7 @@ export class BudgetsController {
     summary: 'Get current period budgets',
     description: 'Get budgets that are active for the current time period'
   })
-  @ApiParam({name: 'accountId', description: 'Account ID'})
+  @ApiParam({ name: 'accountId', description: 'Account ID' })
   @ApiResponseDecorator([BudgetResponseDto], 200, 'Current period budgets retrieved successfully')
   async getCurrentPeriodBudgets(@Param('accountId') accountId: string, @CurrentUser() user: any) {
     const now = new Date();

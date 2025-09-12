@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 interface NotificationPayload {
   userId: string;
@@ -20,7 +20,7 @@ interface EmailNotification {
 export class NotificationsService {
   // Note: This service structure is created but actual notification sending is not implemented
 
-  async sendNotification(notification: NotificationPayload): Promise<{sent: boolean; channels: string[]}> {
+  async sendNotification(notification: NotificationPayload): Promise<{ sent: boolean; channels: string[] }> {
     console.log('Sending notification:', notification);
 
     const channels = notification.channels || ['email'];

@@ -1,53 +1,53 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Currency} from '@common/constants/expense-categories';
-import {AlertType, BudgetPeriod, BudgetStatus} from '../schemas/budget.schema';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Currency } from '@common/constants/expense-categories';
+import { AlertType, BudgetPeriod, BudgetStatus } from '../schemas/budget.schema';
 
 export class BudgetAlertResponseDto {
-  @ApiProperty({description: 'Alert type'})
+  @ApiProperty({ description: 'Alert type' })
   type: AlertType;
 
-  @ApiProperty({description: 'Alert threshold'})
+  @ApiProperty({ description: 'Alert threshold' })
   threshold: number;
 
-  @ApiProperty({description: 'Whether alert is enabled'})
+  @ApiProperty({ description: 'Whether alert is enabled' })
   enabled: boolean;
 
-  @ApiProperty({description: 'Whether alert has been triggered'})
+  @ApiProperty({ description: 'Whether alert has been triggered' })
   triggered: boolean;
 
-  @ApiPropertyOptional({description: 'When alert was triggered'})
+  @ApiPropertyOptional({ description: 'When alert was triggered' })
   triggeredAt?: Date;
 
-  @ApiPropertyOptional({description: 'Alert message'})
+  @ApiPropertyOptional({ description: 'Alert message' })
   message?: string;
 }
 
 export class CategoryBudgetResponseDto {
-  @ApiProperty({description: 'Category ID'})
+  @ApiProperty({ description: 'Category ID' })
   categoryId: string;
 
-  @ApiProperty({description: 'Category name'})
+  @ApiProperty({ description: 'Category name' })
   categoryName: string;
 
-  @ApiProperty({description: 'Category icon'})
+  @ApiProperty({ description: 'Category icon' })
   categoryIcon: string;
 
-  @ApiProperty({description: 'Category color'})
+  @ApiProperty({ description: 'Category color' })
   categoryColor: string;
 
-  @ApiProperty({description: 'Allocated amount'})
+  @ApiProperty({ description: 'Allocated amount' })
   allocatedAmount: number;
 
-  @ApiProperty({description: 'Amount spent'})
+  @ApiProperty({ description: 'Amount spent' })
   spentAmount: number;
 
-  @ApiProperty({description: 'Remaining amount'})
+  @ApiProperty({ description: 'Remaining amount' })
   remainingAmount: number;
 
-  @ApiProperty({description: 'Progress percentage (0-100)'})
+  @ApiProperty({ description: 'Progress percentage (0-100)' })
   progressPercentage: number;
 
-  @ApiProperty({description: 'Whether budget is over allocated amount'})
+  @ApiProperty({ description: 'Whether budget is over allocated amount' })
   isOverBudget: boolean;
 
   @ApiProperty({
@@ -56,18 +56,18 @@ export class CategoryBudgetResponseDto {
   })
   alerts: BudgetAlertResponseDto[];
 
-  @ApiProperty({description: 'Whether expense tracking is enabled'})
+  @ApiProperty({ description: 'Whether expense tracking is enabled' })
   trackExpenses: boolean;
 }
 
 export class BudgetProgressDto {
-  @ApiProperty({description: 'Total progress percentage (0-100)'})
+  @ApiProperty({ description: 'Total progress percentage (0-100)' })
   overallProgress: number;
 
-  @ApiProperty({description: 'Days elapsed in budget period'})
+  @ApiProperty({ description: 'Days elapsed in budget period' })
   daysElapsed: number;
 
-  @ApiProperty({description: 'Total days in budget period'})
+  @ApiProperty({ description: 'Total days in budget period' })
   totalDays: number;
 
   @ApiProperty({
@@ -75,10 +75,10 @@ export class BudgetProgressDto {
   })
   expectedSpending: number;
 
-  @ApiProperty({description: 'Actual vs expected spending difference'})
+  @ApiProperty({ description: 'Actual vs expected spending difference' })
   spendingVariance: number;
 
-  @ApiProperty({description: 'Whether spending is on track'})
+  @ApiProperty({ description: 'Whether spending is on track' })
   onTrack: boolean;
 
   @ApiProperty({
@@ -86,21 +86,21 @@ export class BudgetProgressDto {
   })
   projectedSpending: number;
 
-  @ApiProperty({description: 'Average daily spending'})
+  @ApiProperty({ description: 'Average daily spending' })
   averageDailySpending: number;
 
-  @ApiProperty({description: 'Budget health status'})
+  @ApiProperty({ description: 'Budget health status' })
   healthStatus: 'excellent' | 'good' | 'warning' | 'danger';
 }
 
 export class BudgetStatisticsDto {
-  @ApiProperty({description: 'Number of transactions'})
+  @ApiProperty({ description: 'Number of transactions' })
   transactionCount: number;
 
-  @ApiProperty({description: 'Number of active categories'})
+  @ApiProperty({ description: 'Number of active categories' })
   activeCategoriesCount: number;
 
-  @ApiProperty({description: 'Most spent category'})
+  @ApiProperty({ description: 'Most spent category' })
   topCategory?: {
     categoryId: string;
     categoryName: string;
@@ -108,7 +108,7 @@ export class BudgetStatisticsDto {
     percentage: number;
   };
 
-  @ApiProperty({description: 'Largest single expense'})
+  @ApiProperty({ description: 'Largest single expense' })
   largestExpense?: {
     id: string;
     description: string;
@@ -117,7 +117,7 @@ export class BudgetStatisticsDto {
     categoryName: string;
   };
 
-  @ApiProperty({description: 'Most active day (highest spending)'})
+  @ApiProperty({ description: 'Most active day (highest spending)' })
   mostActiveDay?: {
     date: Date;
     amount: number;
@@ -126,72 +126,72 @@ export class BudgetStatisticsDto {
 }
 
 export class BudgetResponseDto {
-  @ApiProperty({description: 'Budget ID'})
+  @ApiProperty({ description: 'Budget ID' })
   id: string;
 
-  @ApiProperty({description: 'Budget name'})
+  @ApiProperty({ description: 'Budget name' })
   name: string;
 
-  @ApiPropertyOptional({description: 'Budget description'})
+  @ApiPropertyOptional({ description: 'Budget description' })
   description?: string;
 
-  @ApiProperty({description: 'Account ID'})
+  @ApiProperty({ description: 'Account ID' })
   accountId: string;
 
-  @ApiProperty({description: 'Account name'})
+  @ApiProperty({ description: 'Account name' })
   accountName: string;
 
-  @ApiProperty({description: 'User who created the budget'})
+  @ApiProperty({ description: 'User who created the budget' })
   createdBy: {
     id: string;
     name: string;
     email: string;
   };
 
-  @ApiProperty({description: 'Currency'})
+  @ApiProperty({ description: 'Currency' })
   currency: Currency;
 
-  @ApiProperty({description: 'Total budget amount'})
+  @ApiProperty({ description: 'Total budget amount' })
   totalAmount: number;
 
-  @ApiProperty({description: 'Amount spent'})
+  @ApiProperty({ description: 'Amount spent' })
   spentAmount: number;
 
-  @ApiProperty({description: 'Remaining amount'})
+  @ApiProperty({ description: 'Remaining amount' })
   remainingAmount: number;
 
-  @ApiProperty({description: 'Budget period'})
+  @ApiProperty({ description: 'Budget period' })
   period: BudgetPeriod;
 
-  @ApiProperty({description: 'Budget start date'})
+  @ApiProperty({ description: 'Budget start date' })
   startDate: Date;
 
-  @ApiProperty({description: 'Budget end date'})
+  @ApiProperty({ description: 'Budget end date' })
   endDate: Date;
 
-  @ApiProperty({description: 'Budget status'})
+  @ApiProperty({ description: 'Budget status' })
   status: BudgetStatus;
 
-  @ApiProperty({description: 'Whether budget auto-renews'})
+  @ApiProperty({ description: 'Whether budget auto-renews' })
   autoRenew: boolean;
 
-  @ApiPropertyOptional({description: 'ID of budget this was renewed from'})
+  @ApiPropertyOptional({ description: 'ID of budget this was renewed from' })
   renewedFromId?: string;
 
-  @ApiProperty({description: 'Whether this is a template'})
+  @ApiProperty({ description: 'Whether this is a template' })
   isTemplate: boolean;
 
-  @ApiProperty({description: 'Global alerts', type: [BudgetAlertResponseDto]})
+  @ApiProperty({ description: 'Global alerts', type: [BudgetAlertResponseDto] })
   globalAlerts: BudgetAlertResponseDto[];
 
-  @ApiProperty({description: 'Allowed users'})
+  @ApiProperty({ description: 'Allowed users' })
   allowedUsers: Array<{
     id: string;
     name: string;
     email: string;
   }>;
 
-  @ApiProperty({description: 'Metadata'})
+  @ApiProperty({ description: 'Metadata' })
   metadata: {
     source?: string;
     tags?: string[];
@@ -202,47 +202,47 @@ export class BudgetResponseDto {
     rolloverUnspent?: boolean;
   };
 
-  @ApiProperty({description: 'Created at'})
+  @ApiProperty({ description: 'Created at' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Updated at'})
+  @ApiProperty({ description: 'Updated at' })
   updatedAt: Date;
 
-  @ApiPropertyOptional({description: 'Category budgets', type: [CategoryBudgetResponseDto]})
+  @ApiPropertyOptional({ description: 'Category budgets', type: [CategoryBudgetResponseDto] })
   categoryBudgets?: CategoryBudgetResponseDto[];
 
-  @ApiPropertyOptional({description: 'Budget progress information'})
+  @ApiPropertyOptional({ description: 'Budget progress information' })
   progress?: BudgetProgressDto;
 
-  @ApiPropertyOptional({description: 'Budget statistics'})
+  @ApiPropertyOptional({ description: 'Budget statistics' })
   statistics?: BudgetStatisticsDto;
 }
 
 export class BudgetSummaryDto {
-  @ApiProperty({description: 'Total active budgets'})
+  @ApiProperty({ description: 'Total active budgets' })
   totalActiveBudgets: number;
 
-  @ApiProperty({description: 'Total budget amount across all active budgets'})
+  @ApiProperty({ description: 'Total budget amount across all active budgets' })
   totalBudgetAmount: number;
 
-  @ApiProperty({description: 'Total spent across all active budgets'})
+  @ApiProperty({ description: 'Total spent across all active budgets' })
   totalSpentAmount: number;
 
-  @ApiProperty({description: 'Total remaining across all active budgets'})
+  @ApiProperty({ description: 'Total remaining across all active budgets' })
   totalRemainingAmount: number;
 
-  @ApiProperty({description: 'Overall progress percentage'})
+  @ApiProperty({ description: 'Overall progress percentage' })
   overallProgress: number;
 
-  @ApiProperty({description: 'Number of budgets over limit'})
+  @ApiProperty({ description: 'Number of budgets over limit' })
   overBudgetCount: number;
 
-  @ApiProperty({description: 'Number of active alerts'})
+  @ApiProperty({ description: 'Number of active alerts' })
   activeAlertsCount: number;
 
-  @ApiProperty({description: 'Budgets by status'})
+  @ApiProperty({ description: 'Budgets by status' })
   budgetsByStatus: Record<BudgetStatus, number>;
 
-  @ApiProperty({description: 'Budgets by period'})
+  @ApiProperty({ description: 'Budgets by period' })
   budgetsByPeriod: Record<BudgetPeriod, number>;
 }

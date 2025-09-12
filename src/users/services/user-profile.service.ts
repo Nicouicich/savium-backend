@@ -1,9 +1,9 @@
-import {Injectable, Logger, NotFoundException, BadRequestException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 
-import {UserProfile, UserProfileDocument} from '../schemas/user-profile.schema';
-import {User, UserDocument} from '../schemas/user.schema';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 
 export interface CreateProfileDto {
   name: string;
@@ -45,7 +45,7 @@ export class UserProfileService {
 
   async createProfile(userId: string, createProfileDto: CreateProfileDto): Promise<UserProfileDocument> {
     // Check if this is the first profile for the user
-    const existingProfiles = await this.userProfileModel.find({userId: new Types.ObjectId(userId)});
+    const existingProfiles = await this.userProfileModel.find({ userId: new Types.ObjectId(userId) });
     const isFirstProfile = existingProfiles.length === 0;
 
     // Create the new profile
@@ -67,10 +67,10 @@ export class UserProfileService {
 
     // Update user's profile references
     await this.userModel.updateOne(
-      {_id: new Types.ObjectId(userId)},
+      { _id: new Types.ObjectId(userId) },
       {
-        $push: {profiles: savedProfile._id},
-        ...(isFirstProfile ? {activeProfileId: savedProfile._id} : {})
+        $push: { profiles: savedProfile._id },
+        ...(isFirstProfile ? { activeProfileId: savedProfile._id } : {})
       }
     );
 
@@ -84,7 +84,7 @@ export class UserProfileService {
         userId: new Types.ObjectId(userId),
         isActive: true
       })
-      .sort({isDefault: -1, createdAt: -1});
+      .sort({ isDefault: -1, createdAt: -1 });
   }
 
   async getProfileById(profileId: string): Promise<UserProfileDocument> {
@@ -122,9 +122,9 @@ export class UserProfileService {
 
   async updateProfile(profileId: string, updateProfileDto: UpdateProfileDto): Promise<UserProfileDocument> {
     const updatedProfile = await this.userProfileModel.findOneAndUpdate(
-      {_id: new Types.ObjectId(profileId), isActive: true},
-      {$set: updateProfileDto},
-      {new: true}
+      { _id: new Types.ObjectId(profileId), isActive: true },
+      { $set: updateProfileDto },
+      { new: true }
     );
 
     if (!updatedProfile) {
@@ -148,7 +148,7 @@ export class UserProfileService {
     }
 
     // Update user's active profile
-    await this.userModel.updateOne({_id: new Types.ObjectId(userId)}, {$set: {activeProfileId: new Types.ObjectId(profileId)}});
+    await this.userModel.updateOne({ _id: new Types.ObjectId(userId) }, { $set: { activeProfileId: new Types.ObjectId(profileId) } });
 
     this.logger.log(`Active profile switched for user: ${userId} to profile: ${profileId}`);
   }
@@ -166,10 +166,10 @@ export class UserProfileService {
     }
 
     // Remove default from all other profiles of this user
-    await this.userProfileModel.updateMany({userId: new Types.ObjectId(userId)}, {$set: {isDefault: false}});
+    await this.userProfileModel.updateMany({ userId: new Types.ObjectId(userId) }, { $set: { isDefault: false } });
 
     // Set this profile as default
-    await this.userProfileModel.updateOne({_id: new Types.ObjectId(profileId)}, {$set: {isDefault: true}});
+    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $set: { isDefault: true } });
 
     this.logger.log(`Default profile set for user: ${userId} to profile: ${profileId}`);
   }
@@ -191,11 +191,11 @@ export class UserProfileService {
         _id: new Types.ObjectId(profileId),
         userId: new Types.ObjectId(userId)
       },
-      {$set: {isActive: false}}
+      { $set: { isActive: false } }
     );
 
     // Remove from user's profile array
-    await this.userModel.updateOne({_id: new Types.ObjectId(userId)}, {$pull: {profiles: new Types.ObjectId(profileId)}});
+    await this.userModel.updateOne({ _id: new Types.ObjectId(userId) }, { $pull: { profiles: new Types.ObjectId(profileId) } });
 
     // If this was the active profile, switch to default
     if (isActiveProfile) {
@@ -216,11 +216,11 @@ export class UserProfileService {
   }
 
   async associateWithAccount(profileId: string, accountId: string): Promise<void> {
-    await this.userProfileModel.updateOne({_id: new Types.ObjectId(profileId)}, {$addToSet: {associatedAccounts: new Types.ObjectId(accountId)}});
+    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $addToSet: { associatedAccounts: new Types.ObjectId(accountId) } });
   }
 
   async dissociateFromAccount(profileId: string, accountId: string): Promise<void> {
-    await this.userProfileModel.updateOne({_id: new Types.ObjectId(profileId)}, {$pull: {associatedAccounts: new Types.ObjectId(accountId)}});
+    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $pull: { associatedAccounts: new Types.ObjectId(accountId) } });
   }
 
   async getProfilesByAccountId(accountId: string): Promise<UserProfileDocument[]> {
@@ -241,8 +241,8 @@ export class UserProfileService {
   ): Promise<UserProfileDocument[]> {
     const searchFilter: any = {
       isActive: true,
-      'privacy.visibility': {$in: ['public', 'connections']}, // Don't include private profiles in search
-      $text: {$search: query}
+      'privacy.visibility': { $in: ['public', 'connections'] }, // Don't include private profiles in search
+      $text: { $search: query }
     };
 
     if (options?.profileType) {
@@ -253,12 +253,12 @@ export class UserProfileService {
       .find(searchFilter)
       .limit(options?.limit || 20)
       .skip(options?.skip || 0)
-      .sort({score: {$meta: 'textScore'}})
+      .sort({ score: { $meta: 'textScore' } })
       .exec();
   }
 
   async updateProfileMetadata(profileId: string, metadata: Record<string, any>): Promise<void> {
-    await this.userProfileModel.updateOne({_id: new Types.ObjectId(profileId)}, {$set: {metadata}});
+    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $set: { metadata } });
   }
 
   async getProfileStats(userId: string): Promise<any> {

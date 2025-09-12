@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {getModelToken} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {Logger} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Logger } from '@nestjs/common';
 
-import {UserQueryService} from './user-query.service';
-import {User, UserDocument} from '../schemas/user.schema';
-import {UserProfile, UserProfileDocument} from '../schemas/user-profile.schema';
-import {UserRole} from '@common/constants/user-roles';
+import { UserQueryService } from './user-query.service';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { UserRole } from '@common/constants/user-roles';
 
 describe('UserQueryService - Unit Tests', () => {
   let service: UserQueryService;
@@ -137,7 +137,7 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUser);
-        expect(userModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({$match: expect.any(Object)})]));
+        expect(userModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ $match: expect.any(Object) })]));
       });
 
       it('should return null when user not found', async () => {
@@ -161,7 +161,7 @@ describe('UserQueryService - Unit Tests', () => {
       it('should find user by email', async () => {
         // Arrange
         const email = 'test@example.com';
-        const mockUser = createMockUser({email});
+        const mockUser = createMockUser({ email });
         const mockQuery = createMockQuery();
 
         userModel.findOne.mockReturnValue(mockQuery);
@@ -172,14 +172,14 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUser);
-        expect(userModel.findOne).toHaveBeenCalledWith({email: email.toLowerCase()});
+        expect(userModel.findOne).toHaveBeenCalledWith({ email: email.toLowerCase() });
         expect(mockQuery.exec).toHaveBeenCalledTimes(1);
       });
 
       it('should handle case-insensitive email search', async () => {
         // Arrange
         const email = 'TEST@EXAMPLE.COM';
-        const mockUser = createMockUser({email: 'test@example.com'});
+        const mockUser = createMockUser({ email: 'test@example.com' });
         const mockQuery = createMockQuery();
 
         userModel.findOne.mockReturnValue(mockQuery);
@@ -190,7 +190,7 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUser);
-        expect(userModel.findOne).toHaveBeenCalledWith({email: 'test@example.com'});
+        expect(userModel.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
       });
 
       it('should return null when email not found', async () => {
@@ -227,7 +227,7 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUser);
-        expect(userModel.findOne).toHaveBeenCalledWith({email: email.toLowerCase()});
+        expect(userModel.findOne).toHaveBeenCalledWith({ email: email.toLowerCase() });
         expect(mockQuery.select).toHaveBeenCalledWith('+password');
         expect(mockQuery.exec).toHaveBeenCalledTimes(1);
       });
@@ -279,7 +279,7 @@ describe('UserQueryService - Unit Tests', () => {
       it('should find users by array of IDs', async () => {
         // Arrange
         const ids = ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'];
-        const mockUsers = ids.map(id => createMockUser({_id: new Types.ObjectId(id)}));
+        const mockUsers = ids.map(id => createMockUser({ _id: new Types.ObjectId(id) }));
         const mockQuery = createMockQuery();
 
         userModel.find.mockReturnValue(mockQuery);
@@ -291,7 +291,7 @@ describe('UserQueryService - Unit Tests', () => {
         // Assert
         expect(result).toEqual(mockUsers);
         expect(userModel.find).toHaveBeenCalledWith({
-          _id: {$in: ids.map(id => new Types.ObjectId(id))}
+          _id: { $in: ids.map(id => new Types.ObjectId(id)) }
         });
       });
 
@@ -324,7 +324,7 @@ describe('UserQueryService - Unit Tests', () => {
         // Assert
         expect(result).toEqual([]);
         expect(userModel.find).toHaveBeenCalledWith({
-          _id: {$in: []}
+          _id: { $in: [] }
         });
       });
     });
@@ -332,10 +332,10 @@ describe('UserQueryService - Unit Tests', () => {
     describe('findWithPagination', () => {
       it('should find users with pagination', async () => {
         // Arrange
-        const filter = {isActive: true};
+        const filter = { isActive: true };
         const page = 1;
         const limit = 10;
-        const sort = {createdAt: -1};
+        const sort = { createdAt: -1 };
         const mockUsers = [createMockUser(), createMockUser()];
         const totalCount = 25;
         const mockQuery = createMockQuery();
@@ -380,7 +380,7 @@ describe('UserQueryService - Unit Tests', () => {
           totalPages: 1
         });
         expect(userModel.find).toHaveBeenCalledWith({});
-        expect(mockQuery.sort).toHaveBeenCalledWith({createdAt: -1});
+        expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 });
         expect(mockQuery.skip).toHaveBeenCalledWith(0);
         expect(mockQuery.limit).toHaveBeenCalledWith(10);
       });
@@ -415,7 +415,7 @@ describe('UserQueryService - Unit Tests', () => {
       it('should find users by role', async () => {
         // Arrange
         const role = 'ADMIN';
-        const mockUsers = [createMockUser({role}), createMockUser({role})];
+        const mockUsers = [createMockUser({ role }), createMockUser({ role })];
         const mockQuery = createMockQuery();
 
         userModel.find.mockReturnValue(mockQuery);
@@ -426,7 +426,7 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUsers);
-        expect(userModel.find).toHaveBeenCalledWith({role});
+        expect(userModel.find).toHaveBeenCalledWith({ role });
       });
 
       it('should return empty array when no users with role found', async () => {
@@ -449,7 +449,7 @@ describe('UserQueryService - Unit Tests', () => {
       it('should find users by status', async () => {
         // Arrange
         const status = 'pending';
-        const mockUsers = [createMockUser({status})];
+        const mockUsers = [createMockUser({ status })];
         const mockQuery = createMockQuery();
 
         userModel.find.mockReturnValue(mockQuery);
@@ -460,14 +460,14 @@ describe('UserQueryService - Unit Tests', () => {
 
         // Assert
         expect(result).toEqual(mockUsers);
-        expect(userModel.find).toHaveBeenCalledWith({status});
+        expect(userModel.find).toHaveBeenCalledWith({ status });
       });
     });
 
     describe('findWithActiveProfiles', () => {
       it('should find users with active profiles', async () => {
         // Arrange
-        const mockUsers = [createMockUser({activeProfileId: new Types.ObjectId()})];
+        const mockUsers = [createMockUser({ activeProfileId: new Types.ObjectId() })];
         const mockQuery = createMockQuery();
 
         // Mock aggregate method since findWithActiveProfiles uses aggregate
@@ -483,7 +483,7 @@ describe('UserQueryService - Unit Tests', () => {
         expect(userModel.aggregate).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({
-              $match: {activeProfileId: {$exists: true, $ne: null}}
+              $match: { activeProfileId: { $exists: true, $ne: null } }
             })
           ])
         );
@@ -495,7 +495,7 @@ describe('UserQueryService - Unit Tests', () => {
         // Arrange
         const query = 'John';
         const limit = 5;
-        const mockUsers = [createMockUser({firstName: 'John'}), createMockUser({lastName: 'Johnson'})];
+        const mockUsers = [createMockUser({ firstName: 'John' }), createMockUser({ lastName: 'Johnson' })];
         const mockQueryBuilder = createMockQuery();
 
         userModel.find.mockReturnValue(mockQueryBuilder);
@@ -507,7 +507,7 @@ describe('UserQueryService - Unit Tests', () => {
         // Assert
         expect(result).toEqual(mockUsers);
         expect(userModel.find).toHaveBeenCalledWith({
-          $or: [{firstName: expect.any(RegExp)}, {lastName: expect.any(RegExp)}, {email: expect.any(RegExp)}],
+          $or: [{ firstName: expect.any(RegExp) }, { lastName: expect.any(RegExp) }, { email: expect.any(RegExp) }],
           isActive: true
         });
         expect(mockQueryBuilder.limit).toHaveBeenCalledWith(limit);
@@ -596,12 +596,12 @@ describe('UserQueryService - Unit Tests', () => {
       it('should return comprehensive user statistics', async () => {
         // Arrange
         const mockRoleStats = [
-          {_id: 'USER', count: 100},
-          {_id: 'ADMIN', count: 5}
+          { _id: 'USER', count: 100 },
+          { _id: 'ADMIN', count: 5 }
         ];
         const mockStatusStats = [
-          {_id: 'active', count: 90},
-          {_id: 'pending', count: 15}
+          { _id: 'active', count: 90 },
+          { _id: 'pending', count: 15 }
         ];
 
         userModel.countDocuments
@@ -633,12 +633,12 @@ describe('UserQueryService - Unit Tests', () => {
 
         expect(userModel.countDocuments).toHaveBeenCalledTimes(3);
         expect(userModel.countDocuments).toHaveBeenNthCalledWith(1);
-        expect(userModel.countDocuments).toHaveBeenNthCalledWith(2, {isActive: true});
-        expect(userModel.countDocuments).toHaveBeenNthCalledWith(3, {isEmailVerified: true});
+        expect(userModel.countDocuments).toHaveBeenNthCalledWith(2, { isActive: true });
+        expect(userModel.countDocuments).toHaveBeenNthCalledWith(3, { isEmailVerified: true });
 
         expect(userModel.aggregate).toHaveBeenCalledTimes(2);
-        expect(userModel.aggregate).toHaveBeenNthCalledWith(1, [{$group: {_id: '$role', count: {$sum: 1}}}]);
-        expect(userModel.aggregate).toHaveBeenNthCalledWith(2, [{$group: {_id: '$status', count: {$sum: 1}}}]);
+        expect(userModel.aggregate).toHaveBeenNthCalledWith(1, [{ $group: { _id: '$role', count: { $sum: 1 } } }]);
+        expect(userModel.aggregate).toHaveBeenNthCalledWith(2, [{ $group: { _id: '$status', count: { $sum: 1 } } }]);
       });
 
       it('should handle empty aggregation results', async () => {
@@ -722,7 +722,7 @@ describe('UserQueryService - Unit Tests', () => {
         expect(userModel.aggregate).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({
-              $match: {accounts: {$in: expect.any(Array)}}
+              $match: { accounts: { $in: expect.any(Array) } }
             })
           ])
         );
@@ -746,7 +746,7 @@ describe('UserQueryService - Unit Tests', () => {
         expect(userModel.aggregate).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({
-              $match: {accounts: {$in: expect.any(Array)}}
+              $match: { accounts: { $in: expect.any(Array) } }
             })
           ])
         );
@@ -942,7 +942,7 @@ describe('UserQueryService - Unit Tests', () => {
       await service.findByEmail(email);
 
       // Assert
-      expect(userModel.findOne).toHaveBeenCalledWith({email: 'test@example.com'});
+      expect(userModel.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
     });
 
     it('should handle potential injection in search queries', async () => {
@@ -959,7 +959,7 @@ describe('UserQueryService - Unit Tests', () => {
       // Assert
       // The service should create a proper RegExp, not execute the malicious string
       expect(userModel.find).toHaveBeenCalledWith({
-        $or: [{firstName: expect.any(RegExp)}, {lastName: expect.any(RegExp)}, {email: expect.any(RegExp)}],
+        $or: [{ firstName: expect.any(RegExp) }, { lastName: expect.any(RegExp) }, { email: expect.any(RegExp) }],
         isActive: true
       });
     });
@@ -979,7 +979,7 @@ describe('UserQueryService - Unit Tests', () => {
 
       // Assert
       expect(userModel.find).toHaveBeenCalledWith({
-        _id: {$in: expect.arrayContaining([expect.any(Types.ObjectId)])}
+        _id: { $in: expect.arrayContaining([expect.any(Types.ObjectId)]) }
       });
     });
   });
@@ -1016,7 +1016,7 @@ describe('UserQueryService - Unit Tests', () => {
       // Assert
       expect(result).toEqual([]);
       expect(userModel.find).toHaveBeenCalledWith({
-        $or: [{firstName: expect.any(RegExp)}, {lastName: expect.any(RegExp)}, {email: expect.any(RegExp)}],
+        $or: [{ firstName: expect.any(RegExp) }, { lastName: expect.any(RegExp) }, { email: expect.any(RegExp) }],
         isActive: true
       });
     });

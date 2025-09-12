@@ -1,12 +1,12 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {IsString, IsOptional, Length, Matches} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, Length, Matches } from 'class-validator';
 
 export class SetupTwoFactorDto {
   @ApiProperty({
     description: 'Email of the user setting up 2FA',
     example: 'user@example.com'
   })
-  @IsString({message: 'Email must be a string'})
+  @IsString({ message: 'Email must be a string' })
   email: string;
 }
 
@@ -17,9 +17,9 @@ export class VerifyTwoFactorSetupDto {
     minLength: 6,
     maxLength: 6
   })
-  @IsString({message: 'Token must be a string'})
-  @Length(6, 6, {message: 'Token must be exactly 6 digits'})
-  @Matches(/^\d{6}$/, {message: 'Token must contain only digits'})
+  @IsString({ message: 'Token must be a string' })
+  @Length(6, 6, { message: 'Token must be exactly 6 digits' })
+  @Matches(/^\d{6}$/, { message: 'Token must contain only digits' })
   token: string;
 }
 
@@ -28,8 +28,8 @@ export class VerifyTwoFactorDto {
     description: '6-digit TOTP code from authenticator app or 8-character backup code',
     example: '123456'
   })
-  @IsString({message: 'Token must be a string'})
-  @Matches(/^(\d{6}|[A-F0-9]{8})$/, {message: 'Token must be a 6-digit code or 8-character backup code'})
+  @IsString({ message: 'Token must be a string' })
+  @Matches(/^(\d{6}|[A-F0-9]{8})$/, { message: 'Token must be a 6-digit code or 8-character backup code' })
   token: string;
 
   @ApiPropertyOptional({
@@ -37,7 +37,7 @@ export class VerifyTwoFactorDto {
     example: 'abcd1234efgh5678'
   })
   @IsOptional()
-  @IsString({message: 'Challenge ID must be a string'})
+  @IsString({ message: 'Challenge ID must be a string' })
   challengeId?: string;
 
   @ApiPropertyOptional({
@@ -45,7 +45,7 @@ export class VerifyTwoFactorDto {
     example: 'password_change'
   })
   @IsOptional()
-  @IsString({message: 'Operation must be a string'})
+  @IsString({ message: 'Operation must be a string' })
   operation?: string;
 }
 
@@ -56,9 +56,9 @@ export class DisableTwoFactorDto {
     minLength: 6,
     maxLength: 6
   })
-  @IsString({message: 'Token must be a string'})
-  @Length(6, 6, {message: 'Token must be exactly 6 digits'})
-  @Matches(/^\d{6}$/, {message: 'Token must contain only digits'})
+  @IsString({ message: 'Token must be a string' })
+  @Length(6, 6, { message: 'Token must be exactly 6 digits' })
+  @Matches(/^\d{6}$/, { message: 'Token must contain only digits' })
   token: string;
 }
 
@@ -141,8 +141,8 @@ export class RegenerateBackupCodesDto {
     minLength: 6,
     maxLength: 6
   })
-  @IsString({message: 'Token must be a string'})
-  @Length(6, 6, {message: 'Token must be exactly 6 digits'})
-  @Matches(/^\d{6}$/, {message: 'Token must contain only digits'})
+  @IsString({ message: 'Token must be a string' })
+  @Length(6, 6, { message: 'Token must be exactly 6 digits' })
+  @Matches(/^\d{6}$/, { message: 'Token must contain only digits' })
   token: string;
 }

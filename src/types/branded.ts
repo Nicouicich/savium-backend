@@ -1,5 +1,5 @@
 // Branded types for enhanced type safety and security
-export type Brand<T, K> = T & {__brand: K};
+export type Brand<T, K> = T & { __brand: K };
 
 // User-related branded types
 export type UserId = Brand<string, 'UserId'>;

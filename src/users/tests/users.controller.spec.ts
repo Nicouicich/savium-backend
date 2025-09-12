@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {UsersController} from '../users.controller';
-import {UsersService} from '../users.service';
-import {CreateUserDto} from '../dto/create-user.dto';
-import {UpdateUserDto} from '../dto/update-user.dto';
-import {NotFoundException, ConflictException} from '@nestjs/common';
-import {Types} from 'mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from '../users.controller';
+import { UsersService } from '../users.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { NotFoundException, ConflictException } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -24,10 +24,10 @@ describe('UsersController', () => {
     accounts: [],
     refreshTokens: [],
     preferences: {
-      notifications: {email: true, push: true, sms: false, marketing: false},
-      privacy: {dataCollection: true, analytics: true, thirdPartySharing: false},
-      display: {currency: 'USD', language: 'en', theme: 'light', dateFormat: 'MM/DD/YYYY', timeFormat: '12h'},
-      security: {twoFactorEnabled: false, sessionTimeout: 30, requirePasswordChange: false}
+      notifications: { email: true, push: true, sms: false, marketing: false },
+      privacy: { dataCollection: true, analytics: true, thirdPartySharing: false },
+      display: { currency: 'USD', language: 'en', theme: 'light', dateFormat: 'MM/DD/YYYY', timeFormat: '12h' },
+      security: { twoFactorEnabled: false, sessionTimeout: 30, requirePasswordChange: false }
     },
     createdAt: new Date(),
     updatedAt: new Date()
@@ -95,7 +95,7 @@ describe('UsersController', () => {
     });
 
     it('should handle validation errors properly', async () => {
-      const invalidDto = {...createUserDto, email: 'invalid-email'};
+      const invalidDto = { ...createUserDto, email: 'invalid-email' };
 
       // This would be caught by the validation pipe before reaching the controller
       // but we test the service call behavior
@@ -107,7 +107,7 @@ describe('UsersController', () => {
 
   describe('findAll', () => {
     it('should return paginated users', async () => {
-      const paginationDto = {page: 1, limit: 10};
+      const paginationDto = { page: 1, limit: 10 };
       const mockServiceResult = {
         users: [mockUser],
         total: 1,
@@ -160,7 +160,7 @@ describe('UsersController', () => {
       const updatedMockUser = {
         ...mockUser,
         firstName: 'Updated John',
-        toJSON: jest.fn().mockReturnValue({...mockUserData, firstName: 'Updated John'})
+        toJSON: jest.fn().mockReturnValue({ ...mockUserData, firstName: 'Updated John' })
       };
 
       mockUsersService.update.mockResolvedValue(updatedMockUser);
@@ -168,7 +168,7 @@ describe('UsersController', () => {
       const result = await controller.update(userId, updateUserDto);
 
       expect(usersService.update).toHaveBeenCalledWith(userId, updateUserDto);
-      expect(result).toEqual({...mockUserData, firstName: 'Updated John'});
+      expect(result).toEqual({ ...mockUserData, firstName: 'Updated John' });
     });
 
     it('should throw NotFoundException when user not found', async () => {
@@ -180,7 +180,7 @@ describe('UsersController', () => {
 
     it('should throw ConflictException when email already exists', async () => {
       const userId = new Types.ObjectId().toString();
-      const updateDto = {email: 'existing@example.com'};
+      const updateDto = { email: 'existing@example.com' };
 
       mockUsersService.update.mockRejectedValue(new ConflictException('Email already exists'));
 
@@ -196,7 +196,7 @@ describe('UsersController', () => {
       const result = await controller.remove(userId);
 
       expect(usersService.remove).toHaveBeenCalledWith(userId);
-      expect(result).toEqual({message: 'User deleted successfully'});
+      expect(result).toEqual({ message: 'User deleted successfully' });
     });
 
     it('should throw NotFoundException when user not found', async () => {
@@ -213,8 +213,8 @@ describe('UsersController', () => {
         total: 100,
         active: 85,
         verified: 80,
-        byRole: {USER: 90, ADMIN: 10},
-        byStatus: {active: 85, pending: 15}
+        byRole: { USER: 90, ADMIN: 10 },
+        byStatus: { active: 85, pending: 15 }
       };
 
       mockUsersService.getUserStats.mockResolvedValue(expectedStats);

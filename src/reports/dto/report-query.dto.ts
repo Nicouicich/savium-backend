@@ -1,6 +1,6 @@
-import {IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, Min} from 'class-validator';
-import {Transform, Type} from 'class-transformer';
-import {ApiPropertyOptional} from '@nestjs/swagger';
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ReportType {
   MONTHLY = 'monthly',
@@ -74,7 +74,7 @@ export class ReportQueryDto {
     example: ['507f1f77bcf86cd799439011']
   })
   @IsOptional()
-  @Transform(({value}) => (Array.isArray(value) ? value : value.split(',')))
+  @Transform(({ value }) => (Array.isArray(value) ? value : value.split(',')))
   categoryIds?: string[];
 
   @ApiPropertyOptional({
@@ -112,7 +112,7 @@ export class ReportQueryDto {
     example: true
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   includeComparison?: boolean;
 
   @ApiPropertyOptional({
@@ -120,6 +120,6 @@ export class ReportQueryDto {
     example: false
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   groupByUser?: boolean;
 }

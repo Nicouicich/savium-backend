@@ -1,6 +1,6 @@
-import {ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, MaxLength, MinLength} from 'class-validator';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {ExpenseCategory} from '@common/constants/expense-categories';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ExpenseCategory } from '@common/constants/expense-categories';
 
 export class CreateSubcategoryDto {
   @ApiProperty({
@@ -21,13 +21,13 @@ export class CreateSubcategoryDto {
   @MaxLength(100)
   displayName: string;
 
-  @ApiPropertyOptional({description: 'Subcategory description', example: 'Expenses at restaurants and dining establishments'})
+  @ApiPropertyOptional({ description: 'Subcategory description', example: 'Expenses at restaurants and dining establishments' })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   description?: string;
 
-  @ApiPropertyOptional({description: 'Whether the subcategory is active', default: true})
+  @ApiPropertyOptional({ description: 'Whether the subcategory is active', default: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
@@ -56,7 +56,7 @@ export class CreateCategoryDto {
   @MaxLength(100)
   displayName: string;
 
-  @ApiPropertyOptional({description: 'Predefined category type', enum: ExpenseCategory, example: ExpenseCategory.FOOD_DINING})
+  @ApiPropertyOptional({ description: 'Predefined category type', enum: ExpenseCategory, example: ExpenseCategory.FOOD_DINING })
   @IsOptional()
   @IsEnum(ExpenseCategory)
   type?: ExpenseCategory;
@@ -79,35 +79,35 @@ export class CreateCategoryDto {
   @MaxLength(7)
   color: string;
 
-  @ApiPropertyOptional({description: 'Category description', example: 'All expenses related to food, dining, and groceries', maxLength: 500})
+  @ApiPropertyOptional({ description: 'Category description', example: 'All expenses related to food, dining, and groceries', maxLength: 500 })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   description?: string;
 
-  @ApiPropertyOptional({description: 'List of subcategories', type: [CreateSubcategoryDto], maxItems: 20})
+  @ApiPropertyOptional({ description: 'List of subcategories', type: [CreateSubcategoryDto], maxItems: 20 })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(20)
   subcategories?: CreateSubcategoryDto[];
 
-  @ApiPropertyOptional({description: 'Keywords for AI categorization', type: [String], example: ['restaurant', 'food', 'dining', 'grocery'], maxItems: 50})
+  @ApiPropertyOptional({ description: 'Keywords for AI categorization', type: [String], example: ['restaurant', 'food', 'dining', 'grocery'], maxItems: 50 })
   @IsOptional()
   @IsArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   @ArrayMaxSize(50)
   keywords?: string[];
 
-  @ApiPropertyOptional({description: 'Sort order for display', example: 1, minimum: 0, maximum: 999})
+  @ApiPropertyOptional({ description: 'Sort order for display', example: 1, minimum: 0, maximum: 999 })
   @IsOptional()
   @IsNumber()
   sortOrder?: number;
 
-  @ApiPropertyOptional({description: 'AI configuration for categorization', type: 'object'})
+  @ApiPropertyOptional({ description: 'AI configuration for categorization', type: 'object' })
   @IsOptional()
   aiConfig?: Record<string, any>;
 
-  @ApiPropertyOptional({description: 'Additional metadata', type: 'object'})
+  @ApiPropertyOptional({ description: 'Additional metadata', type: 'object' })
   @IsOptional()
   metadata?: Record<string, any>;
 }

@@ -1,22 +1,22 @@
-import {IsString, IsOptional, IsEnum, IsDateString, ValidateNested} from 'class-validator';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Type} from 'class-transformer';
+import { IsString, IsOptional, IsEnum, IsDateString, ValidateNested } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class ProfilePrivacyDto {
-  @ApiProperty({enum: ['public', 'private', 'connections'], default: 'private'})
+  @ApiProperty({ enum: ['public', 'private', 'connections'], default: 'private' })
   @IsOptional()
   @IsEnum(['public', 'private', 'connections'])
   visibility?: 'public' | 'private' | 'connections';
 
-  @ApiProperty({default: false})
+  @ApiProperty({ default: false })
   @IsOptional()
   showContactInfo?: boolean;
 
-  @ApiProperty({default: false})
+  @ApiProperty({ default: false })
   @IsOptional()
   showSocialLinks?: boolean;
 
-  @ApiProperty({default: false})
+  @ApiProperty({ default: false })
   @IsOptional()
   indexInSearchEngines?: boolean;
 }
@@ -76,7 +76,7 @@ export class CreateProfileDto {
   @IsString()
   website?: string;
 
-  @ApiProperty({enum: ['personal', 'professional', 'business', 'family'], default: 'personal'})
+  @ApiProperty({ enum: ['personal', 'professional', 'business', 'family'], default: 'personal' })
   @IsOptional()
   @IsEnum(['personal', 'professional', 'business', 'family'])
   profileType?: 'personal' | 'professional' | 'business' | 'family';

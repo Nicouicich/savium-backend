@@ -1,8 +1,8 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types, PipelineStage} from 'mongoose';
-import {User, UserDocument} from '../schemas/user.schema';
-import {UserProfile, UserProfileDocument} from '../schemas/user-profile.schema';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types, PipelineStage } from 'mongoose';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 
 /**
  * UserQueryService - Handles all database queries for User entities
@@ -31,7 +31,7 @@ export class UserQueryService {
     // Use optimized aggregation pipeline for population (PERF-001)
     const pipeline: PipelineStage[] = [
       {
-        $match: {_id: new Types.ObjectId(id)}
+        $match: { _id: new Types.ObjectId(id) }
       }
     ];
 
@@ -48,7 +48,7 @@ export class UserQueryService {
         } as PipelineStage);
         pipeline.push({
           $addFields: {
-            activeProfile: {$arrayElemAt: ['$activeProfile', 0]}
+            activeProfile: { $arrayElemAt: ['$activeProfile', 0] }
           }
         } as PipelineStage);
       } else if (path === 'userProfiles' || path === 'profiles') {
@@ -72,14 +72,14 @@ export class UserQueryService {
    * Find user by email
    */
   async findByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({email: email.toLowerCase()}).exec();
+    return this.userModel.findOne({ email: email.toLowerCase() }).exec();
   }
 
   /**
    * Find user by email including password field
    */
   async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({email: email.toLowerCase()}).select('+password').exec();
+    return this.userModel.findOne({ email: email.toLowerCase() }).select('+password').exec();
   }
 
   /**
@@ -100,7 +100,7 @@ export class UserQueryService {
   async findByIds(ids: string[]): Promise<UserDocument[]> {
     return this.userModel
       .find({
-        _id: {$in: ids.map(id => new Types.ObjectId(id))}
+        _id: { $in: ids.map(id => new Types.ObjectId(id)) }
       })
       .exec();
   }
@@ -112,8 +112,8 @@ export class UserQueryService {
     filter: any = {},
     page: number = 1,
     limit: number = 10,
-    sort: any = {createdAt: -1}
-  ): Promise<{users: UserDocument[]; total: number; totalPages: number}> {
+    sort: any = { createdAt: -1 }
+  ): Promise<{ users: UserDocument[]; total: number; totalPages: number }> {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([this.userModel.find(filter).sort(sort).skip(skip).limit(limit).exec(), this.userModel.countDocuments(filter)]);
@@ -129,14 +129,14 @@ export class UserQueryService {
    * Find users by role
    */
   async findByRole(role: string): Promise<UserDocument[]> {
-    return this.userModel.find({role}).exec();
+    return this.userModel.find({ role }).exec();
   }
 
   /**
    * Find users by status
    */
   async findByStatus(status: string): Promise<UserDocument[]> {
-    return this.userModel.find({status}).exec();
+    return this.userModel.find({ status }).exec();
   }
 
   /**
@@ -147,7 +147,7 @@ export class UserQueryService {
     const pipeline: PipelineStage[] = [
       {
         $match: {
-          activeProfileId: {$exists: true, $ne: null}
+          activeProfileId: { $exists: true, $ne: null }
         }
       },
       {
@@ -160,7 +160,7 @@ export class UserQueryService {
       } as PipelineStage,
       {
         $addFields: {
-          activeProfile: {$arrayElemAt: ['$activeProfile', 0]}
+          activeProfile: { $arrayElemAt: ['$activeProfile', 0] }
         }
       } as PipelineStage
     ];
@@ -176,7 +176,7 @@ export class UserQueryService {
 
     return this.userModel
       .find({
-        $or: [{firstName: searchRegex}, {lastName: searchRegex}, {email: searchRegex}],
+        $or: [{ firstName: searchRegex }, { lastName: searchRegex }, { email: searchRegex }],
         isActive: true
       })
       .limit(limit)
@@ -205,10 +205,10 @@ export class UserQueryService {
   }> {
     const [total, active, verified, roleStats, statusStats] = await Promise.all([
       this.userModel.countDocuments(),
-      this.userModel.countDocuments({isActive: true}),
-      this.userModel.countDocuments({isEmailVerified: true}),
-      this.userModel.aggregate([{$group: {_id: '$role', count: {$sum: 1}}}]),
-      this.userModel.aggregate([{$group: {_id: '$status', count: {$sum: 1}}}])
+      this.userModel.countDocuments({ isActive: true }),
+      this.userModel.countDocuments({ isEmailVerified: true }),
+      this.userModel.aggregate([{ $group: { _id: '$role', count: { $sum: 1 } } }]),
+      this.userModel.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }])
     ]);
 
     return {
@@ -263,7 +263,7 @@ export class UserQueryService {
       } as PipelineStage,
       {
         $addFields: {
-          activeProfile: {$arrayElemAt: ['$activeProfile', 0]}
+          activeProfile: { $arrayElemAt: ['$activeProfile', 0] }
         }
       } as PipelineStage
     ];

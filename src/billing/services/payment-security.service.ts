@@ -1,13 +1,11 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
-import {v4 as uuidv4} from 'uuid';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
-import {EnhancedPayment, EnhancedPaymentDocument} from '../schemas/enhanced-payment.schema';
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
-
-import {PaymentException} from '../../common/exceptions/payment.exception';
+import { EnhancedPayment, EnhancedPaymentDocument } from '../schemas/enhanced-payment.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
 
 export interface SecurityCheckResult {
   allowed: boolean;
@@ -97,7 +95,7 @@ export class PaymentSecurityService {
    * Assess payment risk for fraud detection
    */
   async assessPaymentRisk(userId: string, amount: number, currency: string, paymentMethodDetails?: any, billingDetails?: any): Promise<PaymentRiskAssessment> {
-    const factors: Array<{type: string; weight: number; description: string}> = [];
+    const factors: Array<{ type: string; weight: number; description: string }> = [];
     let totalScore = 0;
 
     // Amount-based risk factors
@@ -189,13 +187,13 @@ export class PaymentSecurityService {
         $match: {
           userId,
           status: 'succeeded',
-          createdAt: {$gte: today}
+          createdAt: { $gte: today }
         }
       },
       {
         $group: {
           _id: null,
-          total: {$sum: '$amount'}
+          total: { $sum: '$amount' }
         }
       }
     ]);
@@ -210,7 +208,7 @@ export class PaymentSecurityService {
       allowed: !wouldExceedLimit,
       riskLevel: wouldExceedLimit ? 'high' : 'low',
       reasons: wouldExceedLimit ? ['Daily spending limit exceeded'] : [],
-      metadata: {currentSpending: normalizedCurrent, limit: this.MAX_DAILY_AMOUNT}
+      metadata: { currentSpending: normalizedCurrent, limit: this.MAX_DAILY_AMOUNT }
     };
   }
 
@@ -227,13 +225,13 @@ export class PaymentSecurityService {
         $match: {
           userId,
           status: 'succeeded',
-          createdAt: {$gte: monthStart}
+          createdAt: { $gte: monthStart }
         }
       },
       {
         $group: {
           _id: null,
-          total: {$sum: '$amount'}
+          total: { $sum: '$amount' }
         }
       }
     ]);
@@ -248,7 +246,7 @@ export class PaymentSecurityService {
       allowed: !wouldExceedLimit,
       riskLevel: wouldExceedLimit ? 'high' : 'low',
       reasons: wouldExceedLimit ? ['Monthly spending limit exceeded'] : [],
-      metadata: {currentSpending: normalizedCurrent, limit: this.MAX_MONTHLY_AMOUNT}
+      metadata: { currentSpending: normalizedCurrent, limit: this.MAX_MONTHLY_AMOUNT }
     };
   }
 
@@ -261,7 +259,7 @@ export class PaymentSecurityService {
     const failedAttempts = await this.paymentModel.countDocuments({
       userId,
       status: 'failed',
-      createdAt: {$gte: last24Hours}
+      createdAt: { $gte: last24Hours }
     });
 
     const tooManyFailures = failedAttempts >= this.MAX_FAILED_ATTEMPTS;
@@ -270,14 +268,14 @@ export class PaymentSecurityService {
       allowed: !tooManyFailures,
       riskLevel: tooManyFailures ? 'critical' : 'low',
       reasons: tooManyFailures ? ['Too many failed payment attempts'] : [],
-      metadata: {failedAttempts, limit: this.MAX_FAILED_ATTEMPTS}
+      metadata: { failedAttempts, limit: this.MAX_FAILED_ATTEMPTS }
     };
   }
 
   /**
    * Check geographic restrictions
    */
-  private async checkGeographicRestrictions(billingDetails?: any): Promise<SecurityCheckResult> {
+  private checkGeographicRestrictions(billingDetails?: any): SecurityCheckResult {
     if (!billingDetails?.address?.country) {
       return {
         allowed: true,
@@ -294,7 +292,7 @@ export class PaymentSecurityService {
       allowed: !isBlocked,
       riskLevel: isBlocked ? 'critical' : isHighRisk ? 'high' : 'low',
       reasons: isBlocked ? [`Payments blocked from country: ${country}`] : isHighRisk ? [`High-risk country: ${country}`] : [],
-      metadata: {country, isBlocked, isHighRisk}
+      metadata: { country, isBlocked, isHighRisk }
     };
   }
 
@@ -306,7 +304,7 @@ export class PaymentSecurityService {
 
     const recentPayments = await this.paymentModel.countDocuments({
       userId,
-      createdAt: {$gte: last10Minutes}
+      createdAt: { $gte: last10Minutes }
     });
 
     const tooManyRecent = recentPayments > 3; // Max 3 payments in 10 minutes
@@ -315,14 +313,14 @@ export class PaymentSecurityService {
       allowed: !tooManyRecent,
       riskLevel: tooManyRecent ? 'high' : 'low',
       reasons: tooManyRecent ? ['Payment velocity limit exceeded'] : [],
-      metadata: {recentPayments, timeWindow: '10 minutes'}
+      metadata: { recentPayments, timeWindow: '10 minutes' }
     };
   }
 
   /**
    * Check payment method risk indicators
    */
-  private async checkPaymentMethodRisk(paymentMethodDetails?: any): Promise<SecurityCheckResult> {
+  private checkPaymentMethodRisk(paymentMethodDetails?: any): SecurityCheckResult {
     if (!paymentMethodDetails) {
       return {
         allowed: true,
@@ -361,16 +359,16 @@ export class PaymentSecurityService {
     const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     const [totalPayments, failedPayments, disputedPayments] = await Promise.all([
-      this.paymentModel.countDocuments({userId, createdAt: {$gte: last30Days}}),
+      this.paymentModel.countDocuments({ userId, createdAt: { $gte: last30Days } }),
       this.paymentModel.countDocuments({
         userId,
         status: 'failed',
-        createdAt: {$gte: last30Days}
+        createdAt: { $gte: last30Days }
       }),
       this.paymentModel.countDocuments({
         userId,
         disputed: true,
-        createdAt: {$gte: last30Days}
+        createdAt: { $gte: last30Days }
       })
     ]);
 
@@ -398,7 +396,7 @@ export class PaymentSecurityService {
       allowed: riskLevel !== 'high',
       riskLevel,
       reasons: riskFactors,
-      metadata: {totalPayments, failedPayments, disputedPayments}
+      metadata: { totalPayments, failedPayments, disputedPayments }
     };
   }
 
@@ -452,16 +450,16 @@ export class PaymentSecurityService {
     const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     const [totalPayments, failedPayments, disputedPayments] = await Promise.all([
-      this.paymentModel.countDocuments({userId, createdAt: {$gte: last30Days}}),
+      this.paymentModel.countDocuments({ userId, createdAt: { $gte: last30Days } }),
       this.paymentModel.countDocuments({
         userId,
         status: 'failed',
-        createdAt: {$gte: last30Days}
+        createdAt: { $gte: last30Days }
       }),
       this.paymentModel.countDocuments({
         userId,
         disputed: true,
-        createdAt: {$gte: last30Days}
+        createdAt: { $gte: last30Days }
       })
     ]);
 
@@ -482,8 +480,8 @@ export class PaymentSecurityService {
     const lastHour = new Date(Date.now() - 60 * 60 * 1000);
 
     const [recent10Min, recentHour] = await Promise.all([
-      this.paymentModel.countDocuments({userId, createdAt: {$gte: last10Minutes}}),
-      this.paymentModel.countDocuments({userId, createdAt: {$gte: lastHour}})
+      this.paymentModel.countDocuments({ userId, createdAt: { $gte: last10Minutes } }),
+      this.paymentModel.countDocuments({ userId, createdAt: { $gte: lastHour } })
     ]);
 
     let risk = 0;

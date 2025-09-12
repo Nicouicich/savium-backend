@@ -1,6 +1,6 @@
-import {Body, Controller, Get, HttpCode, HttpStatus, Post, Query} from '@nestjs/common';
-import {ApiOperation, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {WhatsappService} from './whatsapp.service';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { WhatsappService } from './whatsapp.service';
 
 @ApiTags('WhatsApp Integration')
 @Controller('integrations/whatsapp')
@@ -40,8 +40,8 @@ export class WhatsappController {
     required: true,
     description: 'Challenge string'
   })
-  @ApiResponse({status: 200, description: 'Webhook verified successfully'})
-  @ApiResponse({status: 403, description: 'Webhook verification failed'})
+  @ApiResponse({ status: 200, description: 'Webhook verified successfully' })
+  @ApiResponse({ status: 403, description: 'Webhook verification failed' })
   async verifyWebhook(@Query('hub.mode') mode: string, @Query('hub.verify_token') verifyToken: string, @Query('hub.challenge') challenge: string) {
     const result = this.whatsappService.verifyWebhook(mode, verifyToken, challenge);
 
@@ -58,7 +58,7 @@ export class WhatsappController {
     summary: 'Handle WhatsApp webhook',
     description: 'Process incoming WhatsApp messages and media (structure only - not implemented)'
   })
-  @ApiResponse({status: 200, description: 'Webhook processed successfully'})
+  @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(@Body() payload: any) {
     try {
       const result = await this.whatsappService.handleWebhook(payload);
@@ -78,9 +78,9 @@ export class WhatsappController {
     summary: 'Send WhatsApp message',
     description: 'Send a message via WhatsApp Business API (structure only - not implemented)'
   })
-  @ApiResponse({status: 200, description: 'Message sent successfully (mock)'})
-  async sendMessage(@Body() body: {to: string; message: string}) {
-    const {to, message} = body;
+  @ApiResponse({ status: 200, description: 'Message sent successfully (mock)' })
+  async sendMessage(@Body() body: { to: string; message: string }) {
+    const { to, message } = body;
 
     if (!to || !message) {
       throw new Error('Phone number and message are required');

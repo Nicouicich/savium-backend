@@ -1,13 +1,13 @@
-import {Injectable, Logger, NotFoundException, BadRequestException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {ConfigService} from '@nestjs/config';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
-import {Subscription, SubscriptionDocument} from '../schemas/subscription.schema';
-import {Payment, PaymentDocument} from '../schemas/payment.schema';
-import {CreateCustomerDto, CreateSubscriptionDto, CreatePaymentDto} from '../dto';
-import {UserProfile, UserProfileDocument} from '../../users/schemas/user-profile.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
+import { Subscription, SubscriptionDocument } from '../schemas/subscription.schema';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { CreateCustomerDto, CreateSubscriptionDto, CreatePaymentDto } from '../dto';
+import { UserProfile, UserProfileDocument } from '../../users/schemas/user-profile.schema';
 
 @Injectable()
 export class BillingService {
@@ -57,7 +57,7 @@ export class BillingService {
   }
 
   async getCustomerByUserId(userId: string): Promise<BillingCustomerDocument> {
-    const customer = await this.billingCustomerModel.findOne({userId: new Types.ObjectId(userId)});
+    const customer = await this.billingCustomerModel.findOne({ userId: new Types.ObjectId(userId) });
     if (!customer) {
       throw new NotFoundException('Billing customer not found');
     }
@@ -65,7 +65,7 @@ export class BillingService {
   }
 
   async getCustomerByStripeId(stripeCustomerId: string): Promise<BillingCustomerDocument> {
-    const customer = await this.billingCustomerModel.findOne({stripeCustomerId});
+    const customer = await this.billingCustomerModel.findOne({ stripeCustomerId });
     if (!customer) {
       throw new NotFoundException('Billing customer not found');
     }
@@ -73,7 +73,7 @@ export class BillingService {
   }
 
   async updateCustomer(userId: string, updateData: Partial<CreateCustomerDto>): Promise<BillingCustomerDocument> {
-    const updatedCustomer = await this.billingCustomerModel.findOneAndUpdate({userId: new Types.ObjectId(userId)}, {$set: updateData}, {new: true});
+    const updatedCustomer = await this.billingCustomerModel.findOneAndUpdate({ userId: new Types.ObjectId(userId) }, { $set: updateData }, { new: true });
 
     if (!updatedCustomer) {
       throw new NotFoundException('Billing customer not found');
@@ -100,12 +100,12 @@ export class BillingService {
 
     // If this is set as default, remove default from other methods
     if (paymentMethodData.isDefault) {
-      await this.billingCustomerModel.updateOne({userId: new Types.ObjectId(userId)}, {$set: {'paymentMethods.$[].isDefault': false}});
+      await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { 'paymentMethods.$[].isDefault': false } });
     }
 
     // Add the new payment method
     await this.billingCustomerModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $push: {
           paymentMethods: {
@@ -121,7 +121,7 @@ export class BillingService {
   }
 
   async removePaymentMethod(userId: string, stripePaymentMethodId: string): Promise<void> {
-    await this.billingCustomerModel.updateOne({userId: new Types.ObjectId(userId)}, {$pull: {paymentMethods: {stripePaymentMethodId}}});
+    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { paymentMethods: { stripePaymentMethodId } } });
 
     this.logger.log(`Payment method removed for user: ${userId}`);
   }
@@ -160,8 +160,8 @@ export class BillingService {
 
     // Update customer's active subscription
     await this.billingCustomerModel.updateOne(
-      {userId: new Types.ObjectId(createSubscriptionDto.userId)},
-      {$set: {activeSubscriptionId: savedSubscription._id}}
+      { userId: new Types.ObjectId(createSubscriptionDto.userId) },
+      { $set: { activeSubscriptionId: savedSubscription._id } }
     );
 
     this.logger.log(`Subscription created: ${savedSubscription._id} for user: ${createSubscriptionDto.userId}`);
@@ -169,16 +169,16 @@ export class BillingService {
   }
 
   async getSubscriptionByUserId(userId: string): Promise<SubscriptionDocument | null> {
-    return this.subscriptionModel.findOne({userId: new Types.ObjectId(userId)}, {}, {sort: {createdAt: -1}});
+    return this.subscriptionModel.findOne({ userId: new Types.ObjectId(userId) }, {}, { sort: { createdAt: -1 } });
   }
 
   async updateSubscriptionStatus(subscriptionId: string, status: string, metadata?: any): Promise<void> {
-    const updateData: any = {status};
+    const updateData: any = { status };
     if (metadata) {
       updateData.metadata = metadata;
     }
 
-    await this.subscriptionModel.updateOne({stripeSubscriptionId: subscriptionId}, {$set: updateData});
+    await this.subscriptionModel.updateOne({ stripeSubscriptionId: subscriptionId }, { $set: updateData });
 
     this.logger.log(`Subscription status updated: ${subscriptionId} to ${status}`);
   }
@@ -193,19 +193,19 @@ export class BillingService {
       updateData.cancelAt = cancelAt;
     }
 
-    await this.subscriptionModel.updateOne({userId: new Types.ObjectId(userId)}, {$set: updateData});
+    await this.subscriptionModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: updateData });
 
     this.logger.log(`Subscription canceled for user: ${userId}`);
   }
 
   // Usage tracking
   async incrementUsage(userId: string, usageType: keyof Subscription['usage'], amount: number = 1): Promise<void> {
-    await this.subscriptionModel.updateOne({userId: new Types.ObjectId(userId), status: 'active'}, {$inc: {[`usage.${String(usageType)}`]: amount}});
+    await this.subscriptionModel.updateOne({ userId: new Types.ObjectId(userId), status: 'active' }, { $inc: { [`usage.${String(usageType)}`]: amount } });
   }
 
   async resetMonthlyUsage(userId: string): Promise<void> {
     await this.subscriptionModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $set: {
           'usage.expensesThisMonth': 0,
@@ -215,17 +215,17 @@ export class BillingService {
     );
   }
 
-  async checkUsageLimit(userId: string, featureName: string): Promise<{allowed: boolean; current: number; limit: number}> {
+  async checkUsageLimit(userId: string, featureName: string): Promise<{ allowed: boolean; current: number; limit: number }> {
     const subscription = await this.getSubscriptionByUserId(userId);
     if (!subscription) {
       throw new NotFoundException('No active subscription found');
     }
 
-    const usageMap: Record<string, {current: keyof Subscription['usage']; limit: keyof Subscription['features']}> = {
-      accounts: {current: 'accountsCreated', limit: 'maxAccounts'},
-      expenses: {current: 'expensesThisMonth', limit: 'maxExpensesPerMonth'},
-      budgets: {current: 'budgetsCreated', limit: 'maxBudgets'},
-      goals: {current: 'goalsCreated', limit: 'maxGoals'}
+    const usageMap: Record<string, { current: keyof Subscription['usage']; limit: keyof Subscription['features'] }> = {
+      accounts: { current: 'accountsCreated', limit: 'maxAccounts' },
+      expenses: { current: 'expensesThisMonth', limit: 'maxExpensesPerMonth' },
+      budgets: { current: 'budgetsCreated', limit: 'maxBudgets' },
+      goals: { current: 'goalsCreated', limit: 'maxGoals' }
     };
 
     const feature = usageMap[featureName];
@@ -271,8 +271,8 @@ export class BillingService {
 
   async getPaymentsByUserId(userId: string, limit: number = 20, skip: number = 0): Promise<PaymentDocument[]> {
     return this.paymentModel
-      .find({userId: new Types.ObjectId(userId)})
-      .sort({createdAt: -1})
+      .find({ userId: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
       .exec();
@@ -358,7 +358,7 @@ export class BillingService {
 
   // Risk and fraud management
   async updateRiskScore(userId: string, riskScore: number): Promise<void> {
-    await this.billingCustomerModel.updateOne({userId: new Types.ObjectId(userId)}, {$set: {riskScore}});
+    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { riskScore } });
   }
 
   async addRiskEvent(
@@ -370,7 +370,7 @@ export class BillingService {
     }
   ): Promise<void> {
     await this.billingCustomerModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $push: {
           riskEvents: {
@@ -385,19 +385,19 @@ export class BillingService {
 
   // Analytics and reporting
   async getBillingStats(userId?: string): Promise<any> {
-    const matchStage = userId ? {userId: new Types.ObjectId(userId)} : {};
+    const matchStage = userId ? { userId: new Types.ObjectId(userId) } : {};
 
     const stats = await this.subscriptionModel.aggregate([
-      {$match: matchStage},
+      { $match: matchStage },
       {
         $group: {
           _id: null,
-          totalSubscriptions: {$sum: 1},
+          totalSubscriptions: { $sum: 1 },
           activeSubscriptions: {
-            $sum: {$cond: [{$eq: ['$status', 'active']}, 1, 0]}
+            $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
           },
           totalRevenue: {
-            $sum: {$cond: [{$eq: ['$status', 'active']}, '$amount', 0]}
+            $sum: { $cond: [{ $eq: ['$status', 'active'] }, '$amount', 0] }
           },
           planBreakdown: {
             $push: '$plan'
@@ -509,7 +509,7 @@ export class BillingService {
       billingPreferences.enhancedPrivacy = true;
     }
 
-    await this.billingCustomerModel.updateOne({userId: new Types.ObjectId(userId)}, {$set: {preferences: billingPreferences}});
+    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { preferences: billingPreferences } });
 
     this.logger.log(`Billing preferences updated for user: ${userId}, profile: ${profileId}`);
   }

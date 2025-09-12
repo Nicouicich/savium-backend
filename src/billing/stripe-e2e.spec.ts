@@ -1,17 +1,17 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {INestApplication, ValidationPipe} from '@nestjs/common';
-import {MongooseModule} from '@nestjs/mongoose';
-import {ConfigModule} from '@nestjs/config';
-import {ThrottlerModule} from '@nestjs/throttler';
-import {MongoMemoryServer} from 'mongodb-memory-server';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
-import {Types} from 'mongoose';
+import { Types } from 'mongoose';
 
-import {AppModule} from '../app.module';
-import {DatabaseModule} from '../database/database.module';
-import {BillingModule} from './billing.module';
+import { AppModule } from '../app.module';
+import { DatabaseModule } from '../database/database.module';
+import { BillingModule } from './billing.module';
 
-import {PaymentException} from '@common/exceptions/payment.exception';
+import { PaymentException } from '@common/exceptions/payment.exception';
 
 describe('Stripe E2E - Complete Financial Transaction Workflows', () => {
   let app: INestApplication;

@@ -1,8 +1,8 @@
-import {OmitType, PartialType} from '@nestjs/swagger';
-import {IsEnum, IsNumber, IsOptional, Min} from 'class-validator';
-import {ApiPropertyOptional} from '@nestjs/swagger';
-import {CreateGoalDto} from './create-goal.dto';
-import {GoalStatus} from '../schemas/goal.schema';
+import { OmitType, PartialType } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateGoalDto } from './create-goal.dto';
+import { GoalStatus } from '../schemas/goal.schema';
 
 export class UpdateGoalDto extends PartialType(OmitType(CreateGoalDto, ['accountId'] as const)) {
   @ApiPropertyOptional({

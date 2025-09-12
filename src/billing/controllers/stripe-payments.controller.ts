@@ -15,22 +15,22 @@ import {
   Headers,
   type RawBodyRequest
 } from '@nestjs/common';
-import {Request, Response} from 'express';
-import {ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery} from '@nestjs/swagger';
-import {ThrottlerGuard} from '@nestjs/throttler';
+import { Request, Response } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
-import {JwtAuthGuard} from '../../auth/guards/jwt-auth.guard';
-import {RolesGuard} from '../../common/guards/roles.guard';
-import {Roles} from '../../common/decorators/roles.decorator';
-import {RequestTracingInterceptor} from '../../common/interceptors/request-tracing.interceptor';
-import {GetUser} from '../../common/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
+import { GetUser } from '../../common/decorators/get-user.decorator';
 
-import {StripeService} from '../services/stripe.service';
-import {StripeWebhookService} from '../services/stripe-webhook.service';
+import { StripeService } from '../services/stripe.service';
+import { StripeWebhookService } from '../services/stripe-webhook.service';
 
-import {CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto} from '../dto';
+import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
 
-import type {UserProfileDocument} from '../../users/schemas/user-profile.schema';
+import type { UserProfileDocument } from '../../users/schemas/user-profile.schema';
 
 @ApiTags('Stripe Payments')
 @Controller('stripe')
@@ -50,9 +50,9 @@ export class StripePaymentsController {
     summary: 'Create or retrieve Stripe customer',
     description: 'Creates a new Stripe customer or retrieves existing one for the authenticated user'
   })
-  @ApiResponse({status: 201, description: 'Customer created or retrieved successfully'})
-  @ApiResponse({status: 400, description: 'Invalid request data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 201, description: 'Customer created or retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createCustomer(@GetUser() user: UserProfileDocument, @Body() createCustomerDto: CreateCustomerDto) {
     const customerData = {
       ...createCustomerDto,
@@ -80,11 +80,11 @@ export class StripePaymentsController {
     summary: 'Create payment intent',
     description: 'Creates a new Stripe payment intent for one-time payments'
   })
-  @ApiResponse({status: 201, description: 'Payment intent created successfully'})
-  @ApiResponse({status: 400, description: 'Invalid payment data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 201, description: 'Payment intent created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid payment data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createPaymentIntent(@GetUser() user: UserProfileDocument, @Body() createPaymentDto: CreatePaymentIntentDto) {
-    const {paymentIntent, payment} = await this.stripeService.createPaymentIntent({
+    const { paymentIntent, payment } = await this.stripeService.createPaymentIntent({
       ...createPaymentDto,
       userId: (user._id as any).toString()
     });
@@ -110,11 +110,11 @@ export class StripePaymentsController {
     summary: 'Confirm payment intent',
     description: 'Confirms a payment intent with optional payment method'
   })
-  @ApiParam({name: 'paymentIntentId', description: 'Stripe payment intent ID'})
-  @ApiResponse({status: 200, description: 'Payment intent confirmed successfully'})
-  @ApiResponse({status: 400, description: 'Invalid confirmation data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  async confirmPaymentIntent(@Param('paymentIntentId') paymentIntentId: string, @Body() confirmData: {paymentMethodId?: string}) {
+  @ApiParam({ name: 'paymentIntentId', description: 'Stripe payment intent ID' })
+  @ApiResponse({ status: 200, description: 'Payment intent confirmed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid confirmation data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async confirmPaymentIntent(@Param('paymentIntentId') paymentIntentId: string, @Body() confirmData: { paymentMethodId?: string }) {
     const paymentIntent = await this.stripeService.confirmPaymentIntent(paymentIntentId, confirmData.paymentMethodId);
 
     return {
@@ -136,11 +136,11 @@ export class StripePaymentsController {
     summary: 'Create subscription',
     description: 'Creates a new Stripe subscription for the user'
   })
-  @ApiResponse({status: 201, description: 'Subscription created successfully'})
-  @ApiResponse({status: 400, description: 'Invalid subscription data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 201, description: 'Subscription created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid subscription data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createSubscription(@GetUser() user: UserProfileDocument, @Body() createSubscriptionDto: CreateSubscriptionDto) {
-    const {subscription, subscriptionDoc} = await this.stripeService.createSubscription({
+    const { subscription, subscriptionDoc } = await this.stripeService.createSubscription({
       ...createSubscriptionDto,
       userId: (user._id as any).toString()
     });
@@ -167,11 +167,11 @@ export class StripePaymentsController {
     summary: 'Update subscription',
     description: 'Updates an existing Stripe subscription'
   })
-  @ApiParam({name: 'subscriptionId', description: 'Stripe subscription ID'})
-  @ApiResponse({status: 200, description: 'Subscription updated successfully'})
-  @ApiResponse({status: 400, description: 'Invalid update data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({status: 404, description: 'Subscription not found'})
+  @ApiParam({ name: 'subscriptionId', description: 'Stripe subscription ID' })
+  @ApiResponse({ status: 200, description: 'Subscription updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid update data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Subscription not found' })
   async updateSubscription(@Param('subscriptionId') subscriptionId: string, @Body() updateSubscriptionDto: UpdateSubscriptionDto) {
     const subscription = await this.stripeService.updateSubscription(subscriptionId, updateSubscriptionDto);
 
@@ -194,11 +194,11 @@ export class StripePaymentsController {
     summary: 'Cancel subscription',
     description: 'Cancels a Stripe subscription'
   })
-  @ApiParam({name: 'subscriptionId', description: 'Stripe subscription ID'})
-  @ApiQuery({name: 'atPeriodEnd', required: false, type: Boolean, description: 'Cancel at period end'})
-  @ApiResponse({status: 200, description: 'Subscription canceled successfully'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({status: 404, description: 'Subscription not found'})
+  @ApiParam({ name: 'subscriptionId', description: 'Stripe subscription ID' })
+  @ApiQuery({ name: 'atPeriodEnd', required: false, type: Boolean, description: 'Cancel at period end' })
+  @ApiResponse({ status: 200, description: 'Subscription canceled successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Subscription not found' })
   async cancelSubscription(@Param('subscriptionId') subscriptionId: string, @Query('atPeriodEnd') atPeriodEnd?: boolean) {
     const cancelAtPeriodEnd = atPeriodEnd !== undefined ? atPeriodEnd : true;
 
@@ -223,10 +223,10 @@ export class StripePaymentsController {
     summary: 'Get subscription details',
     description: 'Retrieves detailed information about a Stripe subscription'
   })
-  @ApiParam({name: 'subscriptionId', description: 'Stripe subscription ID'})
-  @ApiResponse({status: 200, description: 'Subscription details retrieved successfully'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({status: 404, description: 'Subscription not found'})
+  @ApiParam({ name: 'subscriptionId', description: 'Stripe subscription ID' })
+  @ApiResponse({ status: 200, description: 'Subscription details retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Subscription not found' })
   async getSubscription(@Param('subscriptionId') subscriptionId: string) {
     const subscription = await this.stripeService.getSubscription(subscriptionId);
 
@@ -260,10 +260,10 @@ export class StripePaymentsController {
     summary: 'Create setup intent',
     description: 'Creates a setup intent for saving payment methods'
   })
-  @ApiResponse({status: 201, description: 'Setup intent created successfully'})
-  @ApiResponse({status: 400, description: 'Invalid request data'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  async createSetupIntent(@GetUser() user: UserProfileDocument, @Body() setupData: {customerId: string; paymentMethodTypes?: string[]}) {
+  @ApiResponse({ status: 201, description: 'Setup intent created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createSetupIntent(@GetUser() user: UserProfileDocument, @Body() setupData: { customerId: string; paymentMethodTypes?: string[] }) {
     const setupIntent = await this.stripeService.createSetupIntent(setupData.customerId, setupData.paymentMethodTypes);
 
     return {
@@ -284,10 +284,10 @@ export class StripePaymentsController {
     summary: 'List payment methods',
     description: 'Lists saved payment methods for a customer'
   })
-  @ApiParam({name: 'customerId', description: 'Stripe customer ID'})
-  @ApiQuery({name: 'type', required: false, type: String, description: 'Payment method type'})
-  @ApiResponse({status: 200, description: 'Payment methods retrieved successfully'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiParam({ name: 'customerId', description: 'Stripe customer ID' })
+  @ApiQuery({ name: 'type', required: false, type: String, description: 'Payment method type' })
+  @ApiResponse({ status: 200, description: 'Payment methods retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async listPaymentMethods(@Param('customerId') customerId: string, @Query('type') type?: string) {
     const paymentMethods = await this.stripeService.listPaymentMethods(customerId, type);
 
@@ -318,10 +318,10 @@ export class StripePaymentsController {
     summary: 'Detach payment method',
     description: 'Detaches a payment method from customer'
   })
-  @ApiParam({name: 'paymentMethodId', description: 'Stripe payment method ID'})
-  @ApiResponse({status: 200, description: 'Payment method detached successfully'})
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({status: 404, description: 'Payment method not found'})
+  @ApiParam({ name: 'paymentMethodId', description: 'Stripe payment method ID' })
+  @ApiResponse({ status: 200, description: 'Payment method detached successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Payment method not found' })
   async detachPaymentMethod(@Param('paymentMethodId') paymentMethodId: string) {
     const paymentMethod = await this.stripeService.detachPaymentMethod(paymentMethodId);
 
@@ -339,7 +339,7 @@ export class StripePaymentsController {
     summary: 'Get publishable key',
     description: 'Retrieves Stripe publishable key for frontend integration'
   })
-  @ApiResponse({status: 200, description: 'Publishable key retrieved successfully'})
+  @ApiResponse({ status: 200, description: 'Publishable key retrieved successfully' })
   getPublishableKey() {
     const publishableKey = this.stripeService.getPublishableKey();
 
@@ -357,10 +357,10 @@ export class StripePaymentsController {
     summary: 'Stripe webhook endpoint',
     description: 'Handles Stripe webhook events for payment processing'
   })
-  @ApiResponse({status: 200, description: 'Webhook processed successfully'})
-  @ApiResponse({status: 400, description: 'Invalid webhook signature'})
+  @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid webhook signature' })
   async handleWebhook(@Req() req: RawBodyRequest<Request>, @Headers('stripe-signature') signature: string) {
     await this.webhookService.handleWebhookRequest(req.rawBody || Buffer.from(''), signature);
-    return {received: true};
+    return { received: true };
   }
 }

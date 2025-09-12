@@ -1,6 +1,6 @@
-import {IsString, IsEmail, IsOptional, ValidateNested} from 'class-validator';
-import {Type} from 'class-transformer';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { IsString, IsEmail, IsOptional, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AddressDto {
   @ApiProperty()

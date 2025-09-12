@@ -1,4 +1,4 @@
-import {TestSetup} from './helpers/test-helpers';
+import { TestSetup } from './helpers/test-helpers';
 
 // Global test setup
 beforeAll(() => {

@@ -1,9 +1,9 @@
-import {IsString, IsNumber, IsOptional, IsEnum, ValidateNested} from 'class-validator';
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {Type} from 'class-transformer';
+import { IsString, IsNumber, IsOptional, IsEnum, ValidateNested } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class PaymentMethodDto {
-  @ApiProperty({enum: ['card', 'bank_account', 'paypal', 'apple_pay', 'google_pay']})
+  @ApiProperty({ enum: ['card', 'bank_account', 'paypal', 'apple_pay', 'google_pay'] })
   @IsEnum(['card', 'bank_account', 'paypal', 'apple_pay', 'google_pay'])
   type: 'card' | 'bank_account' | 'paypal' | 'apple_pay' | 'google_pay';
 
@@ -87,11 +87,11 @@ export class CreatePaymentDto {
   @IsString()
   currency?: string;
 
-  @ApiProperty({enum: ['succeeded', 'pending', 'failed', 'canceled', 'refunded', 'partially_refunded']})
+  @ApiProperty({ enum: ['succeeded', 'pending', 'failed', 'canceled', 'refunded', 'partially_refunded'] })
   @IsEnum(['succeeded', 'pending', 'failed', 'canceled', 'refunded', 'partially_refunded'])
   status: 'succeeded' | 'pending' | 'failed' | 'canceled' | 'refunded' | 'partially_refunded';
 
-  @ApiProperty({enum: ['subscription', 'one_time', 'upgrade', 'downgrade', 'addon']})
+  @ApiProperty({ enum: ['subscription', 'one_time', 'upgrade', 'downgrade', 'addon'] })
   @IsEnum(['subscription', 'one_time', 'upgrade', 'downgrade', 'addon'])
   type: 'subscription' | 'one_time' | 'upgrade' | 'downgrade' | 'addon';
 

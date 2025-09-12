@@ -1,12 +1,12 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {INestApplication, ValidationPipe} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import {MongooseModule} from '@nestjs/mongoose';
-import {ConfigModule} from '@nestjs/config';
-import {MongoMemoryServer} from 'mongodb-memory-server';
-import {UsersModule} from '../src/users/users.module';
-import {CreateUserDto} from '../src/users/dto/create-user.dto';
-import {UpdateUserDto} from '../src/users/dto/update-user.dto';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { UsersModule } from '../src/users/users.module';
+import { CreateUserDto } from '../src/users/dto/create-user.dto';
+import { UpdateUserDto } from '../src/users/dto/update-user.dto';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
@@ -70,13 +70,13 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 400 for invalid email format', async () => {
-      const invalidUser = {...testUser, email: 'invalid-email'};
+      const invalidUser = { ...testUser, email: 'invalid-email' };
 
       await request(app.getHttpServer()).post('/users').send(invalidUser).expect(400);
     });
 
     it('should return 400 for missing required fields', async () => {
-      const incompleteUser = {email: 'incomplete@example.com'};
+      const incompleteUser = { email: 'incomplete@example.com' };
 
       await request(app.getHttpServer()).post('/users').send(incompleteUser).expect(400);
     });
@@ -86,7 +86,7 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 400 for weak password', async () => {
-      const weakPasswordUser = {...testUser, email: 'weak@example.com', password: '123'};
+      const weakPasswordUser = { ...testUser, email: 'weak@example.com', password: '123' };
 
       await request(app.getHttpServer()).post('/users').send(weakPasswordUser).expect(400);
     });
@@ -114,7 +114,7 @@ describe('Users (e2e)', () => {
 
   describe('GET /users', () => {
     it('should get paginated list of users', async () => {
-      const response = await request(app.getHttpServer()).get('/users').query({page: 1, limit: 10}).expect(200);
+      const response = await request(app.getHttpServer()).get('/users').query({ page: 1, limit: 10 }).expect(200);
 
       expect(response.body).toHaveProperty('users');
       expect(response.body).toHaveProperty('total');
@@ -124,13 +124,13 @@ describe('Users (e2e)', () => {
     });
 
     it('should filter users by status', async () => {
-      const response = await request(app.getHttpServer()).get('/users').query({status: 'pending_verification'}).expect(200);
+      const response = await request(app.getHttpServer()).get('/users').query({ status: 'pending_verification' }).expect(200);
 
       expect(response.body.users.every(user => user.status === 'pending_verification')).toBe(true);
     });
 
     it('should handle empty results gracefully', async () => {
-      const response = await request(app.getHttpServer()).get('/users').query({status: 'non_existent_status'}).expect(200);
+      const response = await request(app.getHttpServer()).get('/users').query({ status: 'non_existent_status' }).expect(200);
 
       expect(response.body.users).toEqual([]);
       expect(response.body.total).toBe(0);
@@ -153,13 +153,13 @@ describe('Users (e2e)', () => {
 
     it('should return 404 for non-existent user update', async () => {
       const nonExistentId = '507f1f77bcf86cd799439011';
-      const updateData = {firstName: 'Updated'};
+      const updateData = { firstName: 'Updated' };
 
       await request(app.getHttpServer()).patch(`/users/${nonExistentId}`).send(updateData).expect(404);
     });
 
     it('should validate update data', async () => {
-      const invalidUpdateData = {email: 'invalid-email-format'};
+      const invalidUpdateData = { email: 'invalid-email-format' };
 
       await request(app.getHttpServer()).patch(`/users/${createdUserId}`).send(invalidUpdateData).expect(400);
     });
@@ -186,20 +186,20 @@ describe('Users (e2e)', () => {
 
   describe('POST /users/:id/password', () => {
     it('should update user password', async () => {
-      const passwordUpdate = {newPassword: 'newPassword123'};
+      const passwordUpdate = { newPassword: 'newPassword123' };
 
       await request(app.getHttpServer()).post(`/users/${createdUserId}/password`).send(passwordUpdate).expect(200);
     });
 
     it('should return 400 for weak new password', async () => {
-      const weakPassword = {newPassword: '123'};
+      const weakPassword = { newPassword: '123' };
 
       await request(app.getHttpServer()).post(`/users/${createdUserId}/password`).send(weakPassword).expect(400);
     });
 
     it('should return 404 for non-existent user password update', async () => {
       const nonExistentId = '507f1f77bcf86cd799439011';
-      const passwordUpdate = {newPassword: 'newPassword123'};
+      const passwordUpdate = { newPassword: 'newPassword123' };
 
       await request(app.getHttpServer()).post(`/users/${nonExistentId}/password`).send(passwordUpdate).expect(404);
     });

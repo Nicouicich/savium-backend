@@ -1,6 +1,6 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
-import {UserRole} from '@common/constants/user-roles';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { UserRole } from '@common/constants/user-roles';
 
 export type UserProfileDocument = UserProfile & Document;
 
@@ -16,13 +16,13 @@ export type UserProfileDocument = UserProfile & Document;
   }
 })
 export class UserProfile {
-  @Prop({type: Types.ObjectId, ref: 'User', required: true})
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({required: true, trim: true})
+  @Prop({ required: true, trim: true })
   name: string; // Can be different from legal name for privacy
 
-  @Prop({trim: true})
+  @Prop({ trim: true })
   displayName?: string;
 
   @Prop()
@@ -70,10 +70,10 @@ export class UserProfile {
   };
 
   // Profile status
-  @Prop({default: true})
+  @Prop({ default: true })
   isActive: boolean;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isDefault: boolean; // One profile should be marked as default
 
   // Profile type for different contexts
@@ -92,9 +92,9 @@ export class UserProfile {
         enum: ['public', 'private', 'connections'],
         default: 'private'
       },
-      showContactInfo: {type: Boolean, default: false},
-      showSocialLinks: {type: Boolean, default: false},
-      indexInSearchEngines: {type: Boolean, default: false}
+      showContactInfo: { type: Boolean, default: false },
+      showSocialLinks: { type: Boolean, default: false },
+      indexInSearchEngines: { type: Boolean, default: false }
     },
     default: {}
   })
@@ -106,11 +106,11 @@ export class UserProfile {
   };
 
   // Account associations for this profile
-  @Prop([{type: Types.ObjectId, ref: 'Account'}])
+  @Prop([{ type: Types.ObjectId, ref: 'Account' }])
   associatedAccounts: Types.ObjectId[];
 
   // Metadata
-  @Prop({type: Object, default: {}})
+  @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
 }
 
@@ -122,7 +122,7 @@ export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);
 // Critical compound indexes for performance (from MEJORAS.md DB-002)
 // User-profile relationship queries
 UserProfileSchema.index(
-  {userId: 1, isActive: 1},
+  { userId: 1, isActive: 1 },
   {
     name: 'user_active_idx',
     background: true
@@ -131,7 +131,7 @@ UserProfileSchema.index(
 
 // Default profile queries
 UserProfileSchema.index(
-  {userId: 1, isDefault: 1},
+  { userId: 1, isDefault: 1 },
   {
     name: 'user_default_idx',
     background: true
@@ -140,7 +140,7 @@ UserProfileSchema.index(
 
 // Profile type filtering
 UserProfileSchema.index(
-  {userId: 1, profileType: 1, isActive: 1},
+  { userId: 1, profileType: 1, isActive: 1 },
   {
     name: 'user_type_active_idx',
     background: true
@@ -149,7 +149,7 @@ UserProfileSchema.index(
 
 // Account association queries
 UserProfileSchema.index(
-  {associatedAccounts: 1, isActive: 1},
+  { associatedAccounts: 1, isActive: 1 },
   {
     name: 'accounts_active_idx',
     background: true
@@ -158,7 +158,7 @@ UserProfileSchema.index(
 
 // Privacy visibility queries
 UserProfileSchema.index(
-  {'privacy.visibility': 1, isActive: 1},
+  { 'privacy.visibility': 1, isActive: 1 },
   {
     name: 'privacy_visibility_active_idx',
     background: true
@@ -175,6 +175,6 @@ UserProfileSchema.index(
   },
   {
     name: 'profile_text_search',
-    weights: {name: 10, displayName: 8, company: 5, bio: 1}
+    weights: { name: 10, displayName: 8, company: 5, bio: 1 }
   }
 );

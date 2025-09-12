@@ -1,7 +1,7 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document} from 'mongoose';
-import {v4 as uuidv4} from 'uuid';
-import {Currency} from '@common/constants/expense-categories';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+import { Currency } from '@common/constants/expense-categories';
 
 export type GoalDocument = Goal & Document;
 
@@ -41,121 +41,121 @@ export enum RecurrenceType {
 
 @Schema()
 export class GoalMilestone {
-  @Prop({required: true, trim: true, maxlength: 100})
+  @Prop({ required: true, trim: true, maxlength: 100 })
   title: string;
 
-  @Prop({trim: true, maxlength: 500})
+  @Prop({ trim: true, maxlength: 500 })
   description?: string;
 
-  @Prop({required: true, min: 0})
+  @Prop({ required: true, min: 0 })
   targetAmount: number;
 
-  @Prop({default: 0, min: 0})
+  @Prop({ default: 0, min: 0 })
   currentAmount: number;
 
-  @Prop({type: Date, required: true})
+  @Prop({ type: Date, required: true })
   targetDate: Date;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isCompleted: boolean;
 
-  @Prop({type: Date})
+  @Prop({ type: Date })
   completedAt?: Date;
 
-  @Prop({default: 1})
+  @Prop({ default: 1 })
   order: number;
 }
 
 @Schema()
 export class GoalSettings {
-  @Prop({default: true})
+  @Prop({ default: true })
   sendReminders: boolean;
 
-  @Prop({default: 7})
+  @Prop({ default: 7 })
   reminderDaysBefore: number; // Days before target date to send reminder
 
-  @Prop({default: true})
+  @Prop({ default: true })
   trackAutomatically: boolean; // Auto-track related expenses/savings
 
-  @Prop({default: false})
+  @Prop({ default: false })
   allowOverage: boolean; // Allow going over target amount
 
-  @Prop({default: true})
+  @Prop({ default: true })
   showInDashboard: boolean;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isPrivate: boolean; // Private goals in shared accounts
 
-  @Prop({type: [String], default: []})
+  @Prop({ type: [String], default: [] })
   linkedCategories: string[]; // Categories to track for this goal
 
-  @Prop({type: [String], default: []})
+  @Prop({ type: [String], default: [] })
   excludeCategories: string[]; // Categories to exclude from tracking
 }
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Goal {
-  @Prop({type: String, default: uuidv4, unique: true})
+  @Prop({ type: String, default: uuidv4, unique: true })
   id: string;
 
-  @Prop({required: true, trim: true, minlength: 1, maxlength: 100})
+  @Prop({ required: true, trim: true, minlength: 1, maxlength: 100 })
   title: string;
 
-  @Prop({trim: true, maxlength: 1000})
+  @Prop({ trim: true, maxlength: 1000 })
   description?: string;
 
-  @Prop({type: String, required: true})
+  @Prop({ type: String, required: true })
   accountId: string;
 
-  @Prop({type: String, required: true})
+  @Prop({ type: String, required: true })
   createdBy: string;
 
-  @Prop({enum: GoalType, required: true})
+  @Prop({ enum: GoalType, required: true })
   type: GoalType;
 
-  @Prop({enum: Currency, default: Currency.USD})
+  @Prop({ enum: Currency, default: Currency.USD })
   currency: Currency;
 
-  @Prop({required: true, min: 0})
+  @Prop({ required: true, min: 0 })
   targetAmount: number;
 
-  @Prop({default: 0, min: 0})
+  @Prop({ default: 0, min: 0 })
   currentAmount: number;
 
-  @Prop({default: 0, min: 0})
+  @Prop({ default: 0, min: 0 })
   remainingAmount: number;
 
-  @Prop({type: Date, required: true})
+  @Prop({ type: Date, required: true })
   targetDate: Date;
 
-  @Prop({type: Date})
+  @Prop({ type: Date })
   startDate?: Date;
 
-  @Prop({enum: GoalStatus, default: GoalStatus.ACTIVE})
+  @Prop({ enum: GoalStatus, default: GoalStatus.ACTIVE })
   status: GoalStatus;
 
-  @Prop({enum: GoalPriority, default: GoalPriority.MEDIUM})
+  @Prop({ enum: GoalPriority, default: GoalPriority.MEDIUM })
   priority: GoalPriority;
 
-  @Prop({enum: RecurrenceType, default: RecurrenceType.NONE})
+  @Prop({ enum: RecurrenceType, default: RecurrenceType.NONE })
   recurrence: RecurrenceType;
 
   @Prop()
   recurringAmount?: number; // Amount to save/reduce per period
 
-  @Prop({type: [GoalMilestone], default: []})
+  @Prop({ type: [GoalMilestone], default: [] })
   milestones: GoalMilestone[];
 
-  @Prop({type: GoalSettings, default: {}})
+  @Prop({ type: GoalSettings, default: {} })
   settings: GoalSettings;
 
-  @Prop({type: [String], default: []})
+  @Prop({ type: [String], default: [] })
   participants: string[]; // Users participating in this goal
 
-  @Prop({type: String})
+  @Prop({ type: String })
   linkedBudgetId?: string; // Link to related budget
 
-  @Prop({type: Object, default: {}})
+  @Prop({ type: Object, default: {} })
   metadata: {
     source?: string; // 'manual', 'template', 'ai_suggested'
     tags?: string[];
@@ -166,16 +166,16 @@ export class Goal {
     estimatedCompletion?: Date; // Estimated completion based on current progress
   };
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isTemplate: boolean;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isDeleted: boolean;
 
-  @Prop({type: Date})
+  @Prop({ type: Date })
   deletedAt?: Date;
 
-  @Prop({type: String})
+  @Prop({ type: String })
   deletedBy?: string;
 }
 
@@ -199,7 +199,7 @@ GoalSchema.set('toJSON', {
 // Critical compound indexes for performance (from MEJORAS.md DB-002)
 // Account-based goal queries with status filtering
 GoalSchema.index(
-  {accountId: 1, status: 1, isDeleted: 1},
+  { accountId: 1, status: 1, isDeleted: 1 },
   {
     name: 'account_status_deleted_idx',
     background: true
@@ -208,7 +208,7 @@ GoalSchema.index(
 
 // Goal type filtering within accounts
 GoalSchema.index(
-  {accountId: 1, type: 1, status: 1, isDeleted: 1},
+  { accountId: 1, type: 1, status: 1, isDeleted: 1 },
   {
     name: 'account_type_status_deleted_idx',
     background: true
@@ -217,7 +217,7 @@ GoalSchema.index(
 
 // Creator-based goal queries
 GoalSchema.index(
-  {createdBy: 1, status: 1, isDeleted: 1},
+  { createdBy: 1, status: 1, isDeleted: 1 },
   {
     name: 'creator_status_deleted_idx',
     background: true
@@ -226,7 +226,7 @@ GoalSchema.index(
 
 // Overdue goal monitoring and processing
 GoalSchema.index(
-  {status: 1, targetDate: 1, isDeleted: 1},
+  { status: 1, targetDate: 1, isDeleted: 1 },
   {
     name: 'status_targetdate_deleted_idx',
     background: true
@@ -235,7 +235,7 @@ GoalSchema.index(
 
 // Participant-based goal queries
 GoalSchema.index(
-  {participants: 1, status: 1, isDeleted: 1},
+  { participants: 1, status: 1, isDeleted: 1 },
   {
     name: 'participants_status_deleted_idx',
     background: true
@@ -244,7 +244,7 @@ GoalSchema.index(
 
 // Template goal queries
 GoalSchema.index(
-  {isTemplate: 1, accountId: 1, isDeleted: 1},
+  { isTemplate: 1, accountId: 1, isDeleted: 1 },
   {
     name: 'template_account_deleted_idx',
     background: true
@@ -253,7 +253,7 @@ GoalSchema.index(
 
 // Priority-based goal filtering
 GoalSchema.index(
-  {accountId: 1, priority: 1, status: 1, isDeleted: 1},
+  { accountId: 1, priority: 1, status: 1, isDeleted: 1 },
   {
     name: 'account_priority_status_deleted_idx',
     background: true
@@ -262,7 +262,7 @@ GoalSchema.index(
 
 // Date-based goal tracking and analytics
 GoalSchema.index(
-  {accountId: 1, targetDate: -1, status: 1},
+  { accountId: 1, targetDate: -1, status: 1 },
   {
     name: 'account_targetdate_status_idx',
     background: true
@@ -271,7 +271,7 @@ GoalSchema.index(
 
 // Recurrence-based goal processing
 GoalSchema.index(
-  {recurrence: 1, status: 1, targetDate: 1},
+  { recurrence: 1, status: 1, targetDate: 1 },
   {
     name: 'recurrence_status_targetdate_idx',
     background: true
@@ -280,7 +280,7 @@ GoalSchema.index(
 
 // Currency-based filtering for multi-currency support
 GoalSchema.index(
-  {accountId: 1, currency: 1, status: 1},
+  { accountId: 1, currency: 1, status: 1 },
   {
     name: 'account_currency_status_idx',
     background: true
@@ -289,7 +289,7 @@ GoalSchema.index(
 
 // Progress tracking queries
 GoalSchema.index(
-  {accountId: 1, currentAmount: -1, status: 1},
+  { accountId: 1, currentAmount: -1, status: 1 },
   {
     name: 'account_progress_status_idx',
     background: true
@@ -298,7 +298,7 @@ GoalSchema.index(
 
 // Budget integration queries
 GoalSchema.index(
-  {linkedBudgetId: 1, status: 1},
+  { linkedBudgetId: 1, status: 1 },
   {
     name: 'budget_linked_status_idx',
     background: true,
@@ -314,7 +314,7 @@ GoalSchema.index(
   },
   {
     name: 'goal_text_search',
-    weights: {title: 10, description: 5}
+    weights: { title: 10, description: 5 }
   }
 );
 

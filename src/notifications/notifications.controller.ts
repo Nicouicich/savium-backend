@@ -1,8 +1,8 @@
-import {Body, Controller, Get, Post, UseGuards} from '@nestjs/common';
-import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {NotificationsService} from './notifications.service';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { NotificationsService } from './notifications.service';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -62,7 +62,7 @@ export class NotificationsController {
     summary: 'Test budget alert notification',
     description: 'Send a test budget alert notification (mock)'
   })
-  @ApiResponse({status: 200, description: 'Test budget alert sent'})
+  @ApiResponse({ status: 200, description: 'Test budget alert sent' })
   async testBudgetAlert(@CurrentUser() user: any) {
     await this.notificationsService.sendBudgetAlert(user.id, 'Monthly Budget', 850, 1000);
 
@@ -78,7 +78,7 @@ export class NotificationsController {
     summary: 'Test goal reminder notification',
     description: 'Send a test goal reminder notification (mock)'
   })
-  @ApiResponse({status: 200, description: 'Test goal reminder sent'})
+  @ApiResponse({ status: 200, description: 'Test goal reminder sent' })
   async testGoalReminder(@CurrentUser() user: any) {
     await this.notificationsService.sendGoalReminder(user.id, 'Emergency Fund', 2500, 45);
 

@@ -1,27 +1,27 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {ExpenseCategory} from '@common/constants/expense-categories';
-import {SubcategoryResponseDto} from './category-response.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ExpenseCategory } from '@common/constants/expense-categories';
+import { SubcategoryResponseDto } from './category-response.dto';
 
 export class CategoryHierarchyResponseDto {
-  @ApiProperty({description: 'Category ID'})
+  @ApiProperty({ description: 'Category ID' })
   id: string;
 
-  @ApiProperty({description: 'Category internal name'})
+  @ApiProperty({ description: 'Category internal name' })
   name: string;
 
-  @ApiProperty({description: 'Category display name'})
+  @ApiProperty({ description: 'Category display name' })
   displayName: string;
 
-  @ApiPropertyOptional({enum: ExpenseCategory, description: 'Predefined category type'})
+  @ApiPropertyOptional({ enum: ExpenseCategory, description: 'Predefined category type' })
   type?: ExpenseCategory;
 
-  @ApiProperty({description: 'Category icon'})
+  @ApiProperty({ description: 'Category icon' })
   icon: string;
 
-  @ApiProperty({description: 'Category color'})
+  @ApiProperty({ description: 'Category color' })
   color: string;
 
-  @ApiPropertyOptional({description: 'Category description'})
+  @ApiPropertyOptional({ description: 'Category description' })
   description?: string;
 
   @ApiProperty({
@@ -30,19 +30,19 @@ export class CategoryHierarchyResponseDto {
   })
   subcategories: SubcategoryResponseDto[];
 
-  @ApiPropertyOptional({description: 'Account ID (null for global categories)'})
+  @ApiPropertyOptional({ description: 'Account ID (null for global categories)' })
   accountId?: string;
 
-  @ApiPropertyOptional({description: 'Category creator ID'})
+  @ApiPropertyOptional({ description: 'Category creator ID' })
   createdBy?: string;
 
-  @ApiProperty({description: 'Whether this is a custom category'})
+  @ApiProperty({ description: 'Whether this is a custom category' })
   isCustom: boolean;
 
-  @ApiProperty({description: 'Whether the category is active'})
+  @ApiProperty({ description: 'Whether the category is active' })
   isActive: boolean;
 
-  @ApiProperty({description: 'Whether the category is visible'})
+  @ApiProperty({ description: 'Whether the category is visible' })
   isVisible: boolean;
 
   @ApiProperty({
@@ -51,21 +51,21 @@ export class CategoryHierarchyResponseDto {
   })
   keywords: string[];
 
-  @ApiProperty({description: 'Sort order'})
+  @ApiProperty({ description: 'Sort order' })
   sortOrder: number;
 
-  @ApiProperty({description: 'Number of subcategories'})
+  @ApiProperty({ description: 'Number of subcategories' })
   subcategoryCount: number;
 
-  @ApiProperty({description: 'Whether category can be edited'})
+  @ApiProperty({ description: 'Whether category can be edited' })
   canEdit: boolean;
 
-  @ApiProperty({description: 'Whether category can be deleted'})
+  @ApiProperty({ description: 'Whether category can be deleted' })
   canDelete: boolean;
 
-  @ApiProperty({description: 'Category creation date'})
+  @ApiProperty({ description: 'Category creation date' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Category update date'})
+  @ApiProperty({ description: 'Category update date' })
   updatedAt: Date;
 }

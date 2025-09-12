@@ -23,7 +23,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Users collection indexes
   {
     collection: 'users',
-    index: {email: 1},
+    index: { email: 1 },
     options: {
       name: 'email_unique',
       unique: true,
@@ -32,7 +32,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'users',
-    index: {refreshTokens: 1},
+    index: { refreshTokens: 1 },
     options: {
       name: 'refresh_tokens',
       sparse: true,
@@ -41,7 +41,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'users',
-    index: {isActive: 1, lastLoginAt: -1},
+    index: { isActive: 1, lastLoginAt: -1 },
     options: {
       name: 'active_users_by_login',
       background: true
@@ -49,7 +49,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'users',
-    index: {createdAt: -1},
+    index: { createdAt: -1 },
     options: {
       name: 'users_by_creation_date',
       background: true
@@ -59,7 +59,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Accounts collection indexes
   {
     collection: 'accounts',
-    index: {owner: 1, type: 1},
+    index: { owner: 1, type: 1 },
     options: {
       name: 'accounts_by_owner_type',
       background: true
@@ -67,7 +67,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'accounts',
-    index: {'members.userId': 1, 'members.isActive': 1},
+    index: { 'members.userId': 1, 'members.isActive': 1 },
     options: {
       name: 'active_account_members',
       background: true
@@ -75,7 +75,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'accounts',
-    index: {status: 1, lastActivityAt: -1},
+    index: { status: 1, lastActivityAt: -1 },
     options: {
       name: 'accounts_by_status_activity',
       background: true
@@ -83,7 +83,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'accounts',
-    index: {'pendingInvitations.token': 1},
+    index: { 'pendingInvitations.token': 1 },
     options: {
       name: 'invitation_tokens',
       sparse: true,
@@ -92,7 +92,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'accounts',
-    index: {'pendingInvitations.email': 1, 'pendingInvitations.status': 1},
+    index: { 'pendingInvitations.email': 1, 'pendingInvitations.status': 1 },
     options: {
       name: 'pending_invitations_by_email',
       sparse: true,
@@ -101,7 +101,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'accounts',
-    index: {name: 'text', description: 'text'},
+    index: { name: 'text', description: 'text' },
     options: {
       name: 'accounts_text_search',
       background: true
@@ -111,7 +111,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Expenses collection indexes
   {
     collection: 'expenses',
-    index: {accountId: 1, date: -1},
+    index: { accountId: 1, date: -1 },
     options: {
       name: 'expenses_by_account_date',
       background: true
@@ -119,7 +119,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {userId: 1, isDeleted: 1},
+    index: { userId: 1, isDeleted: 1 },
     options: {
       name: 'expenses_by_user_deleted_status',
       background: true
@@ -127,7 +127,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {accountId: 1, isDeleted: 1, date: -1},
+    index: { accountId: 1, isDeleted: 1, date: -1 },
     options: {
       name: 'expenses_by_account_active_date',
       background: true
@@ -135,7 +135,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {userId: 1, date: -1},
+    index: { userId: 1, date: -1 },
     options: {
       name: 'expenses_by_user_date',
       background: true
@@ -143,7 +143,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {accountId: 1, categoryId: 1, date: -1},
+    index: { accountId: 1, categoryId: 1, date: -1 },
     options: {
       name: 'expenses_by_account_category_date',
       background: true
@@ -151,7 +151,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {accountId: 1, amount: -1},
+    index: { accountId: 1, amount: -1 },
     options: {
       name: 'expenses_by_account_amount',
       background: true
@@ -172,7 +172,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {tags: 1},
+    index: { tags: 1 },
     options: {
       name: 'expenses_by_tags',
       sparse: true,
@@ -181,7 +181,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {description: 'text', notes: 'text'},
+    index: { description: 'text', notes: 'text' },
     options: {
       name: 'expenses_text_search',
       background: true
@@ -189,7 +189,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {createdAt: -1},
+    index: { createdAt: -1 },
     options: {
       name: 'expenses_by_creation',
       background: true
@@ -197,7 +197,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {recurringExpenseId: 1},
+    index: { recurringExpenseId: 1 },
     options: {
       name: 'recurring_expenses',
       sparse: true,
@@ -206,25 +206,25 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'expenses',
-    index: {isRecurring: 1, 'recurringPattern.nextOccurrence': 1},
+    index: { isRecurring: 1, 'recurringPattern.nextOccurrence': 1 },
     options: {
       name: 'recurring_pattern_next_occurrence',
-      partialFilterExpression: {isRecurring: true},
+      partialFilterExpression: { isRecurring: true },
       background: true
     }
   },
   {
     collection: 'expenses',
-    index: {isSharedExpense: 1, sharedWith: 1},
+    index: { isSharedExpense: 1, sharedWith: 1 },
     options: {
       name: 'shared_expenses',
-      partialFilterExpression: {isSharedExpense: true},
+      partialFilterExpression: { isSharedExpense: true },
       background: true
     }
   },
   {
     collection: 'expenses',
-    index: {paymentMethod: 1, date: -1},
+    index: { paymentMethod: 1, date: -1 },
     options: {
       name: 'expenses_by_payment_method',
       sparse: true,
@@ -235,7 +235,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Categories collection indexes
   {
     collection: 'categories',
-    index: {accountId: 1, isActive: 1},
+    index: { accountId: 1, isActive: 1 },
     options: {
       name: 'active_categories_by_account',
       background: true
@@ -243,7 +243,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'categories',
-    index: {accountId: 1, parentCategory: 1},
+    index: { accountId: 1, parentCategory: 1 },
     options: {
       name: 'categories_by_parent',
       background: true
@@ -251,7 +251,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'categories',
-    index: {name: 'text', description: 'text'},
+    index: { name: 'text', description: 'text' },
     options: {
       name: 'categories_text_search',
       background: true
@@ -259,7 +259,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'categories',
-    index: {type: 1, isActive: 1},
+    index: { type: 1, isActive: 1 },
     options: {
       name: 'categories_by_type',
       background: true
@@ -269,7 +269,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Budgets collection indexes
   {
     collection: 'budgets',
-    index: {accountId: 1, period: 1, status: 1},
+    index: { accountId: 1, period: 1, status: 1 },
     options: {
       name: 'budgets_by_account_period_status',
       background: true
@@ -277,7 +277,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'budgets',
-    index: {accountId: 1, startDate: 1, endDate: 1},
+    index: { accountId: 1, startDate: 1, endDate: 1 },
     options: {
       name: 'budgets_by_date_range',
       background: true
@@ -285,7 +285,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'budgets',
-    index: {'categoryBudgets.categoryId': 1},
+    index: { 'categoryBudgets.categoryId': 1 },
     options: {
       name: 'category_budgets',
       sparse: true,
@@ -294,7 +294,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'budgets',
-    index: {createdBy: 1, status: 1},
+    index: { createdBy: 1, status: 1 },
     options: {
       name: 'budgets_by_creator',
       background: true
@@ -304,7 +304,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Goals collection indexes
   {
     collection: 'goals',
-    index: {accountId: 1, status: 1},
+    index: { accountId: 1, status: 1 },
     options: {
       name: 'goals_by_account_status',
       background: true
@@ -312,7 +312,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'goals',
-    index: {accountId: 1, targetDate: 1},
+    index: { accountId: 1, targetDate: 1 },
     options: {
       name: 'goals_by_target_date',
       background: true
@@ -320,7 +320,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'goals',
-    index: {createdBy: 1, status: 1},
+    index: { createdBy: 1, status: 1 },
     options: {
       name: 'goals_by_creator',
       background: true
@@ -331,7 +331,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // BillingCustomer collection
   {
     collection: 'billingcustomers',
-    index: {userId: 1},
+    index: { userId: 1 },
     options: {
       name: 'billing_customers_by_user',
       unique: true,
@@ -340,7 +340,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {stripeCustomerId: 1},
+    index: { stripeCustomerId: 1 },
     options: {
       name: 'billing_customers_by_stripe_id',
       unique: true,
@@ -349,7 +349,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {email: 1},
+    index: { email: 1 },
     options: {
       name: 'billing_customers_by_email',
       background: true
@@ -357,7 +357,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {status: 1},
+    index: { status: 1 },
     options: {
       name: 'billing_customers_by_status',
       background: true
@@ -365,7 +365,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {riskScore: -1},
+    index: { riskScore: -1 },
     options: {
       name: 'billing_customers_by_risk_score',
       background: true
@@ -373,7 +373,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {activeSubscriptionId: 1},
+    index: { activeSubscriptionId: 1 },
     options: {
       name: 'billing_customers_by_subscription',
       sparse: true,
@@ -382,7 +382,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'billingcustomers',
-    index: {'paymentMethods.stripePaymentMethodId': 1},
+    index: { 'paymentMethods.stripePaymentMethodId': 1 },
     options: {
       name: 'billing_payment_methods',
       sparse: true,
@@ -393,7 +393,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Subscription collection
   {
     collection: 'subscriptions',
-    index: {userId: 1},
+    index: { userId: 1 },
     options: {
       name: 'subscriptions_by_user',
       background: true
@@ -401,7 +401,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {stripeSubscriptionId: 1},
+    index: { stripeSubscriptionId: 1 },
     options: {
       name: 'subscriptions_by_stripe_id',
       unique: true,
@@ -410,7 +410,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {stripeCustomerId: 1},
+    index: { stripeCustomerId: 1 },
     options: {
       name: 'subscriptions_by_customer',
       background: true
@@ -418,7 +418,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {status: 1},
+    index: { status: 1 },
     options: {
       name: 'subscriptions_by_status',
       background: true
@@ -426,7 +426,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {plan: 1, interval: 1},
+    index: { plan: 1, interval: 1 },
     options: {
       name: 'subscriptions_by_plan_interval',
       background: true
@@ -434,7 +434,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {currentPeriodEnd: 1},
+    index: { currentPeriodEnd: 1 },
     options: {
       name: 'subscriptions_by_period_end',
       background: true
@@ -442,7 +442,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'subscriptions',
-    index: {createdAt: -1},
+    index: { createdAt: -1 },
     options: {
       name: 'subscriptions_by_creation_date',
       background: true
@@ -452,7 +452,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Payment collection
   {
     collection: 'payments',
-    index: {userId: 1, createdAt: -1},
+    index: { userId: 1, createdAt: -1 },
     options: {
       name: 'payments_by_user_date',
       background: true
@@ -460,7 +460,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {stripePaymentIntentId: 1},
+    index: { stripePaymentIntentId: 1 },
     options: {
       name: 'payments_by_stripe_intent',
       unique: true,
@@ -469,7 +469,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {stripeCustomerId: 1},
+    index: { stripeCustomerId: 1 },
     options: {
       name: 'payments_by_customer',
       background: true
@@ -477,7 +477,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {subscriptionId: 1},
+    index: { subscriptionId: 1 },
     options: {
       name: 'payments_by_subscription',
       sparse: true,
@@ -486,7 +486,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {status: 1},
+    index: { status: 1 },
     options: {
       name: 'payments_by_status',
       background: true
@@ -494,7 +494,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {type: 1},
+    index: { type: 1 },
     options: {
       name: 'payments_by_type',
       background: true
@@ -502,7 +502,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {disputed: 1},
+    index: { disputed: 1 },
     options: {
       name: 'payments_by_dispute_status',
       sparse: true,
@@ -511,7 +511,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {createdAt: -1},
+    index: { createdAt: -1 },
     options: {
       name: 'payments_by_creation_date',
       background: true
@@ -519,7 +519,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'payments',
-    index: {amount: -1, currency: 1},
+    index: { amount: -1, currency: 1 },
     options: {
       name: 'payments_by_amount_currency',
       background: true
@@ -529,7 +529,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // User Profile collection indexes
   {
     collection: 'userprofiles',
-    index: {userId: 1},
+    index: { userId: 1 },
     options: {
       name: 'user_profiles_by_user',
       background: true
@@ -537,7 +537,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'userprofiles',
-    index: {userId: 1, isDefault: 1},
+    index: { userId: 1, isDefault: 1 },
     options: {
       name: 'user_default_profiles',
       background: true
@@ -545,7 +545,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'userprofiles',
-    index: {profileType: 1, isActive: 1},
+    index: { profileType: 1, isActive: 1 },
     options: {
       name: 'user_profiles_by_type',
       background: true
@@ -553,7 +553,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'userprofiles',
-    index: {associatedAccounts: 1},
+    index: { associatedAccounts: 1 },
     options: {
       name: 'user_profiles_by_accounts',
       sparse: true,
@@ -571,7 +571,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
     options: {
       name: 'recent_expenses_partial',
       partialFilterExpression: {
-        date: {$gte: new Date('2024-01-01')}
+        date: { $gte: new Date('2024-01-01') }
       },
       background: true
     }
@@ -580,7 +580,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // TTL indexes for cleanup
   {
     collection: 'sessions', // If you have a sessions collection
-    index: {expiresAt: 1},
+    index: { expiresAt: 1 },
     options: {
       name: 'session_expiry',
       expireAfterSeconds: 0,
@@ -589,7 +589,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'userauths',
-    index: {'refreshTokens.expiresAt': 1},
+    index: { 'refreshTokens.expiresAt': 1 },
     options: {
       name: 'refresh_tokens_expiry',
       expireAfterSeconds: 0,
@@ -599,7 +599,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'userauths',
-    index: {userId: 1},
+    index: { userId: 1 },
     options: {
       name: 'user_auth_by_user',
       unique: true,
@@ -608,7 +608,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   },
   {
     collection: 'passwordresets', // If you have password reset tokens
-    index: {createdAt: 1},
+    index: { createdAt: 1 },
     options: {
       name: 'password_reset_expiry',
       expireAfterSeconds: 3600, // 1 hour
@@ -635,7 +635,7 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Geospatial index if you track expense locations
   {
     collection: 'expenses',
-    index: {location: '2dsphere'},
+    index: { location: '2dsphere' },
     options: {
       name: 'expense_locations',
       sparse: true,
@@ -650,73 +650,73 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
 export const CRITICAL_INDEXES: IndexDefinition[] = [
   {
     collection: 'users',
-    index: {email: 1},
-    options: {name: 'email_1', unique: true}
+    index: { email: 1 },
+    options: { name: 'email_1', unique: true }
   },
   {
     collection: 'expenses',
-    index: {accountId: 1, date: -1},
-    options: {name: 'accountId_1_date_-1'}
+    index: { accountId: 1, date: -1 },
+    options: { name: 'accountId_1_date_-1' }
   },
   {
     collection: 'expenses',
-    index: {accountId: 1, isDeleted: 1, date: -1},
-    options: {name: 'accountId_1_isDeleted_1_date_-1'}
+    index: { accountId: 1, isDeleted: 1, date: -1 },
+    options: { name: 'accountId_1_isDeleted_1_date_-1' }
   },
   {
     collection: 'expenses',
-    index: {isRecurring: 1, 'recurringPattern.nextOccurrence': 1},
+    index: { isRecurring: 1, 'recurringPattern.nextOccurrence': 1 },
     options: {
       name: 'recurring_expenses_critical',
-      partialFilterExpression: {isRecurring: true}
+      partialFilterExpression: { isRecurring: true }
     }
   },
   {
     collection: 'accounts',
-    index: {owner: 1},
-    options: {name: 'owner_1'}
+    index: { owner: 1 },
+    options: { name: 'owner_1' }
   },
   {
     collection: 'accounts',
-    index: {'members.userId': 1},
-    options: {name: 'members.userId_1'}
+    index: { 'members.userId': 1 },
+    options: { name: 'members.userId_1' }
   },
   // Billing critical indexes
   {
     collection: 'billingcustomers',
-    index: {userId: 1},
-    options: {name: 'billing_customers_userId_1', unique: true}
+    index: { userId: 1 },
+    options: { name: 'billing_customers_userId_1', unique: true }
   },
   {
     collection: 'billingcustomers',
-    index: {stripeCustomerId: 1},
-    options: {name: 'billing_customers_stripeCustomerId_1', unique: true}
+    index: { stripeCustomerId: 1 },
+    options: { name: 'billing_customers_stripeCustomerId_1', unique: true }
   },
   {
     collection: 'subscriptions',
-    index: {userId: 1},
-    options: {name: 'subscriptions_userId_1'}
+    index: { userId: 1 },
+    options: { name: 'subscriptions_userId_1' }
   },
   {
     collection: 'subscriptions',
-    index: {stripeSubscriptionId: 1},
-    options: {name: 'subscriptions_stripeSubscriptionId_1', unique: true}
+    index: { stripeSubscriptionId: 1 },
+    options: { name: 'subscriptions_stripeSubscriptionId_1', unique: true }
   },
   {
     collection: 'payments',
-    index: {userId: 1, createdAt: -1},
-    options: {name: 'payments_userId_1_createdAt_-1'}
+    index: { userId: 1, createdAt: -1 },
+    options: { name: 'payments_userId_1_createdAt_-1' }
   },
   {
     collection: 'payments',
-    index: {stripePaymentIntentId: 1},
-    options: {name: 'payments_stripePaymentIntentId_1', unique: true}
+    index: { stripePaymentIntentId: 1 },
+    options: { name: 'payments_stripePaymentIntentId_1', unique: true }
   },
   // UserAuth critical indexes
   {
     collection: 'userauths',
-    index: {userId: 1},
-    options: {name: 'userauth_userId_1', unique: true}
+    index: { userId: 1 },
+    options: { name: 'userauth_userId_1', unique: true }
   }
 ];
 

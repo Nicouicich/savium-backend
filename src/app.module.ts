@@ -1,31 +1,31 @@
-import {Module} from '@nestjs/common';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {MongooseModule} from '@nestjs/mongoose';
-import {CacheModule} from '@nestjs/cache-manager';
-import {ThrottlerModule} from '@nestjs/throttler';
-import {AppController} from './app.controller';
-import {AppService} from './app.service';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 // Configuration imports
-import {appConfig, configValidationSchema, databaseConfig, integrationsConfig, jwtConfig, redisConfig, swaggerConfig, stripeConfig} from './config';
+import { appConfig, configValidationSchema, databaseConfig, integrationsConfig, jwtConfig, redisConfig, swaggerConfig, stripeConfig } from './config';
 
 // Module imports
-import {CommonModule} from '@common/common.module';
-import {AuthModule} from './auth/auth.module';
-import {UsersModule} from './users/users.module';
-import {AccountsModule} from './accounts/accounts.module';
-import {CategoriesModule} from './categories/categories.module';
-import {ExpensesModule} from './expenses/expenses.module';
-import {ReportsModule} from './reports/reports.module';
-import {BudgetsModule} from './budgets/budgets.module';
-import {GoalsModule} from './goals/goals.module';
-import {AiModule} from './integrations/ai/ai.module';
-import {WhatsappModule} from './integrations/whatsapp/whatsapp.module';
-import {TelegramModule} from './integrations/telegram/telegram.module';
-import {NotificationsModule} from './notifications/notifications.module';
-import {MailModule} from './mail/mail.module';
-import {BillingModule} from './billing/billing.module';
-import {SettingsModule} from './settings/settings.module';
+import { CommonModule } from '@common/common.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { ReportsModule } from './reports/reports.module';
+import { BudgetsModule } from './budgets/budgets.module';
+import { GoalsModule } from './goals/goals.module';
+import { AiModule } from './integrations/ai/ai.module';
+import { WhatsappModule } from './integrations/whatsapp/whatsapp.module';
+import { TelegramModule } from './integrations/telegram/telegram.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { MailModule } from './mail/mail.module';
+import { BillingModule } from './billing/billing.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [

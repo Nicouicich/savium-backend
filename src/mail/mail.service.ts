@@ -1,8 +1,8 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import {Transporter} from 'nodemailer';
-import {requestContext} from '@common/interceptors/logging.interceptor';
+import { Transporter } from 'nodemailer';
+import { requestContext } from '@common/interceptors/logging.interceptor';
 
 export interface MailOptions {
   to: string | string[];

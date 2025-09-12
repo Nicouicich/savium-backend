@@ -1,91 +1,91 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {AccountStatus, AccountType} from '@common/constants/account-types';
-import {AccountRole} from '@common/constants/user-roles';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { AccountStatus, AccountType } from '@common/constants/account-types';
+import { AccountRole } from '@common/constants/user-roles';
 
 export class AccountMemberResponseDto {
-  @ApiProperty({description: 'User ID'})
+  @ApiProperty({ description: 'User ID' })
   userId: string;
 
-  @ApiProperty({description: 'User email'})
+  @ApiProperty({ description: 'User email' })
   userEmail: string;
 
-  @ApiProperty({description: 'User full name'})
+  @ApiProperty({ description: 'User full name' })
   userName: string;
 
-  @ApiProperty({enum: AccountRole, description: 'Member role'})
+  @ApiProperty({ enum: AccountRole, description: 'Member role' })
   role: AccountRole;
 
-  @ApiProperty({description: 'Date when member joined'})
+  @ApiProperty({ description: 'Date when member joined' })
   joinedAt: Date;
 
-  @ApiProperty({description: 'Whether member is active'})
+  @ApiProperty({ description: 'Whether member is active' })
   isActive: boolean;
 
-  @ApiPropertyOptional({description: 'Expense limit for member'})
+  @ApiPropertyOptional({ description: 'Expense limit for member' })
   expenseLimit?: number;
 
-  @ApiProperty({description: 'Member permissions', type: [String]})
+  @ApiProperty({ description: 'Member permissions', type: [String] })
   permissions: string[];
 }
 
 export class AccountInvitationResponseDto {
-  @ApiProperty({description: 'Invitation ID'})
+  @ApiProperty({ description: 'Invitation ID' })
   id: string;
 
-  @ApiProperty({description: 'Invited email'})
+  @ApiProperty({ description: 'Invited email' })
   email: string;
 
-  @ApiProperty({enum: AccountRole, description: 'Invited role'})
+  @ApiProperty({ enum: AccountRole, description: 'Invited role' })
   role: AccountRole;
 
-  @ApiProperty({description: 'Who sent the invitation'})
+  @ApiProperty({ description: 'Who sent the invitation' })
   invitedBy: string;
 
-  @ApiProperty({description: 'Invitation date'})
+  @ApiProperty({ description: 'Invitation date' })
   invitedAt: Date;
 
-  @ApiProperty({description: 'Invitation expiry date'})
+  @ApiProperty({ description: 'Invitation expiry date' })
   expiresAt: Date;
 
-  @ApiProperty({description: 'Invitation status'})
+  @ApiProperty({ description: 'Invitation status' })
   status: string;
 
-  @ApiPropertyOptional({description: 'Expense limit for invited member'})
+  @ApiPropertyOptional({ description: 'Expense limit for invited member' })
   expenseLimit?: number;
 }
 
 export class AccountResponseDto {
-  @ApiProperty({description: 'Account ID'})
+  @ApiProperty({ description: 'Account ID' })
   id: string;
 
-  @ApiProperty({description: 'Account name'})
+  @ApiProperty({ description: 'Account name' })
   name: string;
 
-  @ApiProperty({enum: AccountType, description: 'Account type'})
+  @ApiProperty({ enum: AccountType, description: 'Account type' })
   type: AccountType;
 
-  @ApiProperty({enum: AccountStatus, description: 'Account status'})
+  @ApiProperty({ enum: AccountStatus, description: 'Account status' })
   status: AccountStatus;
 
-  @ApiProperty({description: 'Account owner ID'})
+  @ApiProperty({ description: 'Account owner ID' })
   owner: string;
 
-  @ApiProperty({type: [AccountMemberResponseDto], description: 'Account members'})
+  @ApiProperty({ type: [AccountMemberResponseDto], description: 'Account members' })
   members: AccountMemberResponseDto[];
 
-  @ApiProperty({type: [AccountInvitationResponseDto], description: 'Pending invitations'})
+  @ApiProperty({ type: [AccountInvitationResponseDto], description: 'Pending invitations' })
   pendingInvitations: AccountInvitationResponseDto[];
 
-  @ApiProperty({description: 'Account currency'})
+  @ApiProperty({ description: 'Account currency' })
   currency: string;
 
-  @ApiPropertyOptional({description: 'Account timezone'})
+  @ApiPropertyOptional({ description: 'Account timezone' })
   timezone?: string;
 
-  @ApiPropertyOptional({description: 'Account description'})
+  @ApiPropertyOptional({ description: 'Account description' })
   description?: string;
 
-  @ApiProperty({description: 'Privacy settings', type: 'object'})
+  @ApiProperty({ description: 'Privacy settings', type: 'object' })
   privacySettings: {
     expenseVisibility: string;
     reportVisibility: string;
@@ -96,21 +96,21 @@ export class AccountResponseDto {
     approvalThreshold?: number;
   };
 
-  @ApiProperty({description: 'Account preferences', type: 'object'})
+  @ApiProperty({ description: 'Account preferences', type: 'object' })
   preferences: Record<string, any>;
 
-  @ApiProperty({description: 'Last activity date'})
+  @ApiProperty({ description: 'Last activity date' })
   lastActivityAt: Date;
 
-  @ApiProperty({description: 'Account creation date'})
+  @ApiProperty({ description: 'Account creation date' })
   createdAt: Date;
 
-  @ApiProperty({description: 'Account update date'})
+  @ApiProperty({ description: 'Account update date' })
   updatedAt: Date;
 
-  @ApiProperty({description: 'Member count'})
+  @ApiProperty({ description: 'Member count' })
   memberCount: number;
 
-  @ApiProperty({description: 'Available features', type: [String]})
+  @ApiProperty({ description: 'Available features', type: [String] })
   features: string[];
 }

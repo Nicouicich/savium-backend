@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigService} from '@nestjs/config';
-import {getModelToken} from '@nestjs/mongoose';
-import {Model, Types, ClientSession} from 'mongoose';
-import {Logger} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model, Types, ClientSession } from 'mongoose';
+import { Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
-import {StripeService} from './stripe.service';
-import {Payment, PaymentDocument} from '../schemas/payment.schema';
-import {Subscription, SubscriptionDocument} from '../schemas/subscription.schema';
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
+import { StripeService } from './stripe.service';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { Subscription, SubscriptionDocument } from '../schemas/subscription.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
 
-import {PaymentException} from '../../common/exceptions/payment.exception';
-import {NotFoundResourceException} from '../../common/exceptions/not-found-resource.exception';
-import {ValidationException} from '../../common/exceptions/validation.exception';
+import { PaymentException } from '../../common/exceptions/payment.exception';
+import { NotFoundResourceException } from '../../common/exceptions/not-found-resource.exception';
+import { ValidationException } from '../../common/exceptions/validation.exception';
 
-import {CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto} from '../dto';
+import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
 
 // Mock Stripe - Define MockStripeError before jest.mock
 jest.mock('stripe', () => {
@@ -53,11 +53,11 @@ jest.mock('stripe', () => {
       constructEvent: jest.fn()
     }
   }));
-  
+
   mockStripe.errors = {
     StripeError: MockStripeError
   };
-  
+
   return mockStripe;
 });
 
@@ -156,21 +156,22 @@ describe('StripeService - Unit Tests', () => {
     ...overrides
   });
 
-  const createMockSubscriptionDto = (overrides = {}): CreateSubscriptionDto => ({
-    userId: new Types.ObjectId().toString(),
-    plan: 'personal',
-    interval: 'monthly',
-    stripeSubscriptionId: 'sub_test',
-    stripeCustomerId: 'cus_test',
-    stripePriceId: 'price_test',
-    stripeProductId: 'prod_test',
-    amount: 999,
-    currency: 'usd',
-    currentPeriodStart: new Date(),
-    currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    accountType: 'personal' as any,
-    ...overrides
-  } as any);
+  const createMockSubscriptionDto = (overrides = {}): CreateSubscriptionDto =>
+    ({
+      userId: new Types.ObjectId().toString(),
+      plan: 'personal',
+      interval: 'monthly',
+      stripeSubscriptionId: 'sub_test',
+      stripeCustomerId: 'cus_test',
+      stripePriceId: 'price_test',
+      stripeProductId: 'prod_test',
+      amount: 999,
+      currency: 'usd',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      accountType: 'personal' as any,
+      ...overrides
+    }) as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -234,7 +235,6 @@ describe('StripeService - Unit Tests', () => {
     customerModel = module.get(getModelToken(BillingCustomer.name));
     logger = module.get(Logger);
 
-
     // Create mock Stripe instance
     mockStripe = {
       customers: {
@@ -284,7 +284,7 @@ describe('StripeService - Unit Tests', () => {
 
     // Reset specific mocks that might interfere between tests
     // Don't clear all mocks as it would clear our setup
-    
+
     // Re-setup config service after clearing mocks
     configService.get.mockImplementation((key: string) => {
       const config = {
@@ -303,7 +303,7 @@ describe('StripeService - Unit Tests', () => {
       };
       return config[key];
     });
-    
+
     // Configure the findOne methods to return properly chained objects
     customerModel.findOne.mockImplementation(() => createMockChainWithSession());
     paymentModel.findOne.mockImplementation(() => createMockChainWithSession());
@@ -355,7 +355,7 @@ describe('StripeService - Unit Tests', () => {
         // Arrange
         const createCustomerDto = createMockCreateCustomerDto();
         const existingCustomer = createMockCustomer();
-        const mockStripeCustomer = {id: 'cus_test', deleted: false};
+        const mockStripeCustomer = { id: 'cus_test', deleted: false };
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(existingCustomer));
         mockStripe.customers.retrieve.mockResolvedValue(mockStripeCustomer as any);
@@ -365,7 +365,7 @@ describe('StripeService - Unit Tests', () => {
 
         // Assert
         expect(result).toBe(existingCustomer);
-        expect(customerModel.findOne).toHaveBeenCalledWith({userId: createCustomerDto.userId});
+        expect(customerModel.findOne).toHaveBeenCalledWith({ userId: createCustomerDto.userId });
         expect(mockStripe.customers.retrieve).toHaveBeenCalledWith(existingCustomer.stripeCustomerId);
         expect(mockStripe.customers.create).not.toHaveBeenCalled();
       });
@@ -373,8 +373,8 @@ describe('StripeService - Unit Tests', () => {
       it('should create new Stripe customer when none exists', async () => {
         // Arrange
         const createCustomerDto = createMockCreateCustomerDto();
-        const newStripeCustomer = {id: 'cus_new_customer'};
-        const newCustomer = createMockCustomer({stripeCustomerId: 'cus_new_customer'});
+        const newStripeCustomer = { id: 'cus_new_customer' };
+        const newCustomer = createMockCustomer({ stripeCustomerId: 'cus_new_customer' });
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(null));
         mockStripe.customers.create.mockResolvedValue(newStripeCustomer as any);
@@ -395,15 +395,15 @@ describe('StripeService - Unit Tests', () => {
             traceId: expect.any(String)
           }
         });
-        expect(newCustomer.save).toHaveBeenCalledWith({session: mockSession});
+        expect(newCustomer.save).toHaveBeenCalledWith({ session: mockSession });
       });
 
       it('should create new customer when existing Stripe customer is deleted', async () => {
         // Arrange
         const createCustomerDto = createMockCreateCustomerDto();
         const existingCustomer = createMockCustomer();
-        const deletedStripeCustomer = {id: 'cus_test', deleted: true};
-        const newStripeCustomer = {id: 'cus_new_customer'};
+        const deletedStripeCustomer = { id: 'cus_test', deleted: true };
+        const newStripeCustomer = { id: 'cus_new_customer' };
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(existingCustomer));
         mockStripe.customers.retrieve.mockResolvedValue(deletedStripeCustomer as any);
@@ -414,7 +414,7 @@ describe('StripeService - Unit Tests', () => {
 
         // Assert
         expect(mockStripe.customers.create).toHaveBeenCalled();
-        expect(existingCustomer.save).toHaveBeenCalledWith({session: mockSession});
+        expect(existingCustomer.save).toHaveBeenCalledWith({ session: mockSession });
       });
 
       it('should handle Stripe API errors gracefully', async () => {
@@ -480,7 +480,7 @@ describe('StripeService - Unit Tests', () => {
             allow_redirects: 'never'
           }
         });
-        expect(mockPayment.save).toHaveBeenCalledWith({session: mockSession});
+        expect(mockPayment.save).toHaveBeenCalledWith({ session: mockSession });
       });
 
       it('should throw NotFoundResourceException when customer not found', async () => {
@@ -496,7 +496,7 @@ describe('StripeService - Unit Tests', () => {
 
       it('should throw ValidationException for invalid amount', async () => {
         // Arrange
-        const createPaymentDto = createMockPaymentIntentDto({amount: 0});
+        const createPaymentDto = createMockPaymentIntentDto({ amount: 0 });
         const customer = createMockCustomer();
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -508,9 +508,9 @@ describe('StripeService - Unit Tests', () => {
 
       it('should convert amount to cents correctly', async () => {
         // Arrange
-        const createPaymentDto = createMockPaymentIntentDto({amount: 29.99});
+        const createPaymentDto = createMockPaymentIntentDto({ amount: 29.99 });
         const customer = createMockCustomer();
-        const mockPaymentIntent = {id: 'pi_test', amount: 2999};
+        const mockPaymentIntent = { id: 'pi_test', amount: 2999 };
         const mockPayment = createMockPayment();
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -542,16 +542,16 @@ describe('StripeService - Unit Tests', () => {
         };
 
         mockStripe.paymentIntents.confirm.mockResolvedValue(mockConfirmedPaymentIntent as any);
-        paymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        paymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.confirmPaymentIntent(paymentIntentId, paymentMethodId);
 
         // Assert
         expect(result).toBe(mockConfirmedPaymentIntent);
-        expect(mockStripe.paymentIntents.confirm).toHaveBeenCalledWith(paymentIntentId, {payment_method: paymentMethodId});
+        expect(mockStripe.paymentIntents.confirm).toHaveBeenCalledWith(paymentIntentId, { payment_method: paymentMethodId });
         expect(paymentModel.updateOne).toHaveBeenCalledWith(
-          {stripePaymentIntentId: paymentIntentId},
+          { stripePaymentIntentId: paymentIntentId },
           {
             status: mockConfirmedPaymentIntent.status,
             updatedAt: expect.any(Date),
@@ -559,7 +559,7 @@ describe('StripeService - Unit Tests', () => {
               statusHistory: {
                 status: mockConfirmedPaymentIntent.status,
                 timestamp: expect.any(Date),
-                metadata: {traceId: expect.any(String), action: 'confirm'}
+                metadata: { traceId: expect.any(String), action: 'confirm' }
               }
             }
           }
@@ -575,7 +575,7 @@ describe('StripeService - Unit Tests', () => {
         };
 
         mockStripe.paymentIntents.confirm.mockResolvedValue(mockConfirmedPaymentIntent as any);
-        paymentModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        paymentModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.confirmPaymentIntent(paymentIntentId);
@@ -631,9 +631,9 @@ describe('StripeService - Unit Tests', () => {
         expect(result.subscriptionDoc).toBe(mockSubscriptionDoc);
         expect(mockStripe.subscriptions.create).toHaveBeenCalledWith({
           customer: customer.stripeCustomerId,
-          items: [{price: 'price_personal'}],
+          items: [{ price: 'price_personal' }],
           payment_behavior: 'default_incomplete',
-          payment_settings: {save_default_payment_method: 'on_subscription'},
+          payment_settings: { save_default_payment_method: 'on_subscription' },
           expand: ['latest_invoice.payment_intent'],
           metadata: {
             userId: createSubscriptionDto.userId,
@@ -642,7 +642,7 @@ describe('StripeService - Unit Tests', () => {
           },
           trial_period_days: 14
         });
-        expect(mockSubscriptionDoc.save).toHaveBeenCalledWith({session: mockSession});
+        expect(mockSubscriptionDoc.save).toHaveBeenCalledWith({ session: mockSession });
       });
 
       it('should throw NotFoundResourceException when customer not found', async () => {
@@ -712,7 +712,7 @@ describe('StripeService - Unit Tests', () => {
         // Assert
         expect(mockStripe.subscriptions.create).toHaveBeenCalledWith(
           expect.objectContaining({
-            automatic_tax: {enabled: true}
+            automatic_tax: { enabled: true }
           })
         );
       });
@@ -725,7 +725,7 @@ describe('StripeService - Unit Tests', () => {
         const updateSubscriptionDto: UpdateSubscriptionDto = {
           newAccountType: 'couple',
           prorationBehavior: 'create_prorations',
-          metadata: {updated: 'true'}
+          metadata: { updated: 'true' }
         };
         const mockUpdatedSubscription = {
           id: subscriptionId,
@@ -742,7 +742,7 @@ describe('StripeService - Unit Tests', () => {
         });
 
         mockStripe.subscriptions.update.mockResolvedValue(mockUpdatedSubscription as any);
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.updateSubscription(subscriptionId, updateSubscriptionDto, mockSession);
@@ -750,7 +750,7 @@ describe('StripeService - Unit Tests', () => {
         // Assert
         expect(result).toBe(mockUpdatedSubscription);
         expect(mockStripe.subscriptions.update).toHaveBeenCalledWith(subscriptionId, {
-          items: [{id: undefined, price: 'price_couple'}],
+          items: [{ id: undefined, price: 'price_couple' }],
           proration_behavior: 'create_prorations',
           metadata: {
             updated: 'true',
@@ -759,7 +759,7 @@ describe('StripeService - Unit Tests', () => {
           }
         });
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: subscriptionId},
+          { stripeSubscriptionId: subscriptionId },
           {
             $set: expect.objectContaining({
               status: 'active',
@@ -768,7 +768,7 @@ describe('StripeService - Unit Tests', () => {
               stripeProductId: 'prod_couple'
             })
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
 
@@ -776,12 +776,12 @@ describe('StripeService - Unit Tests', () => {
         // Arrange
         const subscriptionId = 'sub_test_subscription';
         const updateSubscriptionDto: UpdateSubscriptionDto = {
-          metadata: {updated: 'true'}
+          metadata: { updated: 'true' }
         };
-        const mockUpdatedSubscription = {id: subscriptionId, status: 'active'};
+        const mockUpdatedSubscription = { id: subscriptionId, status: 'active' };
 
         mockStripe.subscriptions.update.mockResolvedValue(mockUpdatedSubscription as any);
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.updateSubscription(subscriptionId, updateSubscriptionDto, mockSession);
@@ -826,7 +826,7 @@ describe('StripeService - Unit Tests', () => {
         };
 
         mockStripe.subscriptions.update.mockResolvedValue(mockCanceledSubscription as any);
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.cancelSubscription(subscriptionId, true, mockSession);
@@ -835,10 +835,10 @@ describe('StripeService - Unit Tests', () => {
         expect(result).toBe(mockCanceledSubscription);
         expect(mockStripe.subscriptions.update).toHaveBeenCalledWith(subscriptionId, {
           cancel_at_period_end: true,
-          metadata: {traceId: expect.any(String), cancelAction: 'at_period_end'}
+          metadata: { traceId: expect.any(String), cancelAction: 'at_period_end' }
         });
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: subscriptionId},
+          { stripeSubscriptionId: subscriptionId },
           {
             $set: {
               status: 'active',
@@ -848,7 +848,7 @@ describe('StripeService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
 
@@ -863,7 +863,7 @@ describe('StripeService - Unit Tests', () => {
         };
 
         mockStripe.subscriptions.cancel.mockResolvedValue(mockCanceledSubscription as any);
-        subscriptionModel.updateOne.mockResolvedValue({matchedCount: 1, modifiedCount: 1} as any);
+        subscriptionModel.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 } as any);
 
         // Act
         const result = await service.cancelSubscription(subscriptionId, false, mockSession);
@@ -874,7 +874,7 @@ describe('StripeService - Unit Tests', () => {
           prorate: true
         });
         expect(subscriptionModel.updateOne).toHaveBeenCalledWith(
-          {stripeSubscriptionId: subscriptionId},
+          { stripeSubscriptionId: subscriptionId },
           {
             $set: {
               status: 'canceled',
@@ -884,7 +884,7 @@ describe('StripeService - Unit Tests', () => {
               updatedAt: expect.any(Date)
             }
           },
-          {session: mockSession}
+          { session: mockSession }
         );
       });
     });
@@ -934,7 +934,7 @@ describe('StripeService - Unit Tests', () => {
         // Arrange
         const customerId = 'cus_test_customer';
         const paymentMethodTypes = ['card', 'us_bank_account'];
-        const customer = createMockCustomer({stripeCustomerId: customerId});
+        const customer = createMockCustomer({ stripeCustomerId: customerId });
         const mockSetupIntent = {
           id: 'seti_test_setup_intent',
           client_secret: 'seti_test_setup_intent_secret',
@@ -974,8 +974,8 @@ describe('StripeService - Unit Tests', () => {
       it('should use default payment method types when not specified', async () => {
         // Arrange
         const customerId = 'cus_test_customer';
-        const customer = createMockCustomer({stripeCustomerId: customerId});
-        const mockSetupIntent = {id: 'seti_test'};
+        const customer = createMockCustomer({ stripeCustomerId: customerId });
+        const mockSetupIntent = { id: 'seti_test' };
 
         customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
         mockStripe.setupIntents.create.mockResolvedValue(mockSetupIntent as any);
@@ -1000,11 +1000,11 @@ describe('StripeService - Unit Tests', () => {
         const customerId = 'cus_test_customer';
         const type = 'card';
         const mockPaymentMethods = [
-          {id: 'pm_test_1', type: 'card'},
-          {id: 'pm_test_2', type: 'card'}
+          { id: 'pm_test_1', type: 'card' },
+          { id: 'pm_test_2', type: 'card' }
         ];
 
-        mockStripe.paymentMethods.list.mockResolvedValue({data: mockPaymentMethods} as any);
+        mockStripe.paymentMethods.list.mockResolvedValue({ data: mockPaymentMethods } as any);
 
         // Act
         const result = await service.listPaymentMethods(customerId, type);
@@ -1022,7 +1022,7 @@ describe('StripeService - Unit Tests', () => {
         const customerId = 'cus_test_customer';
         const mockPaymentMethods = [];
 
-        mockStripe.paymentMethods.list.mockResolvedValue({data: mockPaymentMethods} as any);
+        mockStripe.paymentMethods.list.mockResolvedValue({ data: mockPaymentMethods } as any);
 
         // Act
         await service.listPaymentMethods(customerId);
@@ -1101,10 +1101,10 @@ describe('StripeService - Unit Tests', () => {
     describe('constructWebhookEvent', () => {
       it('should construct webhook event successfully', () => {
         // Arrange
-        const payload = JSON.stringify({type: 'payment_intent.succeeded'});
+        const payload = JSON.stringify({ type: 'payment_intent.succeeded' });
         const signature = 'test_signature';
         const webhookSecret = 'whsec_test_secret';
-        const mockEvent = {type: 'payment_intent.succeeded'};
+        const mockEvent = { type: 'payment_intent.succeeded' };
 
         configService.get.mockReturnValue(webhookSecret);
         mockStripe.webhooks.constructEvent.mockReturnValue(mockEvent as any);
@@ -1154,7 +1154,7 @@ describe('StripeService - Unit Tests', () => {
       const customer = createMockCustomer();
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(null));
-      mockStripe.customers.create.mockResolvedValue({id: 'cus_new'} as any);
+      mockStripe.customers.create.mockResolvedValue({ id: 'cus_new' } as any);
       customerModel.create = jest.fn().mockReturnValue(customer);
 
       // Act
@@ -1170,7 +1170,7 @@ describe('StripeService - Unit Tests', () => {
       // Arrange
       const createPaymentDto = createMockPaymentIntentDto();
       const customer = createMockCustomer();
-      const mockPaymentIntent = {id: 'pi_test', client_secret: 'secret'};
+      const mockPaymentIntent = { id: 'pi_test', client_secret: 'secret' };
       const mockPayment = createMockPayment();
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -1205,7 +1205,7 @@ describe('StripeService - Unit Tests', () => {
         description: '<script>alert("XSS")</script>Payment for services'
       });
       const customer = createMockCustomer();
-      const mockPaymentIntent = {id: 'pi_test'};
+      const mockPaymentIntent = { id: 'pi_test' };
       const mockPayment = createMockPayment();
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -1225,7 +1225,7 @@ describe('StripeService - Unit Tests', () => {
 
     it('should validate payment amounts to prevent negative values', async () => {
       // Arrange
-      const createPaymentDto = createMockPaymentIntentDto({amount: -100});
+      const createPaymentDto = createMockPaymentIntentDto({ amount: -100 });
       const customer = createMockCustomer();
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -1236,9 +1236,9 @@ describe('StripeService - Unit Tests', () => {
 
     it('should validate currency codes', async () => {
       // Arrange
-      const createPaymentDto = createMockPaymentIntentDto({currency: 'invalid'});
+      const createPaymentDto = createMockPaymentIntentDto({ currency: 'invalid' });
       const customer = createMockCustomer();
-      const mockPaymentIntent = {id: 'pi_test'};
+      const mockPaymentIntent = { id: 'pi_test' };
       const mockPayment = createMockPayment();
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
@@ -1286,7 +1286,7 @@ describe('StripeService - Unit Tests', () => {
       // Arrange
       const createSubscriptionDto = createMockSubscriptionDto();
       const customer = createMockCustomer();
-      const mockStripeSubscription = {id: 'sub_test', status: 'incomplete'};
+      const mockStripeSubscription = { id: 'sub_test', status: 'incomplete' };
 
       customerModel.findOne.mockImplementation(() => createMockChainWithSession(customer));
       mockStripe.subscriptions.create.mockResolvedValue(mockStripeSubscription as any);

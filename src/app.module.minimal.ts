@@ -1,15 +1,15 @@
-import {Module} from '@nestjs/common';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {MongooseModule} from '@nestjs/mongoose';
-import {AppController} from './app.controller';
-import {AppService} from './app.service';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 // Configuration imports
-import {appConfig, configValidationSchema, databaseConfig, jwtConfig} from './config';
+import { appConfig, configValidationSchema, databaseConfig, jwtConfig } from './config';
 
 // Module imports
-import {AuthModule} from './auth/auth.module';
-import {UsersModule} from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [

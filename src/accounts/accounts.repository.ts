@@ -1,10 +1,10 @@
-import {Injectable} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types, PipelineStage} from 'mongoose';
-import {Account, AccountDocument} from './schemas/account.schema';
-import {CreateAccountDto, UpdateAccountDto} from './dto';
-import {AccountStatus, AccountType} from '@common/constants/account-types';
-import {AccountRole} from '@common/constants/user-roles';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types, PipelineStage } from 'mongoose';
+import { Account, AccountDocument } from './schemas/account.schema';
+import { CreateAccountDto, UpdateAccountDto } from './dto';
+import { AccountStatus, AccountType } from '@common/constants/account-types';
+import { AccountRole } from '@common/constants/user-roles';
 
 @Injectable()
 export class AccountsRepository {
@@ -33,7 +33,7 @@ export class AccountsRepository {
 
   async findById(id: string): Promise<AccountDocument | null> {
     return this.accountModel
-      .findOne({_id: id, isDeleted: false})
+      .findOne({ _id: id, isDeleted: false })
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
       .exec();
@@ -42,12 +42,12 @@ export class AccountsRepository {
   async findByUserId(userId: string): Promise<AccountDocument[]> {
     return this.accountModel
       .find({
-        $or: [{owner: userId}, {'members.userId': userId, 'members.isActive': true}],
+        $or: [{ owner: userId }, { 'members.userId': userId, 'members.isActive': true }],
         isDeleted: false
       })
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
-      .sort({lastActivityAt: -1})
+      .sort({ lastActivityAt: -1 })
       .exec();
   }
 
@@ -56,7 +56,7 @@ export class AccountsRepository {
       {
         $match: {
           $or: [
-            {owner: new Types.ObjectId(userId)},
+            { owner: new Types.ObjectId(userId) },
             {
               'members.userId': new Types.ObjectId(userId),
               'members.isActive': true
@@ -73,7 +73,7 @@ export class AccountsRepository {
           localField: 'owner',
           foreignField: '_id',
           as: 'ownerInfo',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
@@ -84,14 +84,14 @@ export class AccountsRepository {
           localField: 'members.userId',
           foreignField: '_id',
           as: 'memberUsers',
-          pipeline: [{$project: {email: 1, firstName: 1, lastName: 1}}]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
         }
       },
 
       // Process members with their user info
       {
         $addFields: {
-          owner: {$arrayElemAt: ['$ownerInfo', 0]},
+          owner: { $arrayElemAt: ['$ownerInfo', 0] },
           members: {
             $map: {
               input: '$members',
@@ -105,7 +105,7 @@ export class AccountsRepository {
                         {
                           $filter: {
                             input: '$memberUsers',
-                            cond: {$eq: ['$$this._id', '$$member.userId']}
+                            cond: { $eq: ['$$this._id', '$$member.userId'] }
                           }
                         },
                         0
@@ -128,14 +128,14 @@ export class AccountsRepository {
       },
 
       // Sort by activity
-      {$sort: {lastActivityAt: -1}}
+      { $sort: { lastActivityAt: -1 } }
     ];
 
     return this.accountModel.aggregate(pipeline).exec();
   }
 
   async findByType(type: AccountType): Promise<AccountDocument[]> {
-    return this.accountModel.find({type, isDeleted: false}).populate('owner', 'email firstName lastName').exec();
+    return this.accountModel.find({ type, isDeleted: false }).populate('owner', 'email firstName lastName').exec();
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto): Promise<AccountDocument | null> {
@@ -146,7 +146,7 @@ export class AccountsRepository {
           ...updateAccountDto,
           lastActivityAt: new Date()
         },
-        {new: true}
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -162,7 +162,7 @@ export class AccountsRepository {
           deletedAt: new Date(),
           status: AccountStatus.INACTIVE
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -184,7 +184,7 @@ export class AccountsRepository {
           },
           lastActivityAt: new Date()
         },
-        {new: true}
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -201,7 +201,7 @@ export class AccountsRepository {
       permissions?: string[];
     }
   ): Promise<AccountDocument | null> {
-    const updateFields: any = {lastActivityAt: new Date()};
+    const updateFields: any = { lastActivityAt: new Date() };
 
     if (updates.role !== undefined) {
       updateFields['members.$.role'] = updates.role;
@@ -222,8 +222,8 @@ export class AccountsRepository {
           _id: accountId,
           'members.userId': memberId
         },
-        {$set: updateFields},
-        {new: true}
+        { $set: updateFields },
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -235,10 +235,10 @@ export class AccountsRepository {
       .findByIdAndUpdate(
         accountId,
         {
-          $pull: {members: {userId: memberId}},
+          $pull: { members: { userId: memberId } },
           lastActivityAt: new Date()
         },
-        {new: true}
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -270,7 +270,7 @@ export class AccountsRepository {
           },
           lastActivityAt: new Date()
         },
-        {new: true}
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -290,7 +290,7 @@ export class AccountsRepository {
             lastActivityAt: new Date()
           }
         },
-        {new: true}
+        { new: true }
       )
       .populate('owner', 'email firstName lastName')
       .populate('members.userId', 'email firstName lastName')
@@ -302,10 +302,10 @@ export class AccountsRepository {
       .findByIdAndUpdate(
         accountId,
         {
-          $pull: {pendingInvitations: {token: invitationToken}},
+          $pull: { pendingInvitations: { token: invitationToken } },
           lastActivityAt: new Date()
         },
-        {new: true}
+        { new: true }
       )
       .exec();
   }
@@ -315,7 +315,7 @@ export class AccountsRepository {
       .findOne({
         'pendingInvitations.token': token,
         'pendingInvitations.status': 'pending',
-        'pendingInvitations.expiresAt': {$gte: new Date()},
+        'pendingInvitations.expiresAt': { $gte: new Date() },
         isDeleted: false
       })
       .populate('owner', 'email firstName lastName')
@@ -361,6 +361,6 @@ export class AccountsRepository {
   }
 
   async updateLastActivity(accountId: string): Promise<void> {
-    await this.accountModel.findByIdAndUpdate(accountId, {lastActivityAt: new Date()}).exec();
+    await this.accountModel.findByIdAndUpdate(accountId, { lastActivityAt: new Date() }).exec();
   }
 }

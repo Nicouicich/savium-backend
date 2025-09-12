@@ -1,4 +1,4 @@
-import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CategoryBreakdownDto,
   CategoryReportDto,
@@ -13,12 +13,12 @@ import {
   SummaryStatsDto,
   UserBreakdownDto
 } from './dto';
-import {ExpensesService} from '../expenses/expenses.service';
-import {AccountsService} from '../accounts/accounts.service';
-import {CategoriesService} from '../categories/categories.service';
-import {UsersService} from '../users/users.service';
-import {Currency} from '@common/constants/expense-categories';
-import {EnhancedCacheService} from '@common/services/enhanced-cache.service';
+import { ExpensesService } from '../expenses/expenses.service';
+import { AccountsService } from '../accounts/accounts.service';
+import { CategoriesService } from '../categories/categories.service';
+import { UsersService } from '../users/users.service';
+import { Currency } from '@common/constants/expense-categories';
+import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
 @Injectable()
 export class ReportsService {
@@ -53,7 +53,7 @@ export class ReportsService {
     await this.validateAccountAccess(query.accountId!, userId);
 
     // Calculate date range
-    const {startDate, endDate} = this.calculateDateRange(query.period!, query.startDate, query.endDate);
+    const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
     // Generate report metadata
     const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.MONTHLY, startDate, endDate, query.currency, query);
@@ -104,7 +104,7 @@ export class ReportsService {
   private async generateCategoryReportData(query: ReportQueryDto, userId: string): Promise<CategoryReportDto> {
     await this.validateAccountAccess(query.accountId!, userId);
 
-    const {startDate, endDate} = this.calculateDateRange(query.period!, query.startDate, query.endDate);
+    const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
     const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.CATEGORY, startDate, endDate, query.currency, query);
 
@@ -149,7 +149,7 @@ export class ReportsService {
   private async generateSummaryReportData(query: ReportQueryDto, userId: string): Promise<SummaryReportDto> {
     await this.validateAccountAccess(query.accountId!, userId);
 
-    const {startDate, endDate} = this.calculateDateRange(query.period!, query.startDate, query.endDate);
+    const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
     const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.SUMMARY, startDate, endDate, query.currency, query);
 
@@ -239,7 +239,7 @@ export class ReportsService {
     // Cache export metadata for tracking
     await this.cacheService.set(
       `export:${exportResult.downloadToken}`,
-      {report, metadata: exportResult},
+      { report, metadata: exportResult },
       {
         ttl: 86400, // 24 hours
         namespace: 'exports',
@@ -268,7 +268,7 @@ export class ReportsService {
     }
   }
 
-  private calculateDateRange(period: ReportPeriod, customStartDate?: string, customEndDate?: string): {startDate: Date; endDate: Date} {
+  private calculateDateRange(period: ReportPeriod, customStartDate?: string, customEndDate?: string): { startDate: Date; endDate: Date } {
     const now = new Date();
     let startDate: Date;
     let endDate: Date = new Date(now);
@@ -298,7 +298,7 @@ export class ReportsService {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    return {startDate, endDate};
+    return { startDate, endDate };
   }
 
   private async generateReportMetadata(
@@ -386,7 +386,7 @@ export class ReportsService {
     accountId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<Array<{date: string; totalAmount: number; expenseCount: number}>> {
+  ): Promise<Array<{ date: string; totalAmount: number; expenseCount: number }>> {
     // This would require a more complex aggregation query
     // For now, we'll return a simplified version
     const expenses = await this.expensesService.findByAccount(accountId, {
@@ -395,7 +395,7 @@ export class ReportsService {
       limit: 1000
     });
 
-    const dailyMap = new Map<string, {totalAmount: number; expenseCount: number}>();
+    const dailyMap = new Map<string, { totalAmount: number; expenseCount: number }>();
 
     expenses.data.forEach(expense => {
       const dateStr = expense.date.toISOString().split('T')[0];

@@ -1,17 +1,17 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, ClientSession} from 'mongoose';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, ClientSession } from 'mongoose';
 import Stripe from 'stripe';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import {Payment, PaymentDocument} from '../schemas/payment.schema';
-import {EnhancedPayment, EnhancedPaymentDocument} from '../schemas/enhanced-payment.schema';
-import {Subscription, SubscriptionDocument} from '../schemas/subscription.schema';
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { EnhancedPayment, EnhancedPaymentDocument } from '../schemas/enhanced-payment.schema';
+import { Subscription, SubscriptionDocument } from '../schemas/subscription.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
 
-import {PaymentException} from '../../common/exceptions/payment.exception';
-import {DatabaseService} from '../../database/database.service';
-import {StripeService} from './stripe.service';
+import { PaymentException } from '../../common/exceptions/payment.exception';
+import { DatabaseService } from '../../database/database.service';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class StripeWebhookService {
@@ -149,7 +149,7 @@ export class StripeWebhookService {
             break;
 
           default:
-            this.logger.debug(`Unhandled webhook event type: ${event.type}`, {traceId, eventId: event.id});
+            this.logger.debug(`Unhandled webhook event type: ${event.type}`, { traceId, eventId: event.id });
         }
 
         // Record successful webhook processing
@@ -179,7 +179,7 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentIntentCreated(paymentIntent: Stripe.PaymentIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment intent created`, {traceId, paymentIntentId: paymentIntent.id});
+    this.logger.log(`Handling payment intent created`, { traceId, paymentIntentId: paymentIntent.id });
 
     // Update payment record if it exists
     const payment = await this.enhancedPaymentModel
@@ -201,7 +201,7 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment intent succeeded`, {traceId, paymentIntentId: paymentIntent.id});
+    this.logger.log(`Handling payment intent succeeded`, { traceId, paymentIntentId: paymentIntent.id });
 
     const payment = await this.enhancedPaymentModel
       .findOne({
@@ -239,7 +239,7 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment intent failed`, {traceId, paymentIntentId: paymentIntent.id});
+    this.logger.log(`Handling payment intent failed`, { traceId, paymentIntentId: paymentIntent.id });
 
     const payment = await this.enhancedPaymentModel
       .findOne({
@@ -264,7 +264,7 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment intent canceled`, {traceId, paymentIntentId: paymentIntent.id});
+    this.logger.log(`Handling payment intent canceled`, { traceId, paymentIntentId: paymentIntent.id });
 
     const payment = await this.enhancedPaymentModel
       .findOne({
@@ -285,7 +285,7 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentIntentRequiresAction(paymentIntent: Stripe.PaymentIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment intent requires action`, {traceId, paymentIntentId: paymentIntent.id});
+    this.logger.log(`Handling payment intent requires action`, { traceId, paymentIntentId: paymentIntent.id });
 
     const payment = await this.enhancedPaymentModel
       .findOne({
@@ -306,11 +306,11 @@ export class StripeWebhookService {
   }
 
   private async handleCustomerCreated(customer: Stripe.Customer, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling customer created`, {traceId, customerId: customer.id});
+    this.logger.log(`Handling customer created`, { traceId, customerId: customer.id });
 
     // Update customer record with Stripe data
     await this.customerModel.updateOne(
-      {stripeCustomerId: customer.id},
+      { stripeCustomerId: customer.id },
       {
         $set: {
           email: customer.email,
@@ -320,15 +320,15 @@ export class StripeWebhookService {
           updatedAt: new Date()
         }
       },
-      {session, upsert: false}
+      { session, upsert: false }
     );
   }
 
   private async handleCustomerUpdated(customer: Stripe.Customer, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling customer updated`, {traceId, customerId: customer.id});
+    this.logger.log(`Handling customer updated`, { traceId, customerId: customer.id });
 
     await this.customerModel.updateOne(
-      {stripeCustomerId: customer.id},
+      { stripeCustomerId: customer.id },
       {
         $set: {
           email: customer.email,
@@ -338,15 +338,15 @@ export class StripeWebhookService {
           updatedAt: new Date()
         }
       },
-      {session}
+      { session }
     );
   }
 
   private async handleCustomerDeleted(customer: Stripe.Customer, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling customer deleted`, {traceId, customerId: customer.id});
+    this.logger.log(`Handling customer deleted`, { traceId, customerId: customer.id });
 
     await this.customerModel.updateOne(
-      {stripeCustomerId: customer.id},
+      { stripeCustomerId: customer.id },
       {
         $set: {
           isActive: false,
@@ -354,12 +354,12 @@ export class StripeWebhookService {
           updatedAt: new Date()
         }
       },
-      {session}
+      { session }
     );
   }
 
   private async handleSubscriptionCreated(subscription: Stripe.Subscription, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling subscription created`, {traceId, subscriptionId: subscription.id});
+    this.logger.log(`Handling subscription created`, { traceId, subscriptionId: subscription.id });
 
     const existingSubscription = await this.subscriptionModel
       .findOne({
@@ -372,15 +372,15 @@ export class StripeWebhookService {
       existingSubscription.currentPeriodStart = new Date((subscription as any).current_period_start * 1000);
       existingSubscription.currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
       (existingSubscription as any).isActive = ['active', 'trialing'].includes(subscription.status);
-      await existingSubscription.save({session});
+      await existingSubscription.save({ session });
     }
   }
 
   private async handleSubscriptionUpdated(subscription: Stripe.Subscription, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling subscription updated`, {traceId, subscriptionId: subscription.id});
+    this.logger.log(`Handling subscription updated`, { traceId, subscriptionId: subscription.id });
 
     await this.subscriptionModel.updateOne(
-      {stripeSubscriptionId: subscription.id},
+      { stripeSubscriptionId: subscription.id },
       {
         $set: {
           status: subscription.status,
@@ -394,15 +394,15 @@ export class StripeWebhookService {
           updatedAt: new Date()
         }
       },
-      {session}
+      { session }
     );
   }
 
   private async handleSubscriptionDeleted(subscription: Stripe.Subscription, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling subscription deleted`, {traceId, subscriptionId: subscription.id});
+    this.logger.log(`Handling subscription deleted`, { traceId, subscriptionId: subscription.id });
 
     await this.subscriptionModel.updateOne(
-      {stripeSubscriptionId: subscription.id},
+      { stripeSubscriptionId: subscription.id },
       {
         $set: {
           status: 'canceled',
@@ -411,12 +411,12 @@ export class StripeWebhookService {
           updatedAt: new Date()
         }
       },
-      {session}
+      { session }
     );
   }
 
   private async handleSubscriptionTrialWillEnd(subscription: Stripe.Subscription, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling subscription trial will end`, {traceId, subscriptionId: subscription.id});
+    this.logger.log(`Handling subscription trial will end`, { traceId, subscriptionId: subscription.id });
 
     // Here you could send notification emails, etc.
     // For now, just log the event
@@ -428,12 +428,12 @@ export class StripeWebhookService {
   }
 
   private async handleInvoiceCreated(invoice: Stripe.Invoice, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling invoice created`, {traceId, invoiceId: invoice.id});
+    this.logger.log(`Handling invoice created`, { traceId, invoiceId: invoice.id });
 
     // Update payment records with invoice information
     if ((invoice as any).payment_intent) {
       await this.enhancedPaymentModel.updateOne(
-        {stripePaymentIntentId: (invoice as any).payment_intent as string},
+        { stripePaymentIntentId: (invoice as any).payment_intent as string },
         {
           $set: {
             stripeInvoiceId: invoice.id,
@@ -441,47 +441,47 @@ export class StripeWebhookService {
             invoiceUrl: invoice.hosted_invoice_url
           }
         },
-        {session}
+        { session }
       );
     }
   }
 
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling invoice payment succeeded`, {traceId, invoiceId: invoice.id});
+    this.logger.log(`Handling invoice payment succeeded`, { traceId, invoiceId: invoice.id });
 
     if ((invoice as any).payment_intent) {
       await this.enhancedPaymentModel.updateOne(
-        {stripePaymentIntentId: (invoice as any).payment_intent as string},
+        { stripePaymentIntentId: (invoice as any).payment_intent as string },
         {
           $set: {
             status: 'succeeded',
             processedAt: new Date()
           }
         },
-        {session}
+        { session }
       );
     }
   }
 
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling invoice payment failed`, {traceId, invoiceId: invoice.id});
+    this.logger.log(`Handling invoice payment failed`, { traceId, invoiceId: invoice.id });
 
     if ((invoice as any).payment_intent) {
       await this.enhancedPaymentModel.updateOne(
-        {stripePaymentIntentId: (invoice as any).payment_intent as string},
+        { stripePaymentIntentId: (invoice as any).payment_intent as string },
         {
           $set: {
             status: 'failed',
             failureMessage: 'Invoice payment failed'
           }
         },
-        {session}
+        { session }
       );
     }
   }
 
   private async handleInvoiceUpcoming(invoice: Stripe.Invoice, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling upcoming invoice`, {traceId, invoiceId: invoice.id});
+    this.logger.log(`Handling upcoming invoice`, { traceId, invoiceId: invoice.id });
 
     // Here you could send notification emails for upcoming payments
     this.logger.log(`Upcoming invoice for customer: ${invoice.customer}`, {
@@ -492,11 +492,11 @@ export class StripeWebhookService {
   }
 
   private async handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment method attached`, {traceId, paymentMethodId: paymentMethod.id});
+    this.logger.log(`Handling payment method attached`, { traceId, paymentMethodId: paymentMethod.id });
 
     // Update customer record with new payment method
     await this.customerModel.updateOne(
-      {stripeCustomerId: paymentMethod.customer as string},
+      { stripeCustomerId: paymentMethod.customer as string },
       {
         $addToSet: {
           paymentMethods: {
@@ -506,30 +506,30 @@ export class StripeWebhookService {
             isDefault: false
           }
         },
-        $set: {updatedAt: new Date()}
+        $set: { updatedAt: new Date() }
       },
-      {session}
+      { session }
     );
   }
 
   private async handlePaymentMethodDetached(paymentMethod: Stripe.PaymentMethod, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling payment method detached`, {traceId, paymentMethodId: paymentMethod.id});
+    this.logger.log(`Handling payment method detached`, { traceId, paymentMethodId: paymentMethod.id });
 
     // Remove payment method from customer record
     await this.customerModel.updateOne(
-      {stripeCustomerId: paymentMethod.customer as string},
+      { stripeCustomerId: paymentMethod.customer as string },
       {
         $pull: {
-          paymentMethods: {stripePaymentMethodId: paymentMethod.id}
+          paymentMethods: { stripePaymentMethodId: paymentMethod.id }
         },
-        $set: {updatedAt: new Date()}
+        $set: { updatedAt: new Date() }
       },
-      {session}
+      { session }
     );
   }
 
   private async handleSetupIntentSucceeded(setupIntent: Stripe.SetupIntent, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling setup intent succeeded`, {traceId, setupIntentId: setupIntent.id});
+    this.logger.log(`Handling setup intent succeeded`, { traceId, setupIntentId: setupIntent.id });
 
     // Create a setup payment record
     const setupPayment = new this.enhancedPaymentModel({
@@ -550,15 +550,15 @@ export class StripeWebhookService {
       }
     });
 
-    await setupPayment.save({session});
+    await setupPayment.save({ session });
   }
 
   private async handleCheckoutSessionCompleted(session_obj: Stripe.Checkout.Session, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling checkout session completed`, {traceId, sessionId: session_obj.id});
+    this.logger.log(`Handling checkout session completed`, { traceId, sessionId: session_obj.id });
 
     if (session_obj.payment_intent) {
       await this.enhancedPaymentModel.updateOne(
-        {stripePaymentIntentId: session_obj.payment_intent as string},
+        { stripePaymentIntentId: session_obj.payment_intent as string },
         {
           $set: {
             metadata: {
@@ -568,13 +568,13 @@ export class StripeWebhookService {
             }
           }
         },
-        {session}
+        { session }
       );
     }
   }
 
   private async handleDisputeCreated(dispute: Stripe.Dispute, traceId: string, session: ClientSession): Promise<void> {
-    this.logger.log(`Handling dispute created`, {traceId, disputeId: dispute.id});
+    this.logger.log(`Handling dispute created`, { traceId, disputeId: dispute.id });
 
     // Find payment by charge ID
     const payment = await this.enhancedPaymentModel
@@ -638,7 +638,7 @@ export class StripeWebhookService {
 
     if (paymentIntentId) {
       await this.enhancedPaymentModel.updateOne(
-        {stripePaymentIntentId: paymentIntentId},
+        { stripePaymentIntentId: paymentIntentId },
         {
           $push: {
             webhookEvents: {
@@ -650,7 +650,7 @@ export class StripeWebhookService {
             }
           }
         },
-        {session}
+        { session }
       );
     }
   }

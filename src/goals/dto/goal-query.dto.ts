@@ -1,7 +1,7 @@
-import {IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, Min} from 'class-validator';
-import {Transform, Type} from 'class-transformer';
-import {ApiPropertyOptional} from '@nestjs/swagger';
-import {GoalPriority, GoalStatus, GoalType, RecurrenceType} from '../schemas/goal.schema';
+import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { GoalPriority, GoalStatus, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class GoalQueryDto {
   @ApiPropertyOptional({
@@ -69,7 +69,7 @@ export class GoalQueryDto {
     example: false
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isTemplate?: boolean;
 
@@ -78,7 +78,7 @@ export class GoalQueryDto {
     example: true
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   includeParticipated?: boolean;
 
@@ -87,7 +87,7 @@ export class GoalQueryDto {
     example: false
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   overdueOnly?: boolean;
 
@@ -96,7 +96,7 @@ export class GoalQueryDto {
     example: false
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   nearCompletionOnly?: boolean;
 
@@ -162,7 +162,7 @@ export class GoalQueryDto {
     example: true
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   includeProgress?: boolean;
 
@@ -171,7 +171,7 @@ export class GoalQueryDto {
     example: true
   })
   @IsOptional()
-  @Transform(({value}) => value === 'true' || value === true)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   includeMilestones?: boolean;
 }

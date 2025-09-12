@@ -1,6 +1,6 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigService} from '@nestjs/config';
-import {AiService} from './ai.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { AiService } from './ai.service';
 
 describe('AI Service Validation', () => {
   let service: AiService;
@@ -98,13 +98,13 @@ describe('AI Service Validation', () => {
       const mockExpenses = [
         {
           amount: 50,
-          category: {name: 'Food'},
+          category: { name: 'Food' },
           date: new Date(),
           description: 'Lunch'
         },
         {
           amount: 30,
-          category: {name: 'Transport'},
+          category: { name: 'Transport' },
           date: new Date(),
           description: 'Bus'
         }
@@ -124,7 +124,7 @@ describe('AI Service Validation', () => {
       const mockExpenses = [
         {
           amount: 500,
-          category: {name: 'Food'},
+          category: { name: 'Food' },
           date: new Date(),
           description: 'Groceries'
         }

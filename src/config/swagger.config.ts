@@ -1,4 +1,4 @@
-import {registerAs} from '@nestjs/config';
+import { registerAs } from '@nestjs/config';
 
 export default registerAs('swagger', () => ({
   title: process.env.SWAGGER_TITLE || 'Savium AI API',
@@ -8,22 +8,22 @@ export default registerAs('swagger', () => ({
 
   // Tags configuration
   tags: [
-    {name: 'Auth', description: 'Authentication and authorization endpoints'},
-    {name: 'Users', description: 'User management operations'},
+    { name: 'Auth', description: 'Authentication and authorization endpoints' },
+    { name: 'Users', description: 'User management operations' },
     {
       name: 'Accounts',
       description: 'Account management for personal, couple, family, and business'
     },
-    {name: 'Expenses', description: 'Expense tracking and management'},
-    {name: 'Categories', description: 'Expense categorization'},
-    {name: 'Reports', description: 'Financial reports and analytics'},
-    {name: 'Budgets', description: 'Budget management'},
-    {name: 'Goals', description: 'Financial goals and targets'},
+    { name: 'Expenses', description: 'Expense tracking and management' },
+    { name: 'Categories', description: 'Expense categorization' },
+    { name: 'Reports', description: 'Financial reports and analytics' },
+    { name: 'Budgets', description: 'Budget management' },
+    { name: 'Goals', description: 'Financial goals and targets' },
     {
       name: 'Integrations',
       description: 'External service integrations (AI, WhatsApp, Telegram)'
     },
-    {name: 'Health', description: 'Application health and monitoring'}
+    { name: 'Health', description: 'Application health and monitoring' }
   ],
 
   // Server configuration

@@ -1,8 +1,8 @@
-import {BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import {CategoriesRepository} from './categories.repository';
-import {AccountsService} from '../accounts/accounts.service';
+import { CategoriesRepository } from './categories.repository';
+import { AccountsService } from '../accounts/accounts.service';
 import {
   CategoryResponseDto,
   CreateCategoryDto,
@@ -13,9 +13,9 @@ import {
   BulkOperationType
 } from './dto';
 
-import {CATEGORY_CONFIG, CATEGORY_KEYWORDS, ExpenseCategory} from '@common/constants/expense-categories';
-import {AccountRole, Permission, ROLE_PERMISSIONS} from '@common/constants/user-roles';
-import {EnhancedCacheService} from '@common/services/enhanced-cache.service';
+import { CATEGORY_CONFIG, CATEGORY_KEYWORDS, ExpenseCategory } from '@common/constants/expense-categories';
+import { AccountRole, Permission, ROLE_PERMISSIONS } from '@common/constants/user-roles';
+import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
 @Injectable()
 export class CategoriesService {
@@ -453,7 +453,7 @@ export class CategoriesService {
     const result: BulkOperationResultDto = {
       success: 0,
       failed: missingIds.length,
-      errors: missingIds.map(id => ({categoryId: id, error: 'Category not found'}))
+      errors: missingIds.map(id => ({ categoryId: id, error: 'Category not found' }))
     };
 
     if (foundIds.length === 0) {
@@ -479,24 +479,24 @@ export class CategoriesService {
     // Add unauthorized errors
     result.failed += unauthorizedIds.length;
     result.errors = result.errors || [];
-    result.errors.push(...unauthorizedIds.map(id => ({categoryId: id, error: 'Access denied to this category'})));
+    result.errors.push(...unauthorizedIds.map(id => ({ categoryId: id, error: 'Access denied to this category' })));
 
     if (accessibleIds.length === 0) {
       return result;
     }
 
     try {
-      let operationResult: {modifiedCount: number};
+      let operationResult: { modifiedCount: number };
 
       switch (bulkDto.operation) {
         case BulkOperationType.DELETE:
           operationResult = await this.categoriesRepository.bulkSoftDelete(accessibleIds);
           break;
         case BulkOperationType.ACTIVATE:
-          operationResult = await this.categoriesRepository.bulkUpdate(accessibleIds, {isActive: true});
+          operationResult = await this.categoriesRepository.bulkUpdate(accessibleIds, { isActive: true });
           break;
         case BulkOperationType.DEACTIVATE:
-          operationResult = await this.categoriesRepository.bulkUpdate(accessibleIds, {isActive: false});
+          operationResult = await this.categoriesRepository.bulkUpdate(accessibleIds, { isActive: false });
           break;
         default:
           throw new BadRequestException('Invalid bulk operation type');
@@ -516,7 +516,7 @@ export class CategoriesService {
       result.failed += accessibleIds.length;
       result.success = 0;
       result.errors = result.errors || [];
-      result.errors.push(...accessibleIds.map(id => ({categoryId: id, error: 'Bulk operation failed'})));
+      result.errors.push(...accessibleIds.map(id => ({ categoryId: id, error: 'Bulk operation failed' })));
 
       return result;
     }
@@ -525,7 +525,7 @@ export class CategoriesService {
   async initializeGlobalCategories(): Promise<void> {
     // Check if global categories are already initialized (cached check)
     const cacheKey = 'global_categories_initialized';
-    const isInitialized = await this.cacheService.get<boolean>(cacheKey, {namespace: 'system'});
+    const isInitialized = await this.cacheService.get<boolean>(cacheKey, { namespace: 'system' });
 
     if (isInitialized) {
       return; // Already initialized

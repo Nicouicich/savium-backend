@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 interface TelegramUpdate {
   update_id: number;
@@ -15,8 +15,8 @@ interface TelegramUpdate {
     };
     date: number;
     text?: string;
-    photo?: Array<{file_id: string; file_size?: number}>;
-    document?: {file_id: string; file_name: string};
+    photo?: Array<{ file_id: string; file_size?: number }>;
+    document?: { file_id: string; file_name: string };
   };
 }
 
@@ -24,7 +24,7 @@ interface TelegramUpdate {
 export class TelegramService {
   // Note: This service structure is created but Telegram Bot API integration is not implemented
 
-  async handleWebhook(update: TelegramUpdate): Promise<{processed: boolean; message: string}> {
+  async handleWebhook(update: TelegramUpdate): Promise<{ processed: boolean; message: string }> {
     // Placeholder for webhook handling
     console.log('Telegram webhook received:', JSON.stringify(update, null, 2));
 
@@ -189,7 +189,7 @@ export class TelegramService {
     await this.sendMessage(chatId, message);
   }
 
-  async setWebhook(webhookUrl: string): Promise<{success: boolean; message: string}> {
+  async setWebhook(webhookUrl: string): Promise<{ success: boolean; message: string }> {
     // Placeholder for setting webhook
     console.log('Setting Telegram webhook:', webhookUrl);
 

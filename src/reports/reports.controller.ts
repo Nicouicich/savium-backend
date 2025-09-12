@@ -1,10 +1,10 @@
-import {BadRequestException, Controller, Delete, Get, Param, Post, Query, UseGuards} from '@nestjs/common';
-import {ApiOperation, ApiQuery, ApiResponse, ApiTags} from '@nestjs/swagger';
-import {ReportsService} from './reports.service';
-import {CategoryReportDto, ExportFormat, ExportReportDto, MonthlyReportDto, ReportPeriod, ReportQueryDto, ReportType, SummaryReportDto} from './dto';
-import {JwtAuthGuard} from '@common/guards/jwt-auth.guard';
-import {CurrentUser} from '@common/decorators/current-user.decorator';
-import {ApiResponseDecorator} from '@common/decorators/api-response.decorator';
+import { BadRequestException, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ReportsService } from './reports.service';
+import { CategoryReportDto, ExportFormat, ExportReportDto, MonthlyReportDto, ReportPeriod, ReportQueryDto, ReportType, SummaryReportDto } from './dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { ApiResponseDecorator } from '@common/decorators/api-response.decorator';
 
 @ApiTags('Reports')
 @Controller('reports')
@@ -240,8 +240,8 @@ export class ReportsController {
     summary: 'Download exported report',
     description: 'Download a previously exported report using the download token'
   })
-  @ApiResponse({status: 200, description: 'File download successful'})
-  @ApiResponse({status: 404, description: 'Export not found or expired'})
+  @ApiResponse({ status: 200, description: 'File download successful' })
+  @ApiResponse({ status: 404, description: 'Export not found or expired' })
   async downloadReport(@Param('token') token: string, @CurrentUser() user: any) {
     // This would implement the actual file download logic
     // For now, we'll return a placeholder response
@@ -263,7 +263,7 @@ export class ReportsController {
     type: String,
     description: 'Clear cache for specific account only'
   })
-  @ApiResponse({status: 200, description: 'Cache cleared successfully'})
+  @ApiResponse({ status: 200, description: 'Cache cleared successfully' })
   async clearCache(@Query('accountId') accountId?: string, @CurrentUser() user?: any) {
     // In a real implementation, you might want to restrict this to account admins
     await this.reportsService.clearReportsCache(accountId);

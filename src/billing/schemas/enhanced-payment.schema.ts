@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 export type EnhancedPaymentDocument = EnhancedPayment & Document;
 
@@ -16,23 +16,23 @@ export type EnhancedPaymentDocument = EnhancedPayment & Document;
   }
 })
 export class EnhancedPayment {
-  @Prop({type: Types.ObjectId, ref: 'User', required: true})
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({type: Types.ObjectId, ref: 'Account'})
+  @Prop({ type: Types.ObjectId, ref: 'Account' })
   accountId?: Types.ObjectId;
 
-  @Prop({type: Types.ObjectId, ref: 'Subscription'})
+  @Prop({ type: Types.ObjectId, ref: 'Subscription' })
   subscriptionId?: Types.ObjectId;
 
   // Stripe payment identifiers
-  @Prop({required: true, unique: true})
+  @Prop({ required: true, unique: true })
   stripePaymentIntentId: string;
 
   @Prop()
   stripeChargeId?: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   stripeCustomerId: string;
 
   @Prop()
@@ -42,10 +42,10 @@ export class EnhancedPayment {
   stripeClientSecret?: string;
 
   // Payment details
-  @Prop({required: true})
+  @Prop({ required: true })
   amount: number; // Amount in major currency unit (e.g., dollars)
 
-  @Prop({required: true, default: 'usd'})
+  @Prop({ required: true, default: 'usd' })
   currency: string;
 
   @Prop({
@@ -74,7 +74,7 @@ export class EnhancedPayment {
   // Payment method details
   @Prop({
     type: {
-      type: {type: String, enum: ['card', 'us_bank_account', 'sepa_debit', 'ideal', 'giropay', 'sofort', 'bancontact', 'eps', 'p24', 'alipay', 'wechat_pay']},
+      type: { type: String, enum: ['card', 'us_bank_account', 'sepa_debit', 'ideal', 'giropay', 'sofort', 'bancontact', 'eps', 'p24', 'alipay', 'wechat_pay'] },
       last4: String,
       brand: String,
       expMonth: Number,
@@ -118,7 +118,7 @@ export class EnhancedPayment {
     type: [
       {
         status: String,
-        timestamp: {type: Date, default: Date.now},
+        timestamp: { type: Date, default: Date.now },
         metadata: Object
       }
     ],
@@ -171,7 +171,7 @@ export class EnhancedPayment {
   netAmount?: number;
 
   // Refund information
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   refundedAmount: number; // Amount refunded in major currency unit
 
   @Prop()
@@ -201,7 +201,7 @@ export class EnhancedPayment {
   }>;
 
   // Dispute information
-  @Prop({default: false})
+  @Prop({ default: false })
   disputed: boolean;
 
   @Prop()
@@ -243,7 +243,7 @@ export class EnhancedPayment {
   // Risk assessment
   @Prop({
     type: {
-      level: {type: String, enum: ['normal', 'elevated', 'highest']},
+      level: { type: String, enum: ['normal', 'elevated', 'highest'] },
       score: Number,
       reason: String,
       details: Object
@@ -311,7 +311,7 @@ export class EnhancedPayment {
   externalOrderId?: string;
 
   // Metadata
-  @Prop({type: Object, default: {}})
+  @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
 
   // Timestamps
@@ -325,23 +325,23 @@ export class EnhancedPayment {
 export const EnhancedPaymentSchema = SchemaFactory.createForClass(EnhancedPayment);
 
 // Indexes for performance
-EnhancedPaymentSchema.index({userId: 1, createdAt: -1});
-EnhancedPaymentSchema.index({accountId: 1, createdAt: -1});
-EnhancedPaymentSchema.index({stripePaymentIntentId: 1}, {unique: true});
-EnhancedPaymentSchema.index({stripeCustomerId: 1});
-EnhancedPaymentSchema.index({stripeChargeId: 1});
-EnhancedPaymentSchema.index({status: 1, createdAt: -1});
-EnhancedPaymentSchema.index({paymentMethod: 1});
-EnhancedPaymentSchema.index({type: 1});
-EnhancedPaymentSchema.index({disputed: 1});
-EnhancedPaymentSchema.index({currency: 1});
-EnhancedPaymentSchema.index({amount: 1});
-EnhancedPaymentSchema.index({'riskAssessment.level': 1});
+EnhancedPaymentSchema.index({ userId: 1, createdAt: -1 });
+EnhancedPaymentSchema.index({ accountId: 1, createdAt: -1 });
+EnhancedPaymentSchema.index({ stripePaymentIntentId: 1 }, { unique: true });
+EnhancedPaymentSchema.index({ stripeCustomerId: 1 });
+EnhancedPaymentSchema.index({ stripeChargeId: 1 });
+EnhancedPaymentSchema.index({ status: 1, createdAt: -1 });
+EnhancedPaymentSchema.index({ paymentMethod: 1 });
+EnhancedPaymentSchema.index({ type: 1 });
+EnhancedPaymentSchema.index({ disputed: 1 });
+EnhancedPaymentSchema.index({ currency: 1 });
+EnhancedPaymentSchema.index({ amount: 1 });
+EnhancedPaymentSchema.index({ 'riskAssessment.level': 1 });
 
 // Compound indexes for common queries
-EnhancedPaymentSchema.index({userId: 1, status: 1, createdAt: -1});
-EnhancedPaymentSchema.index({accountId: 1, type: 1, createdAt: -1});
-EnhancedPaymentSchema.index({stripeCustomerId: 1, status: 1});
+EnhancedPaymentSchema.index({ userId: 1, status: 1, createdAt: -1 });
+EnhancedPaymentSchema.index({ accountId: 1, type: 1, createdAt: -1 });
+EnhancedPaymentSchema.index({ stripeCustomerId: 1, status: 1 });
 
 // Text index for search
 EnhancedPaymentSchema.index({

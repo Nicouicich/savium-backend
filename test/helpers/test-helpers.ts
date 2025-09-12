@@ -1,13 +1,13 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {INestApplication} from '@nestjs/common';
-import {MongooseModule} from '@nestjs/mongoose';
-import {ConfigModule} from '@nestjs/config';
-import {CacheModule} from '@nestjs/cache-manager';
-import {MongoMemoryServer} from 'mongodb-memory-server';
-import {Connection} from 'mongoose';
-import {getConnectionToken} from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { Connection } from 'mongoose';
+import { getConnectionToken } from '@nestjs/mongoose';
 import * as request from 'supertest';
-import {JwtService} from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 // Test configurations
 const testDbConfig = () => ({
@@ -23,7 +23,7 @@ const testDbConfig = () => ({
   redis: {
     host: 'localhost',
     port: 6379,
-    cache: {ttl: 300, maxItems: 1000}
+    cache: { ttl: 300, maxItems: 1000 }
   },
   jwt: {
     accessToken: {
@@ -63,7 +63,7 @@ export class TestSetup {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          load: [() => ({...testDbConfig(), database: {...testDbConfig().database, uri: mongoUri}})],
+          load: [() => ({ ...testDbConfig(), database: { ...testDbConfig().database, uri: mongoUri } })],
           isGlobal: true
         }),
         MongooseModule.forRoot(mongoUri),
@@ -313,7 +313,7 @@ export class TestUtils {
   static async createTestDocument<T>(connection: Connection, collectionName: string, data: any): Promise<T> {
     const collection = connection.collection(collectionName);
     const result = await collection.insertOne(data);
-    return {...data, _id: result.insertedId} as T;
+    return { ...data, _id: result.insertedId } as T;
   }
 
   /**
@@ -332,7 +332,7 @@ export class TestUtils {
   /**
    * Create test performance metrics
    */
-  static async measurePerformance<T>(operation: () => Promise<T>): Promise<{result: T; duration: number; memoryUsage: any}> {
+  static async measurePerformance<T>(operation: () => Promise<T>): Promise<{ result: T; duration: number; memoryUsage: any }> {
     const startTime = Date.now();
     const startMemory = process.memoryUsage();
 
@@ -354,7 +354,7 @@ export class TestUtils {
   /**
    * Assert performance metrics
    */
-  static assertPerformance(metrics: {duration: number; memoryUsage: any}, maxDuration?: number, maxMemoryIncrease?: number): void {
+  static assertPerformance(metrics: { duration: number; memoryUsage: any }, maxDuration?: number, maxMemoryIncrease?: number): void {
     if (maxDuration) {
       expect(metrics.duration).toBeLessThan(maxDuration);
     }
@@ -402,7 +402,7 @@ export class ApiTestHelpers {
    * Test pagination
    */
   static async testPagination(app: INestApplication, endpoint: string, authToken: string, pageSize = 10) {
-    const response = await TestUtils.authenticatedRequest(app, authToken).get(endpoint).query({limit: pageSize, page: 1}).expect(200);
+    const response = await TestUtils.authenticatedRequest(app, authToken).get(endpoint).query({ limit: pageSize, page: 1 }).expect(200);
 
     expect(response.body).toHaveProperty('data');
     expect(response.body).toHaveProperty('meta');
@@ -421,7 +421,7 @@ export class ApiTestHelpers {
     method: 'post' | 'patch' | 'put',
     authToken: string,
     validData: any,
-    invalidFields: Array<{field: string; value: any; expectedError?: string}>
+    invalidFields: Array<{ field: string; value: any; expectedError?: string }>
   ) {
     // Test with valid data first
     await TestUtils.authenticatedRequest(app, authToken)
@@ -433,8 +433,8 @@ export class ApiTestHelpers {
       });
 
     // Test each invalid field
-    for (const {field, value, expectedError} of invalidFields) {
-      const invalidData = {...validData, [field]: value};
+    for (const { field, value, expectedError } of invalidFields) {
+      const invalidData = { ...validData, [field]: value };
 
       const response = await TestUtils.authenticatedRequest(app, authToken)[method](endpoint).send(invalidData);
 

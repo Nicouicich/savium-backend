@@ -1,13 +1,13 @@
-import {NestFactory, Reflector} from '@nestjs/core';
-import {ConfigService} from '@nestjs/config';
-import {Logger, ValidationPipe, HttpException, HttpStatus} from '@nestjs/common';
-import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
-import {ThrottlerGuard} from '@nestjs/throttler';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { Logger, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import helmet from 'helmet';
 
-import {AppModule} from './app.module';
-import {LoggingInterceptor} from '@common/interceptors/logging.interceptor';
-import {ErrorHandlingInterceptor} from '@common/interceptors/error-handling.interceptor';
+import { AppModule } from './app.module';
+import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
+import { ErrorHandlingInterceptor } from '@common/interceptors/error-handling.interceptor';
 
 async function bootstrap() {
   // Configure log levels based on environment
@@ -60,6 +60,12 @@ async function bootstrap() {
           message: Object.values(error.constraints || {}).join(', '),
           value: error.value
         }));
+
+        // Log detailed validation errors for debugging
+        console.error('Validation failed:', {
+          errors: formattedErrors,
+          timestamp: new Date().toISOString()
+        });
 
         return new HttpException(
           {

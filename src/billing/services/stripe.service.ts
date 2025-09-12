@@ -1,19 +1,19 @@
-import {Injectable, Logger, OnModuleInit} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, ClientSession} from 'mongoose';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, ClientSession } from 'mongoose';
 import Stripe from 'stripe';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import {Payment, PaymentDocument} from '../schemas/payment.schema';
-import {Subscription, SubscriptionDocument} from '../schemas/subscription.schema';
-import {BillingCustomer, BillingCustomerDocument} from '../schemas/billing-customer.schema';
+import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import { Subscription, SubscriptionDocument } from '../schemas/subscription.schema';
+import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
 
-import {PaymentException} from '../../common/exceptions/payment.exception';
-import {NotFoundResourceException} from '../../common/exceptions/not-found-resource.exception';
-import {ValidationException} from '../../common/exceptions/validation.exception';
+import { PaymentException } from '../../common/exceptions/payment.exception';
+import { NotFoundResourceException } from '../../common/exceptions/not-found-resource.exception';
+import { ValidationException } from '../../common/exceptions/validation.exception';
 
-import {CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto} from '../dto';
+import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
 
 @Injectable()
 export class StripeService implements OnModuleInit {
@@ -63,22 +63,22 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Creating/retrieving customer`, {traceId, userId: createCustomerDto.userId});
+    this.logger.log(`Creating/retrieving customer`, { traceId, userId: createCustomerDto.userId });
 
     try {
       // Check if customer already exists in our database
-      let customer = await this.customerModel.findOne({userId: createCustomerDto.userId}).session(session || null);
+      let customer = await this.customerModel.findOne({ userId: createCustomerDto.userId }).session(session || null);
 
       if (customer && customer.stripeCustomerId) {
         // Verify customer exists in Stripe
         try {
           const stripeCustomer = await this.stripe.customers.retrieve(customer.stripeCustomerId);
           if (!stripeCustomer.deleted) {
-            this.logger.log(`Existing customer found`, {traceId, customerId: customer.stripeCustomerId});
+            this.logger.log(`Existing customer found`, { traceId, customerId: customer.stripeCustomerId });
             return customer;
           }
         } catch (error) {
-          this.logger.warn(`Stripe customer not found, creating new one`, {traceId, error: error.message});
+          this.logger.warn(`Stripe customer not found, creating new one`, { traceId, error: error.message });
         }
       }
 
@@ -103,7 +103,7 @@ export class StripeService implements OnModuleInit {
         customer.phone = createCustomerDto.phone;
         customer.address = createCustomerDto.address;
         customer.updatedAt = new Date();
-        await customer.save({session});
+        await customer.save({ session });
       } else {
         customer = new this.customerModel({
           userId: createCustomerDto.userId,
@@ -115,7 +115,7 @@ export class StripeService implements OnModuleInit {
           accountType: (createCustomerDto as any).accountType,
           isActive: true
         });
-        await customer.save({session});
+        await customer.save({ session });
       }
 
       this.logger.log(`Customer created successfully`, {
@@ -145,11 +145,11 @@ export class StripeService implements OnModuleInit {
   async createPaymentIntent(
     createPaymentDto: CreatePaymentIntentDto,
     session?: ClientSession
-  ): Promise<{paymentIntent: Stripe.PaymentIntent; payment: PaymentDocument}> {
+  ): Promise<{ paymentIntent: Stripe.PaymentIntent; payment: PaymentDocument }> {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Creating payment intent`, {traceId, ...createPaymentDto});
+    this.logger.log(`Creating payment intent`, { traceId, ...createPaymentDto });
 
     try {
       // Validate required fields
@@ -158,7 +158,7 @@ export class StripeService implements OnModuleInit {
       }
 
       // Get customer
-      const customer = await this.customerModel.findOne({userId: createPaymentDto.userId}).session(session || null);
+      const customer = await this.customerModel.findOne({ userId: createPaymentDto.userId }).session(session || null);
       if (!customer) {
         throw new NotFoundResourceException('Customer not found', 'USER_NOT_FOUND');
       }
@@ -208,7 +208,7 @@ export class StripeService implements OnModuleInit {
         }
       });
 
-      await payment.save({session});
+      await payment.save({ session });
 
       this.logger.log(`Payment intent created successfully`, {
         traceId,
@@ -217,7 +217,7 @@ export class StripeService implements OnModuleInit {
         currency
       });
 
-      return {paymentIntent, payment};
+      return { paymentIntent, payment };
     } catch (error) {
       this.logger.error(`Failed to create payment intent`, {
         traceId,
@@ -239,7 +239,7 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Confirming payment intent`, {traceId, paymentIntentId});
+    this.logger.log(`Confirming payment intent`, { traceId, paymentIntentId });
 
     try {
       const confirmParams: Stripe.PaymentIntentConfirmParams = {};
@@ -252,7 +252,7 @@ export class StripeService implements OnModuleInit {
 
       // Update payment record
       await this.paymentModel.updateOne(
-        {stripePaymentIntentId: paymentIntentId},
+        { stripePaymentIntentId: paymentIntentId },
         {
           status: paymentIntent.status,
           updatedAt: new Date(),
@@ -260,7 +260,7 @@ export class StripeService implements OnModuleInit {
             statusHistory: {
               status: paymentIntent.status,
               timestamp: new Date(),
-              metadata: {traceId, action: 'confirm'}
+              metadata: { traceId, action: 'confirm' }
             }
           }
         }
@@ -293,11 +293,11 @@ export class StripeService implements OnModuleInit {
   async createSubscription(
     createSubscriptionDto: CreateSubscriptionDto,
     session?: ClientSession
-  ): Promise<{subscription: Stripe.Subscription; subscriptionDoc: SubscriptionDocument}> {
+  ): Promise<{ subscription: Stripe.Subscription; subscriptionDoc: SubscriptionDocument }> {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Creating subscription`, {traceId, ...createSubscriptionDto});
+    this.logger.log(`Creating subscription`, { traceId, ...createSubscriptionDto });
 
     try {
       // Validate required fields
@@ -309,7 +309,7 @@ export class StripeService implements OnModuleInit {
       }
 
       // Get customer
-      const customer = await this.customerModel.findOne({userId: createSubscriptionDto.userId}).session(session || null);
+      const customer = await this.customerModel.findOne({ userId: createSubscriptionDto.userId }).session(session || null);
       if (!customer) {
         throw new NotFoundResourceException('Customer not found', 'USER_NOT_FOUND');
       }
@@ -322,9 +322,9 @@ export class StripeService implements OnModuleInit {
 
       const subscriptionParams: Stripe.SubscriptionCreateParams = {
         customer: customer.stripeCustomerId,
-        items: [{price: productConfig.priceId}],
+        items: [{ price: productConfig.priceId }],
         payment_behavior: 'default_incomplete',
-        payment_settings: {save_default_payment_method: 'on_subscription'},
+        payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
         metadata: {
           userId: createSubscriptionDto.userId,
@@ -345,7 +345,7 @@ export class StripeService implements OnModuleInit {
 
       // Add automatic tax if enabled
       if (this.configService.get<boolean>('stripe.subscription.automaticTax')) {
-        subscriptionParams.automatic_tax = {enabled: true};
+        subscriptionParams.automatic_tax = { enabled: true };
       }
 
       // Create subscription in Stripe
@@ -370,7 +370,7 @@ export class StripeService implements OnModuleInit {
         }
       });
 
-      await subscriptionDoc.save({session});
+      await subscriptionDoc.save({ session });
 
       this.logger.log(`Subscription created successfully`, {
         traceId,
@@ -379,7 +379,7 @@ export class StripeService implements OnModuleInit {
         accountType: (createSubscriptionDto as any).accountType
       });
 
-      return {subscription, subscriptionDoc};
+      return { subscription, subscriptionDoc };
     } catch (error) {
       this.logger.error(`Failed to create subscription`, {
         traceId,
@@ -401,7 +401,7 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Updating subscription`, {traceId, subscriptionId, ...updateSubscriptionDto});
+    this.logger.log(`Updating subscription`, { traceId, subscriptionId, ...updateSubscriptionDto });
 
     try {
       const updateParams: Stripe.SubscriptionUpdateParams = {};
@@ -450,7 +450,7 @@ export class StripeService implements OnModuleInit {
         updateData['metadata.features'] = productConfig.features;
       }
 
-      await this.subscriptionModel.updateOne({stripeSubscriptionId: subscriptionId}, {$set: updateData}, {session});
+      await this.subscriptionModel.updateOne({ stripeSubscriptionId: subscriptionId }, { $set: updateData }, { session });
 
       this.logger.log(`Subscription updated successfully`, {
         traceId,
@@ -480,7 +480,7 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Canceling subscription`, {traceId, subscriptionId, cancelAtPeriodEnd});
+    this.logger.log(`Canceling subscription`, { traceId, subscriptionId, cancelAtPeriodEnd });
 
     try {
       let subscription: Stripe.Subscription;
@@ -488,7 +488,7 @@ export class StripeService implements OnModuleInit {
       if (cancelAtPeriodEnd) {
         subscription = await this.stripe.subscriptions.update(subscriptionId, {
           cancel_at_period_end: true,
-          metadata: {traceId, cancelAction: 'at_period_end'}
+          metadata: { traceId, cancelAction: 'at_period_end' }
         });
       } else {
         subscription = await this.stripe.subscriptions.cancel(subscriptionId, {
@@ -498,7 +498,7 @@ export class StripeService implements OnModuleInit {
 
       // Update subscription in database
       await this.subscriptionModel.updateOne(
-        {stripeSubscriptionId: subscriptionId},
+        { stripeSubscriptionId: subscriptionId },
         {
           $set: {
             status: subscription.status,
@@ -508,7 +508,7 @@ export class StripeService implements OnModuleInit {
             updatedAt: new Date()
           }
         },
-        {session}
+        { session }
       );
 
       this.logger.log(`Subscription canceled successfully`, {
@@ -558,10 +558,10 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Creating setup intent`, {traceId, customerId});
+    this.logger.log(`Creating setup intent`, { traceId, customerId });
 
     try {
-      const customer = await this.customerModel.findOne({stripeCustomerId: customerId});
+      const customer = await this.customerModel.findOne({ stripeCustomerId: customerId });
       if (!customer) {
         throw new NotFoundResourceException('Customer not found', 'CUSTOMER_NOT_FOUND');
       }
@@ -625,7 +625,7 @@ export class StripeService implements OnModuleInit {
     this.ensureStripeInitialized();
 
     const traceId = uuidv4();
-    this.logger.log(`Detaching payment method`, {traceId, paymentMethodId});
+    this.logger.log(`Detaching payment method`, { traceId, paymentMethodId });
 
     try {
       const paymentMethod = await this.stripe.paymentMethods.detach(paymentMethodId);

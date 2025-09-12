@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {ConfigService} from '@nestjs/config';
-import {UnauthorizedException} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { UnauthorizedException } from '@nestjs/common';
 
-import {JwtStrategy, JwtPayload} from './jwt.strategy';
-import {UsersService} from '../../users/users.service';
-import {UserDocument} from '../../users/schemas/user.schema';
-import {UserRole} from '@common/constants/user-roles';
+import { JwtStrategy, JwtPayload } from './jwt.strategy';
+import { UsersService } from '../../users/users.service';
+import { UserDocument } from '../../users/schemas/user.schema';
+import { UserRole } from '@common/constants/user-roles';
 
 describe('JwtStrategy - Unit Tests', () => {
   let strategy: JwtStrategy;
@@ -166,8 +166,8 @@ describe('JwtStrategy - Unit Tests', () => {
 
       it('should validate user with different roles', async () => {
         // Arrange
-        const adminPayload = createMockJwtPayload({role: 'ADMIN'});
-        const adminUser = createMockUser({role: 'ADMIN'});
+        const adminPayload = createMockJwtPayload({ role: 'ADMIN' });
+        const adminUser = createMockUser({ role: 'ADMIN' });
 
         usersService.findById.mockResolvedValue(adminUser as UserDocument);
 
@@ -182,8 +182,8 @@ describe('JwtStrategy - Unit Tests', () => {
 
       it('should validate user with premium role', async () => {
         // Arrange
-        const premiumPayload = createMockJwtPayload({role: 'PREMIUM'});
-        const premiumUser = createMockUser({role: 'PREMIUM'});
+        const premiumPayload = createMockJwtPayload({ role: 'PREMIUM' });
+        const premiumUser = createMockUser({ role: 'PREMIUM' });
 
         usersService.findById.mockResolvedValue(premiumUser as UserDocument);
 
@@ -233,8 +233,8 @@ describe('JwtStrategy - Unit Tests', () => {
         // Arrange
         const payload = createMockJwtPayload();
         const mockAccounts = [
-          {id: 'account1', name: 'Personal'},
-          {id: 'account2', name: 'Business'}
+          { id: 'account1', name: 'Personal' },
+          { id: 'account2', name: 'Business' }
         ];
         const mockUser = createMockUser({
           accounts: mockAccounts
@@ -435,7 +435,7 @@ describe('JwtStrategy - Unit Tests', () => {
         refreshTokens: ['token1', 'token2'],
         __v: 0,
         socialProviders: {
-          google: {id: 'google-id'}
+          google: { id: 'google-id' }
         }
       } as any);
 
@@ -500,7 +500,7 @@ describe('JwtStrategy - Unit Tests', () => {
           beta: true,
           experimental: false
         },
-        auditLog: [{action: 'login', timestamp: new Date()}]
+        auditLog: [{ action: 'login', timestamp: new Date() }]
       } as any);
 
       usersService.findById.mockResolvedValue(mockUser as UserDocument);
@@ -561,7 +561,7 @@ describe('JwtStrategy - Unit Tests', () => {
       const payload = createMockJwtPayload();
       const userWithExtraFields = createMockUser({
         unexpectedField: 'unexpected-value',
-        anotherField: {nested: 'object'}
+        anotherField: { nested: 'object' }
       } as any);
 
       usersService.findById.mockResolvedValue(userWithExtraFields as UserDocument);
@@ -630,7 +630,7 @@ describe('JwtStrategy - Unit Tests', () => {
         role: UserRole.USER,
         isActive: true,
         isEmailVerified: false,
-        accounts: [{id: 'acc1', name: 'Personal'}],
+        accounts: [{ id: 'acc1', name: 'Personal' }],
         preferences: {
           theme: 'dark',
           language: 'en'
@@ -651,7 +651,7 @@ describe('JwtStrategy - Unit Tests', () => {
         lastName: 'Doe',
         isActive: true,
         isEmailVerified: false,
-        accounts: [{id: 'acc1', name: 'Personal'}],
+        accounts: [{ id: 'acc1', name: 'Personal' }],
         preferences: {
           theme: 'dark',
           language: 'en'

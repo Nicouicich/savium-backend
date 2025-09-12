@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 export type PaymentDocument = Payment & Document;
 
@@ -15,27 +15,27 @@ export type PaymentDocument = Payment & Document;
   }
 })
 export class Payment {
-  @Prop({type: Types.ObjectId, ref: 'User', required: true})
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({type: Types.ObjectId, ref: 'Subscription'})
+  @Prop({ type: Types.ObjectId, ref: 'Subscription' })
   subscriptionId?: Types.ObjectId;
 
   // Stripe payment fields
-  @Prop({required: true, unique: true})
+  @Prop({ required: true, unique: true })
   stripePaymentIntentId: string;
 
   @Prop()
   stripeChargeId?: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   stripeCustomerId: string;
 
   // Payment details
-  @Prop({required: true})
+  @Prop({ required: true })
   amount: number; // Amount in cents
 
-  @Prop({required: true, default: 'usd'})
+  @Prop({ required: true, default: 'usd' })
   currency: string;
 
   @Prop({
@@ -55,7 +55,7 @@ export class Payment {
   // Payment method information
   @Prop({
     type: {
-      type: {type: String, enum: ['card', 'bank_account', 'paypal', 'apple_pay', 'google_pay']},
+      type: { type: String, enum: ['card', 'bank_account', 'paypal', 'apple_pay', 'google_pay'] },
       last4: String,
       brand: String,
       expMonth: Number,
@@ -121,7 +121,7 @@ export class Payment {
   refundedAt?: Date;
 
   // Dispute information
-  @Prop({default: false})
+  @Prop({ default: false })
   disputed: boolean;
 
   @Prop()
@@ -148,7 +148,7 @@ export class Payment {
   invoiceNumber?: string;
 
   // Metadata
-  @Prop({type: Object, default: {}})
+  @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
 
   // Timestamps
@@ -162,5 +162,5 @@ export class Payment {
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
 
 // Note: Indexes are managed centrally through DatabasePerformanceService
-PaymentSchema.index({createdAt: -1});
-PaymentSchema.index({disputed: 1});
+PaymentSchema.index({ createdAt: -1 });
+PaymentSchema.index({ disputed: 1 });

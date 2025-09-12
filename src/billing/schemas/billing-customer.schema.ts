@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 export type BillingCustomerDocument = BillingCustomer & Document;
 
@@ -15,15 +15,15 @@ export type BillingCustomerDocument = BillingCustomer & Document;
   }
 })
 export class BillingCustomer {
-  @Prop({type: Types.ObjectId, ref: 'User', required: true, unique: true})
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
   userId: Types.ObjectId;
 
   // Stripe customer information
-  @Prop({required: true, unique: true})
+  @Prop({ required: true, unique: true })
   stripeCustomerId: string;
 
   // Customer details
-  @Prop({required: true})
+  @Prop({ required: true })
   email: string;
 
   @Prop()
@@ -68,14 +68,14 @@ export class BillingCustomer {
   // Payment methods (stored references only)
   @Prop([
     {
-      stripePaymentMethodId: {type: String, required: true},
-      type: {type: String, enum: ['card', 'bank_account'], required: true},
+      stripePaymentMethodId: { type: String, required: true },
+      type: { type: String, enum: ['card', 'bank_account'], required: true },
       last4: String,
       brand: String,
       expMonth: Number,
       expYear: Number,
-      isDefault: {type: Boolean, default: false},
-      createdAt: {type: Date, default: Date.now}
+      isDefault: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now }
     }
   ])
   paymentMethods: {
@@ -92,13 +92,13 @@ export class BillingCustomer {
   // Billing preferences
   @Prop({
     type: {
-      currency: {type: String, default: 'usd'},
+      currency: { type: String, default: 'usd' },
       invoiceDelivery: {
         type: String,
         enum: ['email', 'postal'],
         default: 'email'
       },
-      autoPayment: {type: Boolean, default: true},
+      autoPayment: { type: Boolean, default: true },
       billingThreshold: Number // Alert when balance goes below this amount
     },
     default: {}
@@ -111,10 +111,10 @@ export class BillingCustomer {
   };
 
   // Credit and balance information
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   accountBalance: number; // Negative = credit, Positive = amount owed
 
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   creditBalance: number; // Available credits
 
   // Customer status
@@ -126,16 +126,16 @@ export class BillingCustomer {
   status: 'active' | 'inactive' | 'delinquent' | 'suspended';
 
   // Subscription relationship
-  @Prop({type: Types.ObjectId, ref: 'Subscription'})
+  @Prop({ type: Types.ObjectId, ref: 'Subscription' })
   activeSubscriptionId?: Types.ObjectId;
 
   // Communication preferences
   @Prop({
     type: {
-      billingEmails: {type: Boolean, default: true},
-      marketingEmails: {type: Boolean, default: false},
-      productUpdates: {type: Boolean, default: true},
-      securityAlerts: {type: Boolean, default: true}
+      billingEmails: { type: Boolean, default: true },
+      marketingEmails: { type: Boolean, default: false },
+      productUpdates: { type: Boolean, default: true },
+      securityAlerts: { type: Boolean, default: true }
     },
     default: {}
   })
@@ -147,16 +147,16 @@ export class BillingCustomer {
   };
 
   // Risk and fraud prevention
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   riskScore: number; // 0-100, higher = more risky
 
   @Prop([
     {
-      type: {type: String, enum: ['chargeback', 'refund_request', 'dispute']},
-      date: {type: Date, default: Date.now},
+      type: { type: String, enum: ['chargeback', 'refund_request', 'dispute'] },
+      date: { type: Date, default: Date.now },
       amount: Number,
       reason: String,
-      resolved: {type: Boolean, default: false}
+      resolved: { type: Boolean, default: false }
     }
   ])
   riskEvents: {
@@ -168,7 +168,7 @@ export class BillingCustomer {
   }[];
 
   // Metadata for extensibility
-  @Prop({type: Object, default: {}})
+  @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
 
   // Audit fields
@@ -182,7 +182,7 @@ export class BillingCustomer {
 export const BillingCustomerSchema = SchemaFactory.createForClass(BillingCustomer);
 
 // Note: Indexes are managed centrally through DatabasePerformanceService
-BillingCustomerSchema.index({activeSubscriptionId: 1});
-BillingCustomerSchema.index({'paymentMethods.stripePaymentMethodId': 1});
-BillingCustomerSchema.index({riskScore: -1}); // Higher risk first
-BillingCustomerSchema.index({createdAt: -1});
+BillingCustomerSchema.index({ activeSubscriptionId: 1 });
+BillingCustomerSchema.index({ 'paymentMethods.stripePaymentMethodId': 1 });
+BillingCustomerSchema.index({ riskScore: -1 }); // Higher risk first
+BillingCustomerSchema.index({ createdAt: -1 });

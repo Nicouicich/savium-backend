@@ -1,4 +1,4 @@
-import {Types} from 'mongoose';
+import { Types } from 'mongoose';
 import Stripe from 'stripe';
 
 /**
@@ -316,7 +316,7 @@ export class StripeMockFactory {
             current_period_start: now,
             current_period_end: now + 2592000,
             discounts: [],
-            plan: {id: 'plan_test', object: 'plan'} as any,
+            plan: { id: 'plan_test', object: 'plan' } as any,
             metadata: {},
             price: {
               id: 'price_' + this.generateId(),
@@ -772,7 +772,7 @@ export class StripeMockFactory {
       )
     );
 
-    (this.mockStripe.customers.retrieve as jest.Mock).mockImplementation((id: string) => Promise.resolve(this.createMockCustomer({id, })));
+    (this.mockStripe.customers.retrieve as jest.Mock).mockImplementation((id: string) => Promise.resolve(this.createMockCustomer({ id })));
 
     // Payment Intent mocks
     (this.mockStripe.paymentIntents.create as jest.Mock).mockImplementation((params: any) =>
@@ -810,7 +810,7 @@ export class StripeMockFactory {
       )
     );
 
-    (this.mockStripe.subscriptions.retrieve as jest.Mock).mockImplementation((id: string) => Promise.resolve(this.createMockSubscription({id})));
+    (this.mockStripe.subscriptions.retrieve as jest.Mock).mockImplementation((id: string) => Promise.resolve(this.createMockSubscription({ id })));
 
     (this.mockStripe.subscriptions.update as jest.Mock).mockImplementation((id: string, params: any) =>
       Promise.resolve(
@@ -849,7 +849,7 @@ export class StripeMockFactory {
       Promise.resolve({
         object: 'list',
         data: [
-          this.createMockPaymentMethod({customer: params.customer, type: params.type}),
+          this.createMockPaymentMethod({ customer: params.customer, type: params.type }),
           this.createMockPaymentMethod({
             customer: params.customer,
             type: params.type,
@@ -862,7 +862,7 @@ export class StripeMockFactory {
     );
 
     (this.mockStripe.paymentMethods.detach as jest.Mock).mockImplementation((id: string) =>
-      Promise.resolve(this.createMockPaymentMethod({id, customer: null}))
+      Promise.resolve(this.createMockPaymentMethod({ id, customer: null }))
     );
 
     // Webhook mocks
@@ -951,7 +951,6 @@ export class StripeMockFactory {
     (this.mockStripe.paymentIntents.create as jest.Mock).mockRejectedValue(rateLimitError);
     (this.mockStripe.subscriptions.create as jest.Mock).mockRejectedValue(rateLimitError);
   }
-
 }
 
 // Export singleton instance

@@ -1,5 +1,5 @@
-import {ApiProperty} from '@nestjs/swagger';
-import {IsEnum, IsArray, ArrayNotEmpty, IsString} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsArray, ArrayNotEmpty, IsString } from 'class-validator';
 
 export enum BulkOperationType {
   DELETE = 'delete',
@@ -13,7 +13,7 @@ export class BulkCategoryOperationDto {
     enum: BulkOperationType,
     example: BulkOperationType.DELETE
   })
-  @IsEnum(BulkOperationType, {message: 'Operation must be one of: delete, activate, deactivate'})
+  @IsEnum(BulkOperationType, { message: 'Operation must be one of: delete, activate, deactivate' })
   operation: BulkOperationType;
 
   @ApiProperty({
@@ -21,9 +21,9 @@ export class BulkCategoryOperationDto {
     type: [String],
     example: ['category-1-id', 'category-2-id']
   })
-  @IsArray({message: 'categoryIds must be an array'})
-  @ArrayNotEmpty({message: 'categoryIds cannot be empty'})
-  @IsString({each: true, message: 'Each category ID must be a string'})
+  @IsArray({ message: 'categoryIds must be an array' })
+  @ArrayNotEmpty({ message: 'categoryIds cannot be empty' })
+  @IsString({ each: true, message: 'Each category ID must be a string' })
   categoryIds: string[];
 }
 
@@ -46,8 +46,8 @@ export class BulkOperationResultDto {
     items: {
       type: 'object',
       properties: {
-        categoryId: {type: 'string'},
-        error: {type: 'string'}
+        categoryId: { type: 'string' },
+        error: { type: 'string' }
       }
     },
     example: [
@@ -58,5 +58,5 @@ export class BulkOperationResultDto {
     ],
     required: false
   })
-  errors?: Array<{categoryId: string; error: string}>;
+  errors?: Array<{ categoryId: string; error: string }>;
 }

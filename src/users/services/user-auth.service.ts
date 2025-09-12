@@ -1,11 +1,10 @@
-import {Injectable, Logger, NotFoundException, UnauthorizedException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model, Types} from 'mongoose';
-import {v4 as uuidv4} from 'uuid';
-import * as bcrypt from 'bcrypt';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
-import {UserAuth, UserAuthDocument} from '../schemas/user-auth.schema';
-import {ConfigService} from '@nestjs/config';
+import { UserAuth, UserAuthDocument } from '../schemas/user-auth.schema';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserAuthService {
@@ -32,7 +31,7 @@ export class UserAuthService {
   }
 
   async findByUserId(userId: string): Promise<UserAuthDocument> {
-    const authRecord = await this.userAuthModel.findOne({userId: new Types.ObjectId(userId)});
+    const authRecord = await this.userAuthModel.findOne({ userId: new Types.ObjectId(userId) });
     if (!authRecord) {
       throw new NotFoundException('User auth record not found');
     }
@@ -40,12 +39,12 @@ export class UserAuthService {
   }
 
   // Refresh token management with TTL
-  async addRefreshToken(userId: string, refreshToken: string, deviceInfo?: {userAgent?: string; ipAddress?: string; deviceId?: string}): Promise<void> {
+  async addRefreshToken(userId: string, refreshToken: string, deviceInfo?: { userAgent?: string; ipAddress?: string; deviceId?: string }): Promise<void> {
     const refreshTokenTtl = this.configService.get<string>('jwt.refreshToken.expiresIn') || '7d';
     const expiresAt = new Date(Date.now() + this.parseExpirationTime(refreshTokenTtl));
 
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $push: {
           refreshTokens: {
@@ -57,25 +56,25 @@ export class UserAuthService {
             deviceId: deviceInfo?.deviceId
           }
         },
-        $set: {lastLoginAt: new Date()}
+        $set: { lastLoginAt: new Date() }
       }
     );
 
-    this.logger.log(`Refresh token added for user: ${userId}, expires: ${expiresAt}`);
+    this.logger.log(`Refresh token added for user: ${userId}, expires: ${expiresAt.toISOString()}`);
   }
 
   async removeRefreshToken(userId: string, refreshToken: string): Promise<void> {
-    await this.userAuthModel.updateOne({userId: new Types.ObjectId(userId)}, {$pull: {refreshTokens: {token: refreshToken}}});
+    await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { refreshTokens: { token: refreshToken } } });
 
     this.logger.log(`Refresh token removed for user: ${userId}`);
   }
 
   async clearAllRefreshTokens(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $set: {refreshTokens: []},
-        $unset: {activeSessions: 1}
+        $set: { refreshTokens: [] },
+        $unset: { activeSessions: 1 }
       }
     );
     this.logger.log(`All refresh tokens cleared for user: ${userId}`);
@@ -94,28 +93,28 @@ export class UserAuthService {
 
   // Email verification
   async setEmailVerificationToken(userId: string, token: string): Promise<void> {
-    await this.userAuthModel.updateOne({userId: new Types.ObjectId(userId)}, {$set: {emailVerificationToken: token}});
+    await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { emailVerificationToken: token } });
   }
 
   async verifyEmail(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $set: {isEmailVerified: true},
-        $unset: {emailVerificationToken: 1}
+        $set: { isEmailVerified: true },
+        $unset: { emailVerificationToken: 1 }
       }
     );
     this.logger.log(`Email verified for user: ${userId}`);
   }
 
   async findByEmailVerificationToken(token: string): Promise<UserAuthDocument | null> {
-    return this.userAuthModel.findOne({emailVerificationToken: token});
+    return this.userAuthModel.findOne({ emailVerificationToken: token });
   }
 
   // Password reset
   async setPasswordResetToken(userId: string, token: string, expires: Date): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $set: {
           passwordResetToken: token,
@@ -127,7 +126,7 @@ export class UserAuthService {
 
   async clearPasswordResetToken(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $unset: {
           passwordResetToken: 1,
@@ -140,7 +139,7 @@ export class UserAuthService {
   async findByPasswordResetToken(token: string): Promise<UserAuthDocument | null> {
     return this.userAuthModel.findOne({
       passwordResetToken: token,
-      passwordResetExpires: {$gt: new Date()}
+      passwordResetExpires: { $gt: new Date() }
     });
   }
 
@@ -157,7 +156,7 @@ export class UserAuthService {
     const deviceId = deviceInfo.deviceId || uuidv4();
 
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $push: {
           activeSessions: {
@@ -190,10 +189,10 @@ export class UserAuthService {
 
   async revokeSession(userId: string, deviceId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $pull: {
-          activeSessions: {deviceId}
+          activeSessions: { deviceId }
         }
       }
     );
@@ -207,19 +206,19 @@ export class UserAuthService {
   // Security features
   async recordFailedLogin(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $inc: {failedLoginAttempts: 1}
+        $inc: { failedLoginAttempts: 1 }
       }
     );
   }
 
   async resetFailedLoginAttempts(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $set: {failedLoginAttempts: 0},
-        $unset: {lockedUntil: 1}
+        $set: { failedLoginAttempts: 0 },
+        $unset: { lockedUntil: 1 }
       }
     );
   }
@@ -228,13 +227,13 @@ export class UserAuthService {
     const lockUntil = new Date(Date.now() + lockDurationMinutes * 60 * 1000);
 
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $set: {lockedUntil: lockUntil}
+        $set: { lockedUntil: lockUntil }
       }
     );
 
-    this.logger.warn(`Account locked for user: ${userId} until ${lockUntil}`);
+    this.logger.warn(`Account locked for user: ${userId} until ${lockUntil.toISOString()}`);
   }
 
   async isAccountLocked(userId: string): Promise<boolean> {
@@ -245,7 +244,7 @@ export class UserAuthService {
   // Two-factor authentication
   async enableTwoFactor(userId: string, secret: string, backupCodes: string[]): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
         $set: {
           twoFactorEnabled: true,
@@ -259,9 +258,9 @@ export class UserAuthService {
 
   async disableTwoFactor(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      {userId: new Types.ObjectId(userId)},
+      { userId: new Types.ObjectId(userId) },
       {
-        $set: {twoFactorEnabled: false},
+        $set: { twoFactorEnabled: false },
         $unset: {
           twoFactorSecret: 1,
           backupCodes: 1
@@ -272,19 +271,19 @@ export class UserAuthService {
   }
 
   async consumeBackupCode(userId: string, code: string): Promise<boolean> {
-    const result = await this.userAuthModel.updateOne({userId: new Types.ObjectId(userId)}, {$pull: {backupCodes: code}});
+    const result = await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { backupCodes: code } });
 
     return result.modifiedCount > 0;
   }
 
   // Cleanup methods for maintenance
   async cleanupExpiredRefreshTokens(userId?: string): Promise<number> {
-    const query = userId ? {userId: new Types.ObjectId(userId)} : {};
+    const query = userId ? { userId: new Types.ObjectId(userId) } : {};
 
     const result = await this.userAuthModel.updateMany(query, {
       $pull: {
         refreshTokens: {
-          expiresAt: {$lt: new Date()}
+          expiresAt: { $lt: new Date() }
         }
       }
     });
@@ -305,7 +304,7 @@ export class UserAuthService {
     const expired = authRecord.refreshTokens?.filter(token => token.expiresAt < now).length || 0;
     const active = total - expired;
 
-    return {total, expired, active};
+    return { total, expired, active };
   }
 
   private parseExpirationTime(expiration: string): number {

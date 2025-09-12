@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserAuthDocument = UserAuth & Document;
 
@@ -15,18 +15,18 @@ export type UserAuthDocument = UserAuth & Document;
   }
 })
 export class UserAuth {
-  @Prop({type: Types.ObjectId, ref: 'User', required: true, unique: true})
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
   userId: Types.ObjectId;
 
   // Authentication tokens with TTL
   @Prop([
     {
-      token: {type: String, required: true},
-      expiresAt: {type: Date, required: true, expires: 0}, // MongoDB TTL index
-      createdAt: {type: Date, default: Date.now},
-      userAgent: {type: String},
-      ipAddress: {type: String},
-      deviceId: {type: String}
+      token: { type: String, required: true },
+      expiresAt: { type: Date, required: true, expires: 0 }, // MongoDB TTL index
+      createdAt: { type: Date, default: Date.now },
+      userAgent: { type: String },
+      ipAddress: { type: String },
+      deviceId: { type: String }
     }
   ])
   refreshTokens?: Array<{
@@ -49,21 +49,21 @@ export class UserAuth {
   @Prop()
   emailVerificationToken?: string;
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isEmailVerified: boolean;
 
   // Security metadata
-  @Prop({default: Date.now})
+  @Prop({ default: Date.now })
   lastLoginAt?: Date;
 
   @Prop([
     {
-      deviceId: {type: String, required: true},
+      deviceId: { type: String, required: true },
       deviceName: String,
       userAgent: String,
       ipAddress: String,
-      lastUsedAt: {type: Date, default: Date.now},
-      isActive: {type: Boolean, default: true}
+      lastUsedAt: { type: Date, default: Date.now },
+      isActive: { type: Boolean, default: true }
     }
   ])
   activeSessions?: {
@@ -76,14 +76,14 @@ export class UserAuth {
   }[];
 
   // Failed login attempts tracking
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   failedLoginAttempts: number;
 
   @Prop()
   lockedUntil?: Date;
 
   // Two-factor authentication
-  @Prop({default: false})
+  @Prop({ default: false })
   twoFactorEnabled: boolean;
 
   @Prop()

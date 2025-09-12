@@ -1,9 +1,9 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {INestApplication} from '@nestjs/common';
-import {ConfigModule} from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import * as request from 'supertest';
-import {AppModule} from '../src/app.module';
-import {ValidationPipe} from '@nestjs/common';
+import { AppModule } from '../src/app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 describe('User Flows (e2e)', () => {
   let app: INestApplication;
@@ -304,7 +304,7 @@ describe('User Flows (e2e)', () => {
     it('should get expense statistics', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/expenses/stats')
-        .query({accountId})
+        .query({ accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -316,7 +316,7 @@ describe('User Flows (e2e)', () => {
     it('should get category breakdown', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/expenses/category-breakdown')
-        .query({accountId})
+        .query({ accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -328,7 +328,7 @@ describe('User Flows (e2e)', () => {
     it('should search expenses', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/expenses/search')
-        .query({q: 'lunch', accountId})
+        .query({ q: 'lunch', accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 

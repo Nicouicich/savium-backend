@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import {Test, TestingModule} from '@nestjs/testing';
-import {INestApplication, ValidationPipe} from '@nestjs/common';
-import {ThrottlerModule} from '@nestjs/throttler';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import * as request from 'supertest';
-import {Types} from 'mongoose';
+import { Types } from 'mongoose';
 
-import {StripePaymentsController} from './stripe-payments.controller';
-import {StripeService} from '../services/stripe.service';
-import {StripeWebhookService} from '../services/stripe-webhook.service';
-import {JwtAuthGuard} from '../../auth/guards/jwt-auth.guard';
-import {RolesGuard} from '../../common/guards/roles.guard';
-import {RequestTracingInterceptor} from '../../common/interceptors/request-tracing.interceptor';
+import { StripePaymentsController } from './stripe-payments.controller';
+import { StripeService } from '../services/stripe.service';
+import { StripeWebhookService } from '../services/stripe-webhook.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
 
-import {PaymentException} from '../../common/exceptions/payment.exception';
-import {ValidationException} from '../../common/exceptions/validation.exception';
-import {NotFoundResourceException} from '../../common/exceptions/not-found-resource.exception';
+import { PaymentException } from '../../common/exceptions/payment.exception';
+import { ValidationException } from '../../common/exceptions/validation.exception';
+import { NotFoundResourceException } from '../../common/exceptions/not-found-resource.exception';
 
-import {CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto} from '../dto';
+import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
 
 describe('StripePaymentsController - Integration Tests', () => {
   let app: INestApplication;
@@ -79,7 +79,7 @@ describe('StripePaymentsController - Integration Tests', () => {
       data: [
         {
           id: 'si_test_item',
-          price: {id: 'price_test', product: 'prod_test'},
+          price: { id: 'price_test', product: 'prod_test' },
           quantity: 1
         }
       ]
@@ -372,7 +372,7 @@ describe('StripePaymentsController - Integration Tests', () => {
       stripeService.confirmPaymentIntent.mockResolvedValue(mockConfirmedPaymentIntent);
 
       // Act & Assert
-      const response = await request(app.getHttpServer()).post(`/stripe/payment-intent/${paymentIntentId}/confirm`).send({paymentMethodId}).expect(200);
+      const response = await request(app.getHttpServer()).post(`/stripe/payment-intent/${paymentIntentId}/confirm`).send({ paymentMethodId }).expect(200);
 
       expect(response.body).toEqual({
         success: true,
@@ -522,7 +522,7 @@ describe('StripePaymentsController - Integration Tests', () => {
       const updateDto: UpdateSubscriptionDto = {
         newAccountType: 'couple',
         prorationBehavior: 'create_prorations',
-        metadata: {updated: 'true'}
+        metadata: { updated: 'true' }
       };
       const mockUpdatedSubscription = createMockSubscription({
         id: subscriptionId,
@@ -605,7 +605,7 @@ describe('StripePaymentsController - Integration Tests', () => {
       stripeService.cancelSubscription.mockResolvedValue(mockCanceledSubscription);
 
       // Act & Assert
-      const response = await request(app.getHttpServer()).delete(`/stripe/subscription/${subscriptionId}`).query({atPeriodEnd: 'false'}).expect(200);
+      const response = await request(app.getHttpServer()).delete(`/stripe/subscription/${subscriptionId}`).query({ atPeriodEnd: 'false' }).expect(200);
 
       expect(response.body).toEqual({
         success: true,
@@ -701,7 +701,7 @@ describe('StripePaymentsController - Integration Tests', () => {
     it('should create setup intent with default payment method types', async () => {
       // Arrange
       const customerId = 'cus_test_customer';
-      const setupData = {customerId};
+      const setupData = { customerId };
       const mockSetupIntent = createMockSetupIntent();
 
       stripeService.createSetupIntent.mockResolvedValue(mockSetupIntent);
@@ -731,12 +731,12 @@ describe('StripePaymentsController - Integration Tests', () => {
       // Arrange
       const customerId = 'cus_test_customer';
       const type = 'card';
-      const mockPaymentMethods = [createMockPaymentMethod(), createMockPaymentMethod({id: 'pm_test_2'})];
+      const mockPaymentMethods = [createMockPaymentMethod(), createMockPaymentMethod({ id: 'pm_test_2' })];
 
       stripeService.listPaymentMethods.mockResolvedValue(mockPaymentMethods);
 
       // Act & Assert
-      const response = await request(app.getHttpServer()).get(`/stripe/customer/${customerId}/payment-methods`).query({type}).expect(200);
+      const response = await request(app.getHttpServer()).get(`/stripe/customer/${customerId}/payment-methods`).query({ type }).expect(200);
 
       expect(response.body).toEqual({
         success: true,
@@ -865,7 +865,7 @@ describe('StripePaymentsController - Integration Tests', () => {
       const payload = JSON.stringify({
         id: 'evt_test_webhook',
         type: 'payment_intent.succeeded',
-        data: {object: {id: 'pi_test'}}
+        data: { object: { id: 'pi_test' } }
       });
       const signature = 'test_signature';
       const mockEvent = {
@@ -879,14 +879,14 @@ describe('StripePaymentsController - Integration Tests', () => {
       // Act & Assert
       const response = await request(app.getHttpServer()).post('/stripe/webhook').set('stripe-signature', signature).send(payload).expect(200);
 
-      expect(response.body).toEqual({received: true});
+      expect(response.body).toEqual({ received: true });
       expect(stripeService.constructWebhookEvent).toHaveBeenCalledWith(expect.any(Buffer), signature);
       expect(webhookService.processWebhookEvent).toHaveBeenCalledWith(mockEvent);
     });
 
     it('should reject webhook without signature', async () => {
       // Arrange
-      const payload = JSON.stringify({type: 'payment_intent.succeeded'});
+      const payload = JSON.stringify({ type: 'payment_intent.succeeded' });
 
       // Act & Assert
       const response = await request(app.getHttpServer()).post('/stripe/webhook').send(payload).expect(400);
@@ -898,7 +898,7 @@ describe('StripePaymentsController - Integration Tests', () => {
 
     it('should handle webhook signature verification failure', async () => {
       // Arrange
-      const payload = JSON.stringify({type: 'payment_intent.succeeded'});
+      const payload = JSON.stringify({ type: 'payment_intent.succeeded' });
       const signature = 'invalid_signature';
 
       stripeService.constructWebhookEvent.mockImplementation(() => {
@@ -914,9 +914,9 @@ describe('StripePaymentsController - Integration Tests', () => {
 
     it('should handle webhook processing errors', async () => {
       // Arrange
-      const payload = JSON.stringify({type: 'payment_intent.succeeded'});
+      const payload = JSON.stringify({ type: 'payment_intent.succeeded' });
       const signature = 'test_signature';
-      const mockEvent = {id: 'evt_test', type: 'payment_intent.succeeded'};
+      const mockEvent = { id: 'evt_test', type: 'payment_intent.succeeded' };
 
       stripeService.constructWebhookEvent.mockReturnValue(mockEvent as any);
       webhookService.processWebhookEvent.mockRejectedValue(new Error('Database connection failed'));
