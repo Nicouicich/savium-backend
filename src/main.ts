@@ -44,7 +44,7 @@ async function bootstrap() {
     allowedHeaders: ['Accept', 'Authorization', 'Content-Type', 'X-Requested-With', 'Range', 'X-Trace-Id']
   });
 
-  // Global Interceptors (order matters: Logging -> ErrorHandling -> others)
+  // Global Interceptors (order matters: Logging -> ErrorHandling)
   app.useGlobalInterceptors(new LoggingInterceptor(), new ErrorHandlingInterceptor());
 
   // Global Validation Pipe

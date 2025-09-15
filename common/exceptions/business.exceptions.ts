@@ -83,3 +83,79 @@ export class FileSizeExceededException extends BaseException {
     super(`File size ${actualSize} exceeds maximum allowed size of ${maxSize}`, HttpStatus.PAYLOAD_TOO_LARGE, { maxSize, actualSize });
   }
 }
+
+// Referral System Exceptions
+export class InvalidReferralCodeException extends BaseException {
+  readonly code = 'INVALID_REFERRAL_CODE';
+  readonly userMessage = 'The referral code is invalid or does not exist';
+
+  constructor(code: string) {
+    super(`Invalid referral code: ${code}`, HttpStatus.BAD_REQUEST, { code });
+  }
+}
+
+export class SelfReferralException extends BaseException {
+  readonly code = 'SELF_REFERRAL_NOT_ALLOWED';
+  readonly userMessage = 'You cannot use your own referral code';
+
+  constructor() {
+    super('Self-referral is not allowed', HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class AlreadyReferredException extends BaseException {
+  readonly code = 'ALREADY_REFERRED';
+  readonly userMessage = 'You have already been referred by another user';
+
+  constructor() {
+    super('User has already been referred', HttpStatus.CONFLICT);
+  }
+}
+
+export class ReferralNotFoundException extends NotFoundResourceException {
+  constructor(id: string) {
+    super('Referral', id);
+  }
+}
+
+export class RewardNotFoundException extends NotFoundResourceException {
+  constructor(id: string) {
+    super('Referral Reward', id);
+  }
+}
+
+export class RewardNotAvailableException extends BaseException {
+  readonly code = 'REWARD_NOT_AVAILABLE';
+  readonly userMessage = 'This reward is not available for redemption';
+
+  constructor(rewardId: string, status: string) {
+    super(`Reward ${rewardId} is not available (status: ${status})`, HttpStatus.CONFLICT, { rewardId, status });
+  }
+}
+
+export class InsufficientRewardsException extends BaseException {
+  readonly code = 'INSUFFICIENT_REWARDS';
+  readonly userMessage = 'You do not have enough rewards to complete this redemption';
+
+  constructor(available: number, requested: number) {
+    super(`Insufficient rewards: available ${available}, requested ${requested}`, HttpStatus.BAD_REQUEST, { available, requested });
+  }
+}
+
+export class ReferralCompletionException extends BaseException {
+  readonly code = 'REFERRAL_COMPLETION_ERROR';
+  readonly userMessage = 'Unable to complete the referral process';
+
+  constructor(reason: string) {
+    super(`Referral completion failed: ${reason}`, HttpStatus.UNPROCESSABLE_ENTITY, { reason });
+  }
+}
+
+export class DuplicateReferralCodeException extends BaseException {
+  readonly code = 'DUPLICATE_REFERRAL_CODE';
+  readonly userMessage = 'This referral code is already in use';
+
+  constructor(code: string) {
+    super(`Referral code already exists: ${code}`, HttpStatus.CONFLICT, { code });
+  }
+}

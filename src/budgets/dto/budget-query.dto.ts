@@ -2,11 +2,15 @@ import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, Max, M
 import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { BudgetPeriod, BudgetStatus } from '../schemas/budget.schema';
+import { IsMongoObjectId } from '@common/decorators/validation.decorator';
 
 export class BudgetQueryDto {
-  @ApiPropertyOptional({ description: 'Account ID to filter budgets', example: '507f1f77bcf86cd799439011' })
+  @ApiPropertyOptional({
+    description: 'Account ID to filter budgets (must be a valid MongoDB ObjectId)',
+    example: '507f1f77bcf86cd799439011'
+  })
   @IsOptional()
-  @IsString()
+  @IsMongoObjectId({ message: 'accountId must be a valid MongoDB ObjectId (24-character hexadecimal string)' })
   accountId?: string;
 
   @ApiPropertyOptional({ description: 'Budget status filter', enum: BudgetStatus, example: BudgetStatus.ACTIVE })

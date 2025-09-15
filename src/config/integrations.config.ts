@@ -33,6 +33,19 @@ export default registerAs('integrations', () => ({
     ]
   },
 
+  // AWS S3 Configuration
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION || 'us-east-1',
+    s3: {
+      bucket: process.env.AWS_S3_BUCKET || 'savium',
+      signedUrlExpiration: parseInt(process.env.AWS_S3_SIGNED_URL_EXPIRATION || '3600', 10), // 1 hour default
+      maxFileSize: parseInt(process.env.AWS_S3_MAX_FILE_SIZE || '104857600', 10), // 100MB default
+      allowedMimeTypes: ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/m4a', 'audio/mp4']
+    }
+  },
+
   // Email Configuration (for notifications)
   email: {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',

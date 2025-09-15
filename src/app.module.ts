@@ -26,6 +26,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MailModule } from './mail/mail.module';
 import { BillingModule } from './billing/billing.module';
 import { SettingsModule } from './settings/settings.module';
+import { ReferralsModule } from './referrals/referrals.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SettingsModule } from './settings/settings.module';
       isGlobal: true,
       cache: true,
       expandVariables: true,
+      envFilePath: '.env',
       validationSchema: configValidationSchema,
       validationOptions: {
         allowUnknown: true,
@@ -109,7 +111,8 @@ import { SettingsModule } from './settings/settings.module';
     NotificationsModule,
     MailModule,
     BillingModule,
-    SettingsModule
+    SettingsModule,
+    ReferralsModule
   ],
   controllers: [AppController],
   providers: [AppService]

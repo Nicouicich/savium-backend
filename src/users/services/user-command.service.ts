@@ -35,6 +35,9 @@ export class UserCommandService {
         profiles: [],
         accounts: [],
         refreshTokens: [],
+        referralCode: createUserDto.email.toLowerCase(), // Use email as default referral code
+        lastActiveAt: new Date(),
+        activeDaysCount: 0,
         preferences: {
           notifications: {
             email: true,
@@ -106,6 +109,9 @@ export class UserCommandService {
         profiles: [],
         accounts: [],
         refreshTokens: [],
+        referralCode: oauthData.email.toLowerCase(), // Use email as default referral code
+        lastActiveAt: new Date(),
+        activeDaysCount: 0,
         preferences: {
           notifications: {
             email: true,

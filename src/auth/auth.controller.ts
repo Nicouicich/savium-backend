@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req, Logger } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +13,8 @@ import { ApiErrorResponse, ApiSuccessResponse } from '@common/decorators/api-res
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService
@@ -26,7 +28,14 @@ export class AuthController {
   @ApiErrorResponse(409, 'User already exists')
   async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
     console.log('Register payload received:', registerDto);
-    return this.authService.register(registerDto);
+    const result = await this.authService.register(registerDto);
+
+    // Validate that we have the required data
+    if (!result || !result.user || !result.tokens) {
+      throw new Error('Registration completed but failed to generate complete response data');
+    }
+
+    return result;
   }
 
   @Post('login')
@@ -37,27 +46,31 @@ export class AuthController {
   @ApiErrorResponse(401, 'Invalid credentials')
   @ApiErrorResponse(400, 'Validation failed')
   async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
-    return this.authService.login(loginDto);
+    const result = await this.authService.login(loginDto);
+
+    // Validate that we have the required data
+    if (!result || !result.user || !result.tokens) {
+      throw new Error('Login completed but failed to generate complete response data');
+    }
+
+    return result;
   }
 
   @Post('refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens refreshed successfully',
-    schema: {
-      properties: {
-        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-        expiresIn: { type: 'string', example: '2024-01-01T01:00:00.000Z' }
-      }
-    }
-  })
+  @ApiSuccessResponse(AuthResponseDto, 'Tokens refreshed successfully')
   @ApiErrorResponse(401, 'Invalid refresh token')
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(refreshTokenDto.refreshToken);
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<AuthResponseDto> {
+    const result = await this.authService.refreshTokens(refreshTokenDto.refreshToken);
+
+    // Validate that we have the required data
+    if (!result || !result.user || !result.tokens) {
+      throw new Error('Token refresh completed but failed to generate complete response data');
+    }
+
+    return result;
   }
 
   @Post('logout')

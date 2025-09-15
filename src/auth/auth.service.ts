@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,58 +25,92 @@ export class AuthService {
       // Create the user
       const user = await this.usersService.create(registerDto);
 
+      if (!user) {
+        throw new Error('User creation failed - no user returned');
+      }
+
       // Generate tokens
       const tokens = await this.generateTokens(user);
 
+      if (!tokens || !tokens.accessToken || !tokens.refreshToken) {
+        throw new Error('Token generation failed');
+      }
+
       // Store refresh token
-      await this.usersService.addRefreshToken(user.id, tokens.refreshToken);
+      await this.usersService.addRefreshToken((user as any)._id.toString(), tokens.refreshToken);
 
       // Update last login
-      await this.usersService.updateLastLogin(user.id);
+      await this.usersService.updateLastLogin((user as any)._id.toString());
 
       this.logger.log(`User registered successfully: ${user.email}`);
 
       return {
-        user: user.toJSON() as any,
+        user: user.toObject ? user.toObject() : user,
         tokens
       };
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
       }
+
+      // Check for database connection errors
+      if (this.isDatabaseConnectionError(error)) {
+        this.logger.error('Database connection failed during registration', error.stack);
+        throw new ServiceUnavailableException('Database service is temporarily unavailable. Please try again later.');
+      }
+
       this.logger.error(`Registration failed: ${error.message}`, error.stack);
       throw new BadRequestException('Registration failed');
     }
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    // Validate user credentials
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    try {
+      // Validate user credentials
+      const user = await this.validateUser(loginDto.email, loginDto.password);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      this.logger.debug(`Validated user: ${JSON.stringify(user)}`);
+
+      // Generate tokens
+      const tokens = await this.generateTokens(user);
+
+      if (!tokens || !tokens.accessToken || !tokens.refreshToken) {
+        throw new Error('Token generation failed');
+      }
+
+      // Store refresh token
+      await this.usersService.addRefreshToken(user._id.toString(), tokens.refreshToken);
+
+      // Update last login
+      await this.usersService.updateLastLogin(user._id.toString());
+
+      this.logger.log(`User logged in successfully: ${user.email}`);
+
+      return {
+        user,
+        tokens
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      // Check for database connection errors
+      if (this.isDatabaseConnectionError(error)) {
+        this.logger.error('Database connection failed during login', error.stack);
+        throw new ServiceUnavailableException('Database service is temporarily unavailable. Please try again later.');
+      }
+
+      this.logger.error(`Login failed: ${error.message}`, error.stack);
+      throw new UnauthorizedException('Login failed');
     }
-
-    this.logger.debug(`Validated user: ${JSON.stringify(user)}`);
-
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-
-    // Store refresh token
-    await this.usersService.addRefreshToken(user.id, tokens.refreshToken);
-
-    // Update last login
-    await this.usersService.updateLastLogin(user.id);
-
-    this.logger.log(`User logged in successfully: ${user.email}`);
-
-    return {
-      user,
-      tokens
-    };
   }
 
-  async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; expiresIn: string }> {
+  async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {
     try {
       // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
@@ -96,18 +130,35 @@ export class AuthService {
       }
 
       // Remove old refresh token
-      await this.usersService.removeRefreshToken(user.id, refreshToken);
+      await this.usersService.removeRefreshToken((user as any)._id.toString(), refreshToken);
 
       // Generate new tokens
       const tokens = await this.generateTokens(user);
 
+      if (!tokens || !tokens.accessToken || !tokens.refreshToken) {
+        throw new Error('Token generation failed during refresh');
+      }
+
       // Store new refresh token
-      await this.usersService.addRefreshToken(user.id, tokens.refreshToken);
+      await this.usersService.addRefreshToken((user as any)._id.toString(), tokens.refreshToken);
 
       this.logger.log(`Tokens refreshed for user: ${user.email}`);
 
-      return tokens;
+      return {
+        user: user.toObject ? user.toObject() : user,
+        tokens
+      };
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      // Check for database connection errors
+      if (this.isDatabaseConnectionError(error)) {
+        this.logger.error('Database connection failed during token refresh', error.stack);
+        throw new ServiceUnavailableException('Database service is temporarily unavailable. Please try again later.');
+      }
+
       this.logger.warn(`Token refresh failed: ${error.message}`);
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -165,7 +216,7 @@ export class AuthService {
     this.logger.log(`Password changed for user: ${userId}`);
   }
 
-  async validateUser(email: string, password: string): Promise<any | null> {
+  async validateUser(email: string, password: string): Promise<any> {
     try {
       const user = await this.usersService.findByEmailWithPassword(email);
 
@@ -185,7 +236,8 @@ export class AuthService {
 
       // Remove password from user object before returning
       const userObj = user.toJSON();
-      const { password: _, ...result } = userObj;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: userPassword, ...result } = userObj;
       return result;
     } catch {
       this.logger.warn(`User validation failed for email: ${email}`);
@@ -258,5 +310,12 @@ export class AuthService {
       default:
         return 15 * 60 * 1000;
     }
+  }
+
+  private isDatabaseConnectionError(error: any): boolean {
+    // Check for MongoDB connection errors
+    const mongoErrors = ['MongoServerSelectionError', 'MongoNetworkError', 'MongooseServerSelectionError', 'connect ECONNREFUSED'];
+
+    return mongoErrors.some(errorType => error.name?.includes(errorType) || error.message?.includes(errorType) || error.constructor?.name?.includes(errorType));
   }
 }

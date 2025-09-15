@@ -26,7 +26,7 @@ export class EnhancedPayment {
   subscriptionId?: Types.ObjectId;
 
   // Stripe payment identifiers
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   stripePaymentIntentId: string;
 
   @Prop()

@@ -34,12 +34,22 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
 
     if (err || !user) {
-      this.logger.warn(`Authentication failed for ${request.url}`, {
-        error: err?.message,
-        info: info?.message,
-        ip: request.ip,
-        userAgent: request.headers['user-agent'],
-      });
+      // Only log authentication failures that are not expected token issues
+      // Common token issues (expired, malformed, missing) are expected and don't need logging
+      const isExpectedTokenIssue = info?.message && (
+        info.message.includes('jwt expired') ||
+        info.message.includes('invalid token') ||
+        info.message.includes('jwt malformed') ||
+        info.message.includes('No auth token')
+      );
+
+      if (!isExpectedTokenIssue && process.env.NODE_ENV === 'development') {
+        this.logger.debug(`Authentication failed for ${request.url}`, {
+          error: err?.message,
+          info: info?.message,
+          ip: request.ip,
+        });
+      }
 
       throw err || new UnauthorizedException('Authentication required');
     }

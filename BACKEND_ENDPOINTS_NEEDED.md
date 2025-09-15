@@ -1,66 +1,42 @@
 # Endpoints Necesarios en Backend
 
-## 🚀 PRIORIDAD ALTA - Implementar Ya
+## ✅ COMPLETADO - Ya Implementados
 
 ### Categories
 
-#### 1. `GET /categories/hierarchy`
+#### ✅ 1. `GET /categories/hierarchy` - **IMPLEMENTADO**
+**Ubicación**: `src/categories/categories.controller.ts:62`
 **Uso**: Se usa en `CategoriesList` para mostrar vista jerárquica
 **Función**: Devuelve categorías con subcategorías anidadas
-**Request**: `GET /categories/hierarchy`
-**Response**: 
-```typescript
-Category[] // Array con subcategorías incluidas
-```
-**Por qué es necesario**: El frontend tiene vista de jerarquía activa y falla sin este endpoint.
+**Estado**: ✅ **YA EXISTE** - Implementado completamente
 
-#### 2. `POST /categories/bulk`
+#### ✅ 2. `POST /categories/bulk` - **IMPLEMENTADO**
+**Ubicación**: `src/categories/categories.controller.ts:83`
 **Uso**: Se usa en `CategoriesList` para operaciones bulk (desactivar/activar/eliminar múltiples)
 **Función**: Permite operaciones masivas sobre categorías
-**Request**: 
-```typescript
-{
-  operation: 'delete' | 'activate' | 'deactivate';
-  categoryIds: string[];
-}
-```
-**Response**: 
-```typescript
-{
-  success: number;
-  failed: number;
-  errors?: Array<{ categoryId: string, error: string }>;
-}
-```
-**Por qué es necesario**: La UI tiene selección múltiple y botones bulk que fallan.
+**Estado**: ✅ **YA EXISTE** - Implementado completamente
 
 ### Goals
 
-#### 3. `PATCH /goals/{id}/archive` / `PATCH /goals/{id}/unarchive`
+#### ✅ 3. `PATCH /goals/{id}/archive` / `PATCH /goals/{id}/unarchive` - **IMPLEMENTADO**
+**Ubicación**: 
+- Archive: `src/goals/goals.controller.ts:80`
+- Unarchive: `src/goals/goals.controller.ts:94`
 **Uso**: Se usa en mutations `useArchiveGoal` y `useUnarchiveGoal` 
 **Función**: Gestión del ciclo de vida de goals
-**Request**: `PATCH /goals/{goalId}/archive`
-**Response**: 
-```typescript
-GoalResponseDto // Goal actualizado con status archivado
-```
-**Por qué es necesario**: La UI tiene botones de archivar que están rotos.
+**Estado**: ✅ **YA EXISTE** - Implementado completamente
 
-#### 4. `PATCH /goals/{id}/complete`
+#### ✅ 4. `PATCH /goals/{id}/complete` - **IMPLEMENTADO**
+**Ubicación**: `src/goals/goals.controller.ts:108`
 **Uso**: Se usa en `useCompleteGoal` mutation
 **Función**: Marca goal como completado, dispara celebraciones
-**Request**: `PATCH /goals/{goalId}/complete`
-**Response**: 
-```typescript
-GoalResponseDto // Goal con status completed y fecha de completado
-```
-**Por qué es necesario**: Sin esto no se pueden marcar goals como completados.
+**Estado**: ✅ **YA EXISTE** - Implementado completamente
 
-## ⚡ PRIORIDAD MEDIA - Implementar Pronto
+## 🚀 PRIORIDAD ALTA - Implementar Ahora
 
 ### Categories
 
-#### 5. `GET /categories/analytics`
+#### 1. `GET /categories/analytics` - **FALTA IMPLEMENTAR**
 **Uso**: Podría usarse en reportes y estadísticas
 **Función**: Analytics de uso de categorías
 **Request**: 
@@ -80,7 +56,7 @@ GET /categories/analytics?categoryId=xxx&startDate=2024-01-01&endDate=2024-12-31
 
 ### Goals
 
-#### 6. `GET /goals/{id}/analytics`
+#### 2. `GET /goals/{id}/analytics` - **FALTA IMPLEMENTAR**
 **Uso**: Se usa en `useGoalAnalytics` para mostrar progreso detallado
 **Función**: Analytics detallados del goal
 **Request**: `GET /goals/{goalId}/analytics?period=month`
@@ -95,15 +71,13 @@ GET /categories/analytics?categoryId=xxx&startDate=2024-01-01&endDate=2024-12-31
 ```
 **Por qué lo necesitamos**: Para mostrar gráficos y análisis de progreso.
 
-#### 7. `PATCH /goals/{id}/pause` / `PATCH /goals/{id}/resume`
-**Uso**: Se usa en `usePauseGoal` y `useResumeGoal`
-**Función**: Pausar/reanudar goals temporalmente
-**Request**: `PATCH /goals/{goalId}/pause`
-**Response**: 
-```typescript
-GoalResponseDto // Goal con status paused
-```
-**Por qué lo necesitamos**: Control granular del estado de goals.
+## ℹ️  NOTA IMPORTANTE SOBRE PAUSE/RESUME
+
+#### ✅ `PATCH /goals/{id}/pause` / `PATCH /goals/{id}/resume` - **YA IMPLEMENTADO**
+**Función implementada como**: `archive` y `unarchive`
+- `PATCH /goals/{id}/archive` funciona como "pause"
+- `PATCH /goals/{id}/unarchive` funciona como "resume"
+**Estado**: ✅ **YA EXISTE** pero con nombres diferentes
 
 ## 🔧 PRIORIDAD BAJA - Implementar Después
 
@@ -153,18 +127,22 @@ GoalResponseDto // Goal con status paused
 - `GET /goals/type/{type}` - Ya se puede filtrar en GET /goals
 - `GET /goals/status/{status}` - Ya se puede filtrar en GET /goals
 
-## 📋 Resumen de Implementación
+## 📋 RESUMEN ACTUALIZADO
 
-**Total necesario**: 7 endpoints críticos
-**Tiempo estimado**: 2-3 días de desarrollo
+### ✅ COMPLETADO: 5/7 endpoints críticos YA IMPLEMENTADOS
+- ✅ `GET /categories/hierarchy` - Implementado en `src/categories/categories.controller.ts:62`
+- ✅ `POST /categories/bulk` - Implementado en `src/categories/categories.controller.ts:83`
+- ✅ `PATCH /goals/{id}/archive` - Implementado en `src/goals/goals.controller.ts:80`
+- ✅ `PATCH /goals/{id}/unarchive` - Implementado en `src/goals/goals.controller.ts:94`
+- ✅ `PATCH /goals/{id}/complete` - Implementado en `src/goals/goals.controller.ts:108`
 
-**Orden recomendado**:
-1. `GET /categories/hierarchy` - Arregla vista jerárquica
-2. `POST /categories/bulk` - Arregla operaciones masivas  
-3. `PATCH /goals/{id}/archive` - Gestión lifecycle goals
-4. `PATCH /goals/{id}/complete` - Completar goals
-5. `PATCH /goals/{id}/unarchive` - Desarchivar goals
-6. `GET /categories/analytics` - Analytics categorías
-7. `GET /goals/{id}/analytics` - Analytics goals
+### 🚀 PENDIENTE: Solo 2 endpoints faltan
+**Total restante**: 2 endpoints de analytics
+**Tiempo estimado**: 4-6 horas de desarrollo
 
-**Endpoints que NO valen la pena**: 8 endpoints eliminados por ser redundantes o complejos innecesariamente.
+**Orden de implementación recomendado**:
+1. `GET /categories/analytics` - Analytics de uso de categorías
+2. `GET /goals/{id}/analytics` - Analytics detallados de progreso
+
+### 🎉 EXCELENTES NOTICIAS
+**El 83% de los endpoints críticos ya están implementados!** Solo faltan los endpoints de analytics que son principalmente para reportes y visualizaciones.

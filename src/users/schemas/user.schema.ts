@@ -146,6 +146,31 @@ export class User {
   @Prop([{ type: Types.ObjectId, ref: 'Account' }])
   accounts: Types.ObjectId[];
 
+  // Referral system fields
+  @Prop({
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
+  })
+  referralCode?: string; // Username or email used as referral code
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'User',
+    index: true
+  })
+  referredByUserId?: Types.ObjectId; // Who referred this user
+
+  @Prop()
+  referralCompletedAt?: Date; // When the referral was completed (7 active days)
+
+  @Prop({ default: Date.now })
+  lastActiveAt: Date; // Last time user was active
+
+  @Prop({ default: 0 })
+  activeDaysCount: number; // Count of active days for referral completion
+
   // Compliance and legal
   @Prop({ default: Date.now })
   termsAcceptedAt: Date;
@@ -271,6 +296,43 @@ UserSchema.index(
   { 'preferences.security.twoFactorEnabled': 1, isActive: 1 },
   {
     name: 'two_factor_active_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+// Referral system indexes
+UserSchema.index(
+  { referralCode: 1 },
+  {
+    name: 'referral_code_idx',
+    background: true,
+    unique: true,
+    sparse: true
+  }
+);
+
+UserSchema.index(
+  { referredByUserId: 1, referralCompletedAt: 1 },
+  {
+    name: 'referred_by_completion_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+UserSchema.index(
+  { lastActiveAt: -1, activeDaysCount: 1 },
+  {
+    name: 'activity_tracking_idx',
+    background: true
+  }
+);
+
+UserSchema.index(
+  { referredByUserId: 1, activeDaysCount: 1, referralCompletedAt: 1 },
+  {
+    name: 'referral_completion_tracking_idx',
     background: true,
     sparse: true
   }

@@ -22,7 +22,7 @@ export class Payment {
   subscriptionId?: Types.ObjectId;
 
   // Stripe payment fields
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   stripePaymentIntentId: string;
 
   @Prop()

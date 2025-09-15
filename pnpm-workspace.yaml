@@ -1,0 +1,5 @@
+ignoredBuiltDependencies:
+  - '@nestjs/core'
+  - bcrypt
+  - mongodb-memory-server
+  - unrs-resolver

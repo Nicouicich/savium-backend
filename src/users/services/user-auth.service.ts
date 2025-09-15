@@ -43,7 +43,9 @@ export class UserAuthService {
     const refreshTokenTtl = this.configService.get<string>('jwt.refreshToken.expiresIn') || '7d';
     const expiresAt = new Date(Date.now() + this.parseExpirationTime(refreshTokenTtl));
 
-    await this.userAuthModel.updateOne(
+    this.logger.debug(`Adding refresh token for user: ${userId}, token starts with: ${refreshToken.substring(0, 20)}...`);
+
+    const result = await this.userAuthModel.updateOne(
       { userId: new Types.ObjectId(userId) },
       {
         $push: {
@@ -60,6 +62,7 @@ export class UserAuthService {
       }
     );
 
+    this.logger.debug(`Update result: matchedCount=${result.matchedCount}, modifiedCount=${result.modifiedCount}`);
     this.logger.log(`Refresh token added for user: ${userId}, expires: ${expiresAt.toISOString()}`);
   }
 
@@ -81,14 +84,29 @@ export class UserAuthService {
   }
 
   async validateRefreshToken(userId: string, refreshToken: string): Promise<boolean> {
-    const authRecord = await this.findByUserId(userId);
-    const tokenExists = authRecord.refreshTokens?.some(tokenData => tokenData.token === refreshToken && tokenData.expiresAt > new Date()) || false;
+    try {
+      this.logger.log(`Validating refresh token for user: ${userId}`);
+      const authRecord = await this.findByUserId(userId);
+      this.logger.log(`Auth record found for user ${userId}, refreshTokens count: ${authRecord.refreshTokens?.length || 0}`);
 
-    if (!tokenExists) {
-      this.logger.warn(`Invalid or expired refresh token for user: ${userId}`);
+      const tokenExists =
+        authRecord.refreshTokens?.some(tokenData => {
+          const isMatch = tokenData.token === refreshToken;
+          const isValid = tokenData.expiresAt > new Date();
+          this.logger.log(`Token match: ${isMatch}, valid: ${isValid}, expires: ${tokenData.expiresAt}`);
+          return isMatch && isValid;
+        }) || false;
+
+      if (!tokenExists) {
+        this.logger.warn(`Invalid or expired refresh token for user: ${userId}`);
+        this.logger.log(`Provided token starts with: ${refreshToken.substring(0, 20)}...`);
+      }
+
+      return tokenExists;
+    } catch (error) {
+      this.logger.error(`Error validating refresh token for user ${userId}: ${error.message}`);
+      return false;
     }
-
-    return tokenExists;
   }
 
   // Email verification

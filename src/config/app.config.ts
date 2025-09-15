@@ -5,6 +5,8 @@ export default registerAs('app', () => ({
   port: parseInt(process.env.PORT || '3000', 10) || 3000,
   name: process.env.APP_NAME || 'Savium AI Backend',
   url: process.env.APP_URL || 'http://localhost:3000',
+  frontendUrl: process.env.FRONTEND_URL || 'https://app.savium.com',
+  env: process.env.NODE_ENV || 'development',
 
   // Security
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10) || 12,
@@ -20,5 +22,12 @@ export default registerAs('app', () => ({
 
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',
-  logFormat: process.env.LOG_FORMAT || 'json'
+  logFormat: process.env.LOG_FORMAT || 'json',
+
+  // Referral System
+  referral: {
+    completionDays: parseInt(process.env.REFERRAL_COMPLETION_DAYS || '7', 10),
+    rewardAmount: parseFloat(process.env.REFERRAL_REWARD_AMOUNT || '10'),
+    rewardCurrency: process.env.REFERRAL_REWARD_CURRENCY || 'USD'
+  }
 }));

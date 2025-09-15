@@ -48,13 +48,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const isExpectedError = this.isExpectedError(status, request.url);
     
     if (isExpectedError) {
-      // Log expected errors (401, 404, validation errors) with minimal info
-      this.logger.warn(`${status} ${errorMessage}`, {
-        statusCode: status,
-        path: request.url,
-        method: request.method,
-        user: (request as any).user?.id || 'anonymous',
-      });
+      // Don't log common expected errors (401, 403) as these are normal user behavior
+      // Only log validation errors and 404s if in development mode
+      if ((status === 400 || status === 404) && process.env.NODE_ENV === 'development') {
+        this.logger.debug(`${status} ${errorMessage}`, {
+          statusCode: status,
+          path: request.url,
+          method: request.method,
+        });
+      }
     } else {
       // Log unexpected errors with full details
       this.logger.error('HTTP Exception', {

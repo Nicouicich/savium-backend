@@ -253,15 +253,29 @@ export class BudgetsService {
       .exec();
   }
 
-  async getBudgetSummary(accountId: string, userId: string): Promise<BudgetSummaryDto> {
-    const hasAccess = await this.accountsService.hasUserAccess(accountId, userId);
-    if (!hasAccess) {
-      throw new ForbiddenException('Access denied to this account');
+  async getBudgetSummary(userId: string): Promise<BudgetSummaryDto> {
+    // Get all accounts the user has access to
+    const userAccounts = await this.accountsService.findByUser(userId);
+    const accountIds = userAccounts.map(account => account._id);
+
+    if (accountIds.length === 0) {
+      // User has no accounts, return empty summary
+      return {
+        totalActiveBudgets: 0,
+        totalBudgetAmount: 0,
+        totalSpentAmount: 0,
+        totalRemainingAmount: 0,
+        overallProgress: 0,
+        overBudgetCount: 0,
+        activeAlertsCount: 0,
+        budgetsByStatus: {} as Record<BudgetStatus, number>,
+        budgetsByPeriod: {} as Record<BudgetPeriod, number>
+      };
     }
 
     const budgets = await this.budgetModel
       .find({
-        accountId: new Types.ObjectId(accountId),
+        accountId: { $in: accountIds },
         isDeleted: false
       })
       .exec();

@@ -49,6 +49,9 @@ export * from './constants/expense-categories';
 export * from './utils/pagination.util';
 export * from './utils/response.util';
 
+// Pipes
+export * from './pipes/parse-objectid.pipe';
+
 // Services
 export * from './services/sanitization.service';
 export * from './services/advanced-rate-limiter.service';
@@ -110,7 +113,7 @@ export * from './guards/two-factor-auth.guard';
     SanitizationService,
     AdvancedRateLimiterService,
     SecurityAuditService,
-    DatabasePerformanceService,
+    // DatabasePerformanceService, // Temporarily disabled - requires MongoDB auth
     EnhancedCacheService,
     MonitoringService,
     CircuitBreakerService,
@@ -128,7 +131,7 @@ export * from './guards/two-factor-auth.guard';
     SanitizationService,
     AdvancedRateLimiterService,
     SecurityAuditService,
-    DatabasePerformanceService,
+    // DatabasePerformanceService, // Temporarily disabled - requires MongoDB auth
     EnhancedCacheService,
     MonitoringService,
     CircuitBreakerService,
