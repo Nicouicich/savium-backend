@@ -35,7 +35,7 @@ export class AccountMember {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({ enum: AccountRole, required: true })
+  @Prop({ type: String, enum: AccountRole, required: true })
   role: AccountRole;
 
   @Prop({ type: Date, default: Date.now })
@@ -56,7 +56,7 @@ export class AccountInvitation {
   @Prop({ required: true })
   email: string;
 
-  @Prop({ enum: AccountRole, required: true })
+  @Prop({ type: String, enum: AccountRole, required: true })
   role: AccountRole;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -83,10 +83,10 @@ export class Account {
   @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop({ enum: AccountType, required: true })
+  @Prop({ type: String, enum: AccountType, required: true })
   type: AccountType;
 
-  @Prop({ enum: AccountStatus, default: AccountStatus.ACTIVE })
+  @Prop({ type: String, enum: AccountStatus, default: AccountStatus.ACTIVE })
   status: AccountStatus;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })

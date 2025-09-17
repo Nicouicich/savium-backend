@@ -69,7 +69,7 @@ export class ExpenseReaction {
   @Prop({ type: String, required: true, index: true })
   userId: string; // User UUID
 
-  @Prop({ enum: CoupleReactionType, required: true })
+  @Prop({ type: String, enum: CoupleReactionType, required: true })
   type: CoupleReactionType;
 
   @Prop({ type: Date, default: Date.now })
@@ -191,7 +191,7 @@ export class Expense {
   @Prop({ required: true, min: 0 })
   amount: number;
 
-  @Prop({ enum: Currency, default: Currency.USD })
+  @Prop({ type: String, enum: Currency, default: Currency.USD })
   currency: Currency;
 
   @Prop({ type: Date, required: true })
@@ -209,7 +209,7 @@ export class Expense {
   @Prop({ type: String, required: true, index: true })
   userId: string; // User UUID
 
-  @Prop({ enum: PaymentMethod, default: PaymentMethod.CASH })
+  @Prop({ type: String, enum: PaymentMethod, default: PaymentMethod.CASH })
   paymentMethod: PaymentMethod;
 
   @Prop({ trim: true })

@@ -456,7 +456,6 @@ export class AuthService {
     });
 
     try {
-
       // Verify the SMS code using the SMS verification service
       const verificationResult = await this.smsVerificationService.verifyCode(
         verifyPhoneDto.phoneNumber,

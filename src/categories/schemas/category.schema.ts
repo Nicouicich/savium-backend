@@ -27,7 +27,7 @@ export class Category {
   @Prop({ required: true, trim: true })
   displayName: string;
 
-  @Prop({ enum: ExpenseCategory })
+  @Prop({ type: String, enum: ExpenseCategory })
   type?: ExpenseCategory;
 
   @Prop({ required: true })

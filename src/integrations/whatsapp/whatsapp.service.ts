@@ -9,6 +9,11 @@ import { MessageProcessorService, UnifiedMessage } from '../ai/message-processor
 import { MessagingFileService } from '../../files/services/messaging-file.service';
 import { ReceiptProcessorService } from '../ai/receipt-processor.service';
 import { FilePurpose } from '../../files/schemas/file-metadata.schema';
+import { ExpensesService } from '../../expenses/expenses.service';
+import { AccountsService } from '../../accounts/accounts.service';
+import { RequestContextService } from '@common/interceptors/request-context';
+import { BusinessException } from '@common/exceptions/business.exception';
+import { ErrorCode } from '@common/constants/error-codes';
 
 interface WhatsAppMessage {
   from: string;
@@ -49,7 +54,9 @@ export class WhatsappService {
     @InjectModel(UserProfile.name) private userProfileModel,
     private messageProcessor: MessageProcessorService,
     private messagingFileService: MessagingFileService,
-    private receiptProcessorService: ReceiptProcessorService
+    private receiptProcessorService: ReceiptProcessorService,
+    private expensesService: ExpensesService,
+    private accountsService: AccountsService
   ) {
     this.accessToken = this.configService.get('WHATSAPP_ACCESS_TOKEN');
     this.phoneNumberId = this.configService.get('WHATSAPP_PHONE_NUMBER_ID');
@@ -63,122 +70,170 @@ export class WhatsappService {
   }
 
   async handleWebhook(payload: WebhookPayload): Promise<{ processed: boolean; message: string }> {
-    // Placeholder for webhook handling
-    // In real implementation, this would:
-    // 1. Verify webhook signature
-    // 2. Parse incoming messages
-    // 3. Process expense commands
-    // 4. Handle media uploads (receipts)
-    // 5. Send responses back to WhatsApp
+    const traceId = RequestContextService.getTraceId() || `webhook_${Date.now()}`;
 
-    console.log('WhatsApp webhook received:', JSON.stringify(payload, null, 2));
-
-    if (payload.entry?.[0]?.changes?.[0]?.value?.messages) {
-      const { messages } = payload.entry[0].changes[0].value;
-
-      for (const message of messages) {
-        await this.processMessage({
-          from: message.from,
-          body: message.text?.body || '',
-          timestamp: new Date(message.timestamp * 1000),
-          mediaUrl: message.image?.id || message.document?.id,
-          mediaType: message.type
-        });
+    try {
+      // Validate webhook payload structure
+      if (!payload || typeof payload !== 'object') {
+        this.logger.warn('Invalid webhook payload: not an object', { traceId });
+        return { processed: false, message: 'Invalid payload structure' };
       }
-    }
 
-    return {
-      processed: true,
-      message: 'Webhook processed (mock implementation)'
-    };
+      if (!payload.entry || !Array.isArray(payload.entry) || payload.entry.length === 0) {
+        this.logger.warn('Invalid webhook payload: missing or empty entry array', { traceId });
+        return { processed: false, message: 'Missing entry data' };
+      }
+
+      // Process each entry
+      let messagesProcessed = 0;
+      for (const entry of payload.entry) {
+        if (!entry.changes || !Array.isArray(entry.changes)) {
+          continue;
+        }
+
+        for (const change of entry.changes) {
+          if (!change.value?.messages || !Array.isArray(change.value.messages)) {
+            continue;
+          }
+
+          for (const message of change.value.messages) {
+            try {
+              // Validate message structure
+              if (!message.from || !message.timestamp) {
+                this.logger.warn('Invalid message structure in webhook', {
+                  messageId: message.id,
+                  traceId
+                });
+                continue;
+              }
+
+              await this.processMessage({
+                from: message.from,
+                body: message.text?.body || message.caption || '',
+                timestamp: new Date(parseInt(message.timestamp) * 1000),
+                mediaUrl: message.image?.id || message.document?.id || message.audio?.id,
+                mediaType: message.type || 'text'
+              });
+
+              messagesProcessed++;
+            } catch (error) {
+              this.logger.error('Error processing individual message from webhook', {
+                messageId: message.id,
+                error: error.message,
+                traceId
+              });
+            }
+          }
+        }
+      }
+
+      this.logger.log('Webhook processed successfully', {
+        messagesProcessed,
+        traceId
+      });
+
+      return {
+        processed: true,
+        message: `Processed ${messagesProcessed} messages`
+      };
+    } catch (error) {
+      this.logger.error('Error processing webhook payload', {
+        error: error.message,
+        stack: error.stack,
+        traceId
+      });
+
+      return {
+        processed: false,
+        message: 'Internal processing error'
+      };
+    }
   }
 
   async processMessage(message: WhatsAppMessage): Promise<void> {
-    console.log('📱 WhatsApp message received:', {
-      from: message.from,
-      body: message.body,
+    const traceId = RequestContextService.getTraceId() || `whatsapp_${Date.now()}`;
+
+    this.logger.log('📱 WhatsApp message received:', {
+      from: this.maskPhoneNumber(message.from),
+      body: message.body?.substring(0, 100), // Limit body length in logs
       timestamp: message.timestamp,
-      mediaUrl: message.mediaUrl,
-      mediaType: message.mediaType
+      hasMedia: !!message.mediaUrl,
+      mediaType: message.mediaType,
+      traceId
     });
 
-    // Try to find or associate user with this phone number
-    const user = await this.autoAssociateUser(message.from, message);
-
-    // Convert WhatsApp message to unified format
-    const unifiedMessage: UnifiedMessage = {
-      from: message.from,
-      body: message.body || '',
-      timestamp: message.timestamp,
-      mediaUrl: message.mediaUrl,
-      mediaType: this.mapMediaType(message.mediaType),
-      platform: 'whatsapp',
-      chatId: message.from, // For WhatsApp, phone number acts as chat ID
-      messageId: `whatsapp_${Date.now()}`,
-      userId: user?.id
-    };
-
     try {
+      // First, try to find user by phone number
+      const user = await this.findUserByPhoneNumber(message.from);
+
+      if (!user) {
+        await this.handleUnknownUser(message.from, message.body, traceId);
+        return;
+      }
+
+      // Set user context for request tracing
+      RequestContextService.updateContext({ userId: user.id });
+
+      // Get user's language preference for responses
+      const userLanguage = user.preferences?.display?.language || 'es';
+
+      // Convert WhatsApp message to unified format
+      const unifiedMessage: UnifiedMessage = {
+        from: message.from,
+        body: message.body || '',
+        timestamp: message.timestamp,
+        mediaUrl: message.mediaUrl,
+        mediaType: this.mapMediaType(message.mediaType),
+        platform: 'whatsapp',
+        chatId: message.from, // For WhatsApp, phone number acts as chat ID
+        messageId: `whatsapp_${traceId}`,
+        userId: user.id
+      };
+
       // Process message with centralized AI service
       const result = await this.messageProcessor.processMessage(unifiedMessage);
 
       if (result.success && result.responseText) {
-        await this.sendMessage(message.from, result.responseText);
+        // Translate response to user's language if needed
+        const responseText = await this.translateResponse(result.responseText, userLanguage);
+        await this.sendMessage(message.from, responseText);
 
         // Log the action taken
         if (result.actionTaken) {
           this.logger.log(`Action taken for WhatsApp message: ${result.actionTaken.type}`, {
-            from: message.from,
-            actionData: result.actionTaken.data
+            from: this.maskPhoneNumber(message.from),
+            userId: user.id,
+            actionType: result.actionTaken.type,
+            traceId
           });
         }
       } else if (result.error) {
-        await this.sendMessage(message.from, result.responseText || 'Hubo un error procesando tu mensaje.');
+        const errorMessage = await this.translateResponse(result.responseText || 'Hubo un error procesando tu mensaje.', userLanguage);
+        await this.sendMessage(message.from, errorMessage);
       }
     } catch (error) {
-      this.logger.error('Error processing WhatsApp message:', error);
+      this.logger.error('Error processing WhatsApp message:', {
+        error: error.message,
+        stack: error.stack,
+        from: this.maskPhoneNumber(message.from),
+        traceId
+      });
+
+      // Send generic error message in Spanish by default
       await this.sendMessage(message.from, '❌ Lo siento, hubo un problema procesando tu mensaje. Por favor intenta de nuevo.');
     }
   }
 
-  // Public methods for AI to call when responding to users
-  async respondToExpense(phoneNumber: string, text: string): Promise<boolean> {
-    return this.parseExpenseMessage({ from: phoneNumber, body: text } as WhatsAppMessage);
-  }
-
-  async respondToPhoto(phoneNumber: string): Promise<boolean> {
-    return this.processReceiptImage({ from: phoneNumber, mediaType: 'image' } as WhatsAppMessage);
-  }
-
-  async respondToDocument(phoneNumber: string): Promise<boolean> {
-    return this.processReceiptImage({ from: phoneNumber, mediaType: 'document' } as WhatsAppMessage);
-  }
-
+  // Public method for sending custom messages (used by AI service)
   async respondWithCustomMessage(phoneNumber: string, message: string): Promise<boolean> {
     try {
       await this.sendMessage(phoneNumber, message);
       return true;
     } catch (error) {
-      console.error('Error sending WhatsApp message:', error.message);
-      return false;
-    }
-  }
-
-  private async parseExpenseMessage(message: WhatsAppMessage): Promise<boolean> {
-    try {
-      // Placeholder for expense parsing from text
-      const expenseData = this.extractExpenseData(message.body);
-
-      if (expenseData.amount) {
-        console.log('Parsed expense:', expenseData);
-        // In real implementation: save to database via ExpensesService
-        await this.sendConfirmationMessage(message.from, expenseData);
-      } else {
-        await this.sendErrorMessage(message.from, 'Could not parse expense amount');
-      }
-      return true;
-    } catch (error) {
-      console.error('Error parsing expense message:', error);
+      this.logger.error('Error sending WhatsApp message:', {
+        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        error: error.message
+      });
       return false;
     }
   }
@@ -200,122 +255,13 @@ export class WhatsappService {
     }
   }
 
-  private async processReceiptImage(message: WhatsAppMessage): Promise<boolean> {
-    try {
-      this.logger.log('Processing potential receipt image from WhatsApp', {
-        from: message.from,
-        mediaUrl: message.mediaUrl
-      });
-
-      if (!message.mediaUrl) {
-        await this.sendMessage(message.from, '❌ No se pudo procesar la imagen. Por favor intenta de nuevo.');
-        return false;
-      }
-
-      // Find user for file upload
-      const user = await this.findUserByPhoneNumber(message.from);
-      if (!user) {
-        await this.sendMessage(message.from, '❌ Tu cuenta no está vinculada. Conecta tu WhatsApp en la app primero.');
-        return false;
-      }
-
-      // Get user's active account for file upload
-      const accountId = await this.getUserActiveAccountId(user);
-      if (!accountId) {
-        await this.sendMessage(message.from, '❌ No tienes cuentas disponibles. Crea una cuenta en la app primero.');
-        return false;
-      }
-
-      // Send immediate acknowledgment
-      await this.sendMessage(message.from, '📸 Imagen recibida! Analizando...');
-
-      // Process with receipt processor service
-      const result = await this.receiptProcessorService.processImageFromWhatsApp(message.mediaUrl, user.id, accountId, {
-        caption: message.body,
-        traceId: `whatsapp_${Date.now()}`
-      });
-
-      if (result.error) {
-        await this.sendMessage(message.from, `❌ Error procesando imagen: ${result.error}`);
-        return false;
-      }
-
-      // Send appropriate response based on processing result
-      if (result.isReceipt && result.expenseCreated) {
-        // Receipt detected and expense created
-        const successMessage = [
-          '🎉 ¡Recibo procesado exitosamente!',
-          '',
-          `💰 Monto: $${result.expenseCreated.amount}`,
-          `📝 Descripción: ${result.expenseCreated.description}`,
-          `📄 Archivo guardado: ${result.fileUploaded?.fileId.substring(0, 8)}...`,
-          `🔍 Confianza IA: ${Math.round(result.confidence * 100)}%`,
-          '',
-          '✅ Gasto creado automáticamente',
-          '💡 Revisa la app para editar si es necesario'
-        ].join('\n');
-
-        await this.sendMessage(message.from, successMessage);
-      } else if (result.isReceipt && result.extractedData?.amount) {
-        // Receipt detected but expense creation failed
-        const partialMessage = [
-          '📸 Recibo detectado!',
-          '',
-          `💰 Monto encontrado: $${result.extractedData.amount}`,
-          result.extractedData.vendor ? `🏪 Comercio: ${result.extractedData.vendor}` : '',
-          `📄 Archivo guardado: ${result.fileUploaded?.fileId.substring(0, 8)}...`,
-          '',
-          '⚠️ Por favor crea el gasto manualmente en la app',
-          '💡 Usa los datos extraídos automáticamente'
-        ]
-          .filter(Boolean)
-          .join('\n');
-
-        await this.sendMessage(message.from, partialMessage);
-      } else if (result.isReceipt) {
-        // Receipt detected but couldn't extract data
-        const basicMessage = [
-          '📄 Imagen guardada como recibo',
-          '',
-          `📁 Archivo: ${result.fileUploaded?.fileId.substring(0, 8)}...`,
-          `🔍 Confianza: ${Math.round(result.confidence * 100)}%`,
-          '',
-          '⚠️ No se pudieron extraer datos automáticamente',
-          '💡 Revisa el archivo en la app para crear el gasto'
-        ].join('\n');
-
-        await this.sendMessage(message.from, basicMessage);
-      } else {
-        // Not a receipt
-        const nonReceiptMessage = [
-          '📷 Imagen guardada',
-          '',
-          `📁 Archivo: ${result.fileUploaded?.fileId.substring(0, 8)}...`,
-          '',
-          '💡 No parece ser un recibo. Si es un error,',
-          'usa la app para procesar manualmente.'
-        ].join('\n');
-
-        await this.sendMessage(message.from, nonReceiptMessage);
-      }
-
-      return true;
-    } catch (error) {
-      this.logger.error('Error processing receipt image:', {
-        from: message.from,
-        error: error.message,
-        stack: error.stack
-      });
-
-      await this.sendMessage(message.from, '❌ Error procesando la imagen. Por favor intenta de nuevo.');
-      return false;
-    }
-  }
 
   async sendMessage(to: string, message: string): Promise<void> {
     if (!this.accessToken || !this.phoneNumberId) {
-      this.logger.warn('WhatsApp credentials not configured, message not sent');
-      console.log(`[MOCK] WhatsApp message to ${to}: ${message}`);
+      this.logger.warn('WhatsApp credentials not configured, message not sent', {
+        to: this.maskPhoneNumber(to),
+        messageLength: message?.length || 0
+      });
       return;
     }
 
@@ -324,7 +270,7 @@ export class WhatsappService {
 
       const payload = {
         messaging_product: 'whatsapp',
-        to: `+54299154047906`,
+        to: to,
         type: 'text',
         text: {
           body: message
@@ -337,7 +283,7 @@ export class WhatsappService {
       };
 
       this.logger.debug('Sending WhatsApp message', {
-        to: `+${to}`,
+        to: this.maskPhoneNumber(to),
         messageLength: message.length,
         url
       });
@@ -345,13 +291,13 @@ export class WhatsappService {
       const response = await axios.post(url, payload, { headers });
 
       this.logger.log('WhatsApp message sent successfully', {
-        to: to,
+        to: this.maskPhoneNumber(to),
         messageId: response.data.messages?.[0]?.id,
         status: response.status
       });
     } catch (error) {
       this.logger.error('Failed to send WhatsApp message', {
-        to: `+${to}`,
+        to: this.maskPhoneNumber(to),
         error: error.message,
         status: error.response?.status,
         data: error.response?.data
@@ -360,48 +306,32 @@ export class WhatsappService {
       // Check if error is due to recipient not in allowed list (development mode)
       if (error.response?.status === 400 && error.response?.data?.error?.code === 131030) {
         this.logger.warn('WhatsApp recipient not in allowed list (development mode)', {
-          to: `+${to}`,
+          to: this.maskPhoneNumber(to),
           message: 'Add this number to Business Manager recipients list'
         });
 
         // In development, log the message instead of throwing error
-        console.log(`[DEV-FALLBACK] WhatsApp message to +${to}: ${message}`);
-        console.log(`⚠️  Add +${to} to WhatsApp Business Manager recipients list to receive real messages`);
+        this.logger.warn('[DEV-FALLBACK] WhatsApp message sent to console due to recipient restrictions', {
+          to: this.maskPhoneNumber(to),
+          messageLength: message?.length || 0,
+          suggestion: 'Add number to WhatsApp Business Manager recipients list'
+        });
         return; // Don't throw error, just log
       }
 
-      // Fallback to console log in development for other errors
+      // Fallback logging in development for other errors
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[FALLBACK] WhatsApp message to ${to}: ${message}`);
+        this.logger.debug('[FALLBACK] WhatsApp message failed, logged for development', {
+          to: this.maskPhoneNumber(to),
+          messageLength: message?.length || 0,
+          errorStatus: error.response?.status
+        });
       }
 
       throw new Error(`Failed to send WhatsApp message: ${error.message}`);
     }
   }
 
-  private async sendConfirmationMessage(to: string, expenseData: any): Promise<void> {
-    const message = `✅ Expense recorded!\nAmount: $${expenseData.amount}\nDescription: ${expenseData.description || 'N/A'}\n\n(Mock confirmation - integration not implemented)`;
-    await this.sendMessage(to, message);
-  }
-
-  private async sendErrorMessage(to: string, error: string): Promise<void> {
-    const message = `❌ Error: ${error}\n\nPlease try again with format: "spent $25 on lunch"`;
-    await this.sendMessage(to, message);
-  }
-
-  private async sendHelpMessage(to: string): Promise<void> {
-    const helpText = [
-      '🤖 Savium AI - Expense Tracking',
-      '',
-      'Commands:',
-      '• "spent $25 on lunch" - Record expense',
-      '• Send receipt photo - Auto-extract expense',
-      '• "help" - Show this message',
-      '',
-      '(WhatsApp integration not implemented)'
-    ].join('\n');
-    await this.sendMessage(to, helpText);
-  }
 
   verifyWebhook(mode: string, token: string, challenge: string): string | null {
     this.logger.debug('WhatsApp webhook verification attempt', {
@@ -456,44 +386,112 @@ export class WhatsappService {
     };
   }
 
-  private async autoAssociateUser(phoneNumber: string, message: WhatsAppMessage): Promise<UserDocument | null> {
+  private async handleUnknownUser(phoneNumber: string, messageBody: string, traceId: string): Promise<void> {
     try {
-      // First, check if we already have a user associated with this phone number
-      const user = await this.userModel.findOne({
-        'messagingIntegrations.whatsapp.phoneNumber': phoneNumber
+      this.logger.warn('Unregistered WhatsApp user attempted contact', {
+        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        messageBody: messageBody?.substring(0, 100),
+        traceId
       });
 
-      if (user) {
-        console.log(`Found existing user ${user.id} for WhatsApp ${phoneNumber}`);
-        return user;
-      }
-
-      // For now, just log that we received a message from an unassociated phone
-      console.log(`📱 Unassociated WhatsApp ${phoneNumber} sent message: "${message.body}"`);
-      console.log(`Use POST /api/v1/integrations/messaging/connect to associate this phone with a user`);
-
-      // Send a helpful message to the user
-      await this.sendMessage(
+      // Send helpful message in Spanish and English
+      const helpMessage = [
+        '👋 ¡Hola! Parece que es tu primer mensaje.',
+        '',
+        '🔗 Para vincular tu cuenta:',
+        '1. Descarga la app Savium',
+        '2. Crea tu cuenta o inicia sesión',
+        '3. Ve a Configuración > Integraciones',
+        '4. Conecta tu WhatsApp',
+        '',
+        '📧 ¿Necesitas ayuda? Contacta soporte con tu número:',
         phoneNumber,
-        '👋 Hello! I see this is your first message.\n\n' +
-          '🔗 To link your account, please visit our app and connect your WhatsApp.\n\n' +
-          '📧 Or contact support with your phone number: ' +
-          phoneNumber
-      );
+        '',
+        '---',
+        '',
+        '👋 Hello! This seems to be your first message.',
+        '',
+        '🔗 To link your account:',
+        '1. Download the Savium app',
+        '2. Create your account or sign in',
+        '3. Go to Settings > Integrations',
+        '4. Connect your WhatsApp',
+        '',
+        '📧 Need help? Contact support with your number:',
+        phoneNumber
+      ].join('\n');
 
-      return null;
+      await this.sendMessage(phoneNumber, helpMessage);
+
+      // TODO: Optionally create a lead/prospect record for marketing follow-up
+      // await this.marketingService.createProspect({ phoneNumber, source: 'whatsapp' });
     } catch (error) {
-      console.error('Error in auto-associate user:', error);
-      return null;
+      this.logger.error('Error handling unknown user:', {
+        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        error: error.message,
+        traceId
+      });
     }
   }
 
   async findUserByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
-    return this.userModel
-      .findOne({
-        'messagingIntegrations.whatsapp.phoneNumber': phoneNumber
-      })
-      .exec();
+    try {
+      // Clean the phone number (remove non-digits, ensure + prefix)
+      const cleanedPhoneNumber = this.cleanPhoneNumber(phoneNumber);
+      const phoneWithoutPlus = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber.substring(1) : cleanedPhoneNumber;
+      const phoneWithPlus = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber : '+' + cleanedPhoneNumber;
+
+      // Single query with $or operator for all lookup strategies with timeout
+      const user = await Promise.race([
+        this.userModel.findOne({
+          $or: [
+            { 'messagingIntegrations.whatsapp.phoneNumber': cleanedPhoneNumber },
+            { phoneNumber: cleanedPhoneNumber },
+            { phoneNumber: phoneWithoutPlus },
+            { phoneNumber: phoneWithPlus }
+          ]
+        }).populate('activeProfile').exec(),
+        new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error('Database query timeout')), 5000)
+        )
+      ]);
+
+      if (user) {
+        this.logger.log('User found by phone number', {
+          phoneNumber: this.maskPhoneNumber(cleanedPhoneNumber),
+          userId: user.id
+        });
+        return user;
+      }
+
+      this.logger.warn('No user found for phone number', {
+        phoneNumber: this.maskPhoneNumber(cleanedPhoneNumber)
+      });
+
+      return null;
+    } catch (error) {
+      // Handle specific database errors
+      if (error.name === 'MongooseError' || error.name === 'MongoError') {
+        this.logger.error('Database error during user lookup:', {
+          phoneNumber: this.maskPhoneNumber(phoneNumber),
+          error: error.message,
+          errorType: error.name
+        });
+      } else if (error.message === 'Database query timeout') {
+        this.logger.error('Database query timeout during user lookup:', {
+          phoneNumber: this.maskPhoneNumber(phoneNumber),
+          timeout: '5000ms'
+        });
+      } else {
+        this.logger.error('Unexpected error finding user by phone number:', {
+          phoneNumber: this.maskPhoneNumber(phoneNumber),
+          error: error.message,
+          stack: error.stack
+        });
+      }
+
+      return null;
+    }
   }
 
   /**
@@ -504,8 +502,14 @@ export class WhatsappService {
     try {
       // First, try to get the active profile and its associated accounts
       if (user.activeProfileId) {
-        const activeProfile = await this.userProfileModel.findById(user.activeProfileId);
-        if (activeProfile && activeProfile.associatedAccounts.length > 0) {
+        const activeProfile = await Promise.race([
+          this.userProfileModel.findById(user.activeProfileId),
+          new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error('Database query timeout')), 3000)
+          )
+        ]);
+
+        if (activeProfile && activeProfile.associatedAccounts?.length > 0) {
           return activeProfile.associatedAccounts[0].toString();
         }
       }
@@ -519,13 +523,124 @@ export class WhatsappService {
       this.logger.warn('User has no accounts available', { userId: user.id });
       return null;
     } catch (error) {
-      this.logger.error('Error getting user active account ID', {
-        userId: user.id,
-        error: error.message
-      });
+      // Handle specific database errors
+      if (error.name === 'MongooseError' || error.name === 'MongoError') {
+        this.logger.error('Database error getting user active account ID:', {
+          userId: user.id,
+          error: error.message,
+          errorType: error.name
+        });
+      } else if (error.message === 'Database query timeout') {
+        this.logger.error('Database timeout getting user active account ID:', {
+          userId: user.id,
+          timeout: '3000ms'
+        });
+      } else {
+        this.logger.error('Unexpected error getting user active account ID:', {
+          userId: user.id,
+          error: error.message,
+          stack: error.stack
+        });
+      }
+
+      // Fallback to user's first account if profile lookup fails
+      if (user.accounts && user.accounts.length > 0) {
+        this.logger.warn('Falling back to first account due to profile lookup error', {
+          userId: user.id
+        });
+        return user.accounts[0].toString();
+      }
+
       return null;
     }
   }
+
+  /**
+   * Clean and normalize phone number for consistent lookup
+   */
+  private cleanPhoneNumber(phoneNumber: string): string {
+    // Remove all non-digit characters except +
+    let cleaned = phoneNumber.replace(/[^\d+]/g, '');
+
+    // Ensure it starts with + for international format
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned;
+    }
+
+    return cleaned;
+  }
+
+  /**
+   * Mask phone number for privacy in logs
+   */
+  private maskPhoneNumber(phoneNumber: string): string {
+    if (!phoneNumber || phoneNumber.length < 4) {
+      return '***';
+    }
+
+    // Show first 3 characters and last 3, mask the middle
+    const start = phoneNumber.substring(0, 3);
+    const end = phoneNumber.substring(phoneNumber.length - 3);
+    const middle = '*'.repeat(Math.max(0, phoneNumber.length - 6));
+
+    return `${start}${middle}${end}`;
+  }
+
+  /**
+   * Translate response to user's preferred language
+   */
+  private async translateResponse(text: string, targetLanguage: string): Promise<string> {
+    // For now, return text as-is since most responses are already in Spanish
+    // TODO: Implement actual translation service integration (Google Translate, DeepL, etc.)
+
+    if (targetLanguage === 'en') {
+      // Enhanced translation map for common WhatsApp responses
+      const translations: Record<string, string> = {
+        // General terms
+        'gasté': 'spent',
+        'gasto': 'expense',
+        'creado': 'created',
+        'procesando': 'processing',
+        'recibido': 'received',
+        'guardado': 'saved',
+        'analizado': 'analyzed',
+        'detectado': 'detected',
+
+        // Error messages
+        'Hubo un error': 'There was an error',
+        'Lo siento': 'Sorry',
+        'Por favor intenta': 'Please try',
+        'de nuevo': 'again',
+
+        // Success messages
+        'exitosamente': 'successfully',
+        '¡Perfecto!': 'Perfect!',
+        '¡Excelente!': 'Excellent!',
+
+        // Categories and amounts
+        'Monto': 'Amount',
+        'Descripción': 'Description',
+        'Categoría': 'Category',
+        'Confianza': 'Confidence',
+
+        // Instructions
+        'Revisa la app': 'Check the app',
+        'Crea una cuenta': 'Create an account',
+        'Conecta tu WhatsApp': 'Connect your WhatsApp'
+      };
+
+      let translatedText = text;
+      for (const [spanish, english] of Object.entries(translations)) {
+        translatedText = translatedText.replace(new RegExp(spanish, 'gi'), english);
+      }
+
+      return translatedText;
+    }
+
+    return text;
+  }
+
+
 
   private extractExpenseData(text: string): { amount?: number; description?: string } {
     // Parse expense from text like "25 lunch" or "spent 30 on groceries" or "gasté 45 en cena"

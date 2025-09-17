@@ -74,7 +74,6 @@ export class UserQueryService {
     return new this.userModel(result);
   }
 
-
   /**
    * Find user by ID including password field
    */
