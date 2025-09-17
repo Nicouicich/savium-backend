@@ -36,10 +36,10 @@ export class ExpensesRepository {
   async create(createExpenseDto: CreateExpenseDto, userId: string): Promise<ExpenseDocument> {
     const expense = new this.expenseModel({
       ...createExpenseDto,
-      userId: new Types.ObjectId(userId),
+      userId, // UUID string
       accountId: new Types.ObjectId(createExpenseDto.accountId),
       categoryId: new Types.ObjectId(createExpenseDto.categoryId),
-      sharedWith: createExpenseDto.sharedWith?.map(id => new Types.ObjectId(id)) || [],
+      sharedWith: createExpenseDto.sharedWith || [], // UUID strings
       metadata: {
         ...createExpenseDto.metadata,
         source: createExpenseDto.metadata?.source || 'manual'
@@ -52,10 +52,10 @@ export class ExpensesRepository {
   async createWithSession(createExpenseDto: CreateExpenseDto, userId: string, session: ClientSession): Promise<ExpenseDocument> {
     const expense = new this.expenseModel({
       ...createExpenseDto,
-      userId: new Types.ObjectId(userId),
+      userId, // UUID string
       accountId: new Types.ObjectId(createExpenseDto.accountId),
       categoryId: new Types.ObjectId(createExpenseDto.categoryId),
-      sharedWith: createExpenseDto.sharedWith?.map(id => new Types.ObjectId(id)) || [],
+      sharedWith: createExpenseDto.sharedWith || [], // UUID strings
       metadata: {
         ...createExpenseDto.metadata,
         source: createExpenseDto.metadata?.source || 'manual'
@@ -100,9 +100,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'userId',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'user',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -122,9 +122,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'sharedWith',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'sharedUsers',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -133,9 +133,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'reviewedBy',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'reviewer',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -195,7 +195,7 @@ export class ExpensesRepository {
       updateData.categoryId = new Types.ObjectId(updateExpenseDto.categoryId);
     }
     if (updateExpenseDto.sharedWith) {
-      updateData.sharedWith = updateExpenseDto.sharedWith.map(id => new Types.ObjectId(id));
+      updateData.sharedWith = updateExpenseDto.sharedWith; // UUID strings
     }
 
     // Update the expense first
@@ -213,7 +213,7 @@ export class ExpensesRepository {
         {
           isDeleted: true,
           deletedAt: new Date(),
-          deletedBy: new Types.ObjectId(deletedBy)
+          deletedBy // UUID string
         },
         { new: true }
       )
@@ -258,9 +258,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'userId',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'user',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -294,7 +294,7 @@ export class ExpensesRepository {
   async findByUser(userId: string, accountId?: string, limit = 100): Promise<ExpenseDocument[]> {
     // Use optimized aggregation pipeline to avoid N+1 queries (PERF-001)
     const matchQuery: any = {
-      userId: new Types.ObjectId(userId),
+      userId, // UUID string
       isDeleted: false
     };
 
@@ -338,7 +338,7 @@ export class ExpensesRepository {
       matchQuery.accountId = new Types.ObjectId(accountId);
     }
     if (userId) {
-      matchQuery.userId = new Types.ObjectId(userId);
+      matchQuery.userId = userId; // UUID string
     }
     if (startDate || endDate) {
       matchQuery.date = {};
@@ -578,9 +578,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'userId',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'user',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
       {
@@ -611,7 +611,7 @@ export class ExpensesRepository {
         expenseId,
         {
           needsReview: false,
-          reviewedBy: new Types.ObjectId(reviewedBy),
+          reviewedBy, // UUID string
           reviewedAt: new Date(),
           status: approved ? 'approved' : 'rejected'
         },
@@ -645,9 +645,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'userId',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'user',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
       {
@@ -690,7 +690,7 @@ export class ExpensesRepository {
     }
 
     if (filters.userId) {
-      query.userId = new Types.ObjectId(filters.userId);
+      query.userId = filters.userId; // UUID string
     }
 
     if (filters.startDate || filters.endDate) {
@@ -770,9 +770,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'userId',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'user',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -792,9 +792,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'sharedWith',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'sharedUsers',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 
@@ -803,9 +803,9 @@ export class ExpensesRepository {
         $lookup: {
           from: 'users',
           localField: 'reviewedBy',
-          foreignField: '_id',
+          foreignField: 'uuid',
           as: 'reviewer',
-          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1 } }]
+          pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
         }
       },
 

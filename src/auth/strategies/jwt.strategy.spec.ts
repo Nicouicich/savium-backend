@@ -15,11 +15,12 @@ describe('JwtStrategy - Unit Tests', () => {
 
   // Test data factories
   const createMockUser = (overrides = {}): Partial<UserDocument> => ({
-    id: '507f1f77bcf86cd799439011',
+    uuid: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
     _id: '507f1f77bcf86cd799439011',
     email: 'test@example.com',
     firstName: 'John',
     lastName: 'Doe',
+    fullName: 'John Doe',
     role: UserRole.USER,
     isActive: true,
     isEmailVerified: true,
@@ -55,7 +56,7 @@ describe('JwtStrategy - Unit Tests', () => {
   });
 
   const createMockJwtPayload = (overrides = {}): JwtPayload => ({
-    sub: '507f1f77bcf86cd799439011',
+    sub: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', // UUID instead of MongoDB _id
     email: 'test@example.com',
     role: UserRole.USER,
     iat: Math.floor(Date.now() / 1000),
@@ -85,7 +86,7 @@ describe('JwtStrategy - Unit Tests', () => {
         {
           provide: UsersService,
           useValue: {
-            findById: jest.fn()
+            findByUuid: jest.fn()
           }
         }
       ]

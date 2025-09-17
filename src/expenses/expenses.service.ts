@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, ClientSession } from 'mongoose';
 import { ExpenseStats, ExpensesRepository, PaginatedResult } from './expenses.repository';
-import { CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto } from './dto';
+import { CreateExpenseDto, ExpenseQueryDto, UpdateExpenseDto, ExpenseExportDto, ExportPeriod } from './dto';
 import { ExpenseDocument } from './schemas/expense.schema';
 import { AccountsService } from '../accounts/accounts.service';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '@common/constants/user-roles';
 import { FileUploadService, UploadedFile } from './file-upload.service';
+import { PdfExportService } from './pdf-export.service';
 import { Currency } from '@common/constants/expense-categories';
 import { AccountNotFoundException, ExpenseNotFoundException, UnauthorizedAccessException, ValidationException } from '@common/exceptions';
 import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
@@ -24,6 +25,7 @@ export class ExpensesService {
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService,
     private readonly fileUploadService: FileUploadService,
+    private readonly pdfExportService: PdfExportService,
     private readonly configService: ConfigService,
     private readonly cacheService: EnhancedCacheService,
     @InjectConnection() private readonly connection: Connection
@@ -664,5 +666,95 @@ export class ExpensesService {
     // User must be an admin of the account
     const isAdmin = await this.accountsService.isUserAdmin(expense.accountId.toString(), userId);
     return isAdmin;
+  }
+
+  async exportExpenses(exportDto: ExpenseExportDto, userId: string): Promise<Buffer> {
+    this.logger.log(`Starting expense export for user ${userId} with format ${exportDto.format}`);
+
+    // Validate account access
+    let accountId = exportDto.accountId;
+    if (!accountId) {
+      // Get user's default account if not specified
+      const userAccounts = await this.accountsService.findByUser(userId);
+      if (userAccounts.length === 0) {
+        throw new BadRequestException('No accounts found for user');
+      }
+      accountId = userAccounts[0]._id.toString();
+    }
+
+    if (!accountId) {
+      throw new BadRequestException('Account ID is required');
+    }
+
+    const account = await this.validateAccountAccess(accountId, userId);
+
+    // Calculate date range based on period
+    const dateRange = this.pdfExportService.calculateDateRange(exportDto.period || ExportPeriod.CURRENT_MONTH, exportDto.startDate, exportDto.endDate);
+
+    // Build query for expenses
+    const query: any = {
+      accountId: accountId,
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+      limit: 10000, // Large limit for export
+      page: 1
+    };
+
+    // Add category filter if specified
+    if (exportDto.categoryId) {
+      query.categoryId = exportDto.categoryId;
+    }
+
+    // Filter private expenses if user doesn't want them included
+    if (!exportDto.includePrivate) {
+      query.isPrivate = false;
+    }
+
+    // Get expenses data
+    const expensesResult = await this.expensesRepository.findManyOptimized(query);
+
+    // Get additional data for PDF
+    const [stats, categoryBreakdown, monthlyTrends] = await Promise.all([
+      this.getExpenseStats(accountId, userId, dateRange.start, dateRange.end),
+      exportDto.includeCategoryBreakdown ? this.getCategoryBreakdown(accountId, userId, dateRange.start, dateRange.end) : Promise.resolve(undefined),
+      exportDto.includeMonthlyTrends ? this.getMonthlyTrends(accountId, userId, 6) : Promise.resolve(undefined)
+    ]);
+
+    // Prepare export data
+    const exportData = {
+      expenses: expensesResult.data,
+      summary: {
+        totalAmount: stats.totalAmount || 0,
+        totalExpenses: stats.totalExpenses || 0,
+        averageAmount: stats.averageAmount || 0,
+        currency: account.currency || Currency.USD,
+        period: exportDto.period || ExportPeriod.CURRENT_MONTH,
+        dateRange: dateRange.description
+      },
+      categoryBreakdown,
+      monthlyTrends,
+      accountInfo: {
+        id: account._id.toString(),
+        name: account.name || 'Mi Cuenta',
+        type: account.type || 'personal'
+      }
+    };
+
+    // Generate PDF based on format
+    switch (exportDto.format) {
+      case 'pdf':
+        return this.pdfExportService.generateExpensesPdf(exportData, exportDto);
+
+      case 'csv':
+        // TODO: Implement CSV export
+        throw new BadRequestException('CSV export not yet implemented');
+
+      case 'excel':
+        // TODO: Implement Excel export
+        throw new BadRequestException('Excel export not yet implemented');
+
+      default:
+        throw new BadRequestException('Unsupported export format');
+    }
   }
 }

@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../../users/users.service';
+import { UserMapper } from '../../users/utils';
+import { UserForJWT } from '../../users/types';
 
 export interface JwtPayload {
   sub: string; // User ID
@@ -36,27 +38,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<UserForJWT> {
     try {
-      // Find user by ID from token payload
+      // Find user by MongoDB ObjectId from token payload
       const user = await this.usersService.findById(payload.sub);
 
       if (!user || !user.isActive) {
         throw new UnauthorizedException('User not found or inactive');
       }
 
-      // Return user object that will be attached to request
-      return {
-        id: user.id || user._id,
-        email: user.email,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isActive: user.isActive,
-        isEmailVerified: user.isEmailVerified,
-        accounts: user.accounts,
-        preferences: user.preferences
-      };
+      // Return properly typed user object for JWT validation
+      return UserMapper.toJWTUser(user);
     } catch {
       throw new UnauthorizedException('Invalid token');
     }

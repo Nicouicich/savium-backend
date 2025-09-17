@@ -4,20 +4,23 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
 import { FileUploadService } from './file-upload.service';
-import { CreateExpenseDto, ExpenseQueryDto, ExpenseResponseDto, UpdateExpenseDto } from './dto';
+import { CreateExpenseDto, ExpenseQueryDto, ExpenseResponseDto, UpdateExpenseDto, ExpenseExportDto } from './dto';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { ApiResponseDecorator } from '@common/decorators/api-response.decorator';
@@ -265,5 +268,45 @@ export class ExpensesController {
   async remove(@Param('id') id: string, @CurrentUser() user: any) {
     await this.expensesService.remove(id, user.id);
     return { message: 'Expense deleted successfully' };
+  }
+
+  @Post('export')
+  @ApiOperation({
+    summary: 'Export expenses to PDF',
+    description: 'Export expenses for a specific account and time period to PDF format'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PDF export generated successfully',
+    headers: {
+      'Content-Type': {
+        description: 'application/pdf'
+      },
+      'Content-Disposition': {
+        description: 'attachment; filename="expenses-export.pdf"'
+      }
+    }
+  })
+  async exportExpenses(@Body() exportDto: ExpenseExportDto, @CurrentUser() user: any, @Res() res: Response) {
+    const pdfBuffer = await this.expensesService.exportExpenses(exportDto, user.id);
+
+    const filename = this.generateExportFilename(exportDto);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': pdfBuffer.length.toString()
+    });
+
+    res.send(pdfBuffer);
+  }
+
+  private generateExportFilename(exportDto: ExpenseExportDto): string {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const period = exportDto.period || 'custom';
+    const format = exportDto.format || 'pdf';
+
+    return `gastos-${period}-${dateStr}.${format}`;
   }
 }

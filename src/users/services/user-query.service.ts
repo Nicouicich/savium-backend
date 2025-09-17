@@ -65,7 +65,21 @@ export class UserQueryService {
     });
 
     const results = await this.userModel.aggregate(pipeline).exec();
-    return results[0] || null;
+    if (!results[0]) {
+      return null;
+    }
+
+    // Convert aggregation result back to a Mongoose document
+    const result = results[0];
+    return new this.userModel(result);
+  }
+
+
+  /**
+   * Find user by ID including password field
+   */
+  async findByIdWithPassword(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).select('+password').exec();
   }
 
   /**
@@ -269,5 +283,42 @@ export class UserQueryService {
     ];
 
     return this.userModel.aggregate(pipeline).exec();
+  }
+
+  /**
+   * Find user by phone number
+   */
+  async findByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({
+        phoneNumber,
+        isActive: true
+      })
+      .exec();
+  }
+
+  /**
+   * Check if phone number exists
+   */
+  async phoneExists(phoneNumber: string): Promise<boolean> {
+    const count = await this.userModel.countDocuments({
+      phoneNumber,
+      isActive: true
+    });
+    return count > 0;
+  }
+
+  /**
+   * Find users by phone verification status
+   */
+  async findByPhoneVerificationStatus(isVerified: boolean, limit: number = 100): Promise<UserDocument[]> {
+    return this.userModel
+      .find({
+        isPhoneVerified: isVerified,
+        phoneNumber: { $exists: true, $ne: null },
+        isActive: true
+      })
+      .limit(limit)
+      .exec();
   }
 }

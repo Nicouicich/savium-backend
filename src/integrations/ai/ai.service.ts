@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import { AI_PROMPTS, buildCompactCategorizationPrompt, buildCompactReceiptPrompt, buildCompactAudioPrompt, formatUserCategories } from './prompts/ai-prompts';
 
 export interface TicketProcessingResult {
+  type?: 'expense' | 'income';
   amount?: number;
   vendor?: string;
   date?: Date;
@@ -10,6 +12,24 @@ export interface TicketProcessingResult {
   suggestedCategory?: string;
   confidence?: number;
   extractedText?: string;
+  isRecurring?: boolean;
+  installments?: number;
+  installmentInfo?: string;
+}
+
+export interface AudioTranscriptionResult {
+  transcription: string;
+  language?: string;
+  confidence?: number;
+  processedTransaction?: {
+    type?: 'expense' | 'income';
+    amount?: number;
+    description?: string;
+    category?: string;
+    isRecurring?: boolean;
+    installments?: number;
+    installmentInfo?: string;
+  };
 }
 
 export interface CategorySuggestion {
@@ -26,8 +46,8 @@ export class AiService {
   private readonly isEnabled: boolean;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('integrations.openai.apiKey');
-    this.isEnabled = Boolean(apiKey && apiKey !== 'placeholder-openai-key');
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    this.isEnabled = Boolean(apiKey && apiKey !== 'placeholder-openai-key' && apiKey !== 'sk-test-mock-key-for-development');
 
     if (this.isEnabled) {
       try {
@@ -55,26 +75,18 @@ export class AiService {
       const base64Image = imageBuffer.toString('base64');
       const imageUrl = `data:${mimeType};base64,${base64Image}`;
 
+      const defaultCategories = ['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Hogar', 'Ropa', 'Tecnología', 'Servicios', 'Ingresos', 'Otros'];
+      const receiptPrompt = buildCompactReceiptPrompt('', defaultCategories);
+
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4-vision-preview',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Analyze this receipt/ticket image and extract the following information in JSON format:
-                {
-                  "amount": number (total amount),
-                  "vendor": string (store/restaurant name),
-                  "date": string (ISO date format),
-                  "description": string (brief description of purchase),
-                  "suggestedCategory": string (one of: Food & Dining, Transportation, Shopping, Entertainment, Healthcare, Utilities, Travel, Education, Other),
-                  "confidence": number (0-1, how confident you are in the extraction),
-                  "extractedText": string (all visible text from the image)
-                }
-                
-                If you cannot extract certain information, set those fields to null. Be as accurate as possible.`
+                text: receiptPrompt
               },
               {
                 type: 'image_url',
@@ -86,7 +98,7 @@ export class AiService {
             ]
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 500,
         temperature: 0.1
       });
 
@@ -115,46 +127,25 @@ export class AiService {
     }
   }
 
-  async categorizeExpense(description: string, amount: number, vendor?: string): Promise<CategorySuggestion[]> {
+  async categorizeExpense(description: string, amount: number, userCategories: string[], vendor?: string): Promise<CategorySuggestion[]> {
     if (!this.isEnabled || !this.openai) {
       this.logger.warn('AI categorization requested but not enabled - returning mock data');
       return this.getMockCategorySuggestions(description);
     }
 
     try {
-      const contextInfo = [`Description: ${description}`, `Amount: $${amount}`, vendor ? `Vendor: ${vendor}` : null].filter(Boolean).join('\n');
+      const expenseText = [`${description}`, `$${amount}`, vendor || ''].filter(Boolean).join(' ');
+      const compactPrompt = buildCompactCategorizationPrompt(expenseText, userCategories);
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
-            role: 'system',
-            content: `You are a financial categorization assistant. Analyze expense information and suggest the most appropriate categories with confidence scores and reasoning.
-            
-            Available categories:
-            - Food & Dining (restaurants, groceries, food delivery)
-            - Transportation (gas, public transport, ride-sharing, car maintenance)
-            - Shopping (clothing, electronics, general retail)
-            - Entertainment (movies, games, subscriptions, events)
-            - Healthcare (medical, dental, pharmacy, insurance)
-            - Utilities (electricity, water, internet, phone)
-            - Travel (hotels, flights, vacation expenses)
-            - Education (courses, books, training)
-            - Business (office supplies, professional services)
-            - Home & Garden (maintenance, furniture, gardening)
-            - Other (miscellaneous expenses)
-            
-            Return up to 3 suggestions in JSON format as an array of objects with:
-            - categoryName: exact category name from the list above
-            - confidence: number between 0 and 1
-            - reasoning: brief explanation for the suggestion`
-          },
-          {
             role: 'user',
-            content: contextInfo
+            content: compactPrompt
           }
         ],
-        max_tokens: 500,
+        max_tokens: 200,
         temperature: 0.2
       });
 
@@ -231,12 +222,11 @@ Provide analysis in JSON format with:
 - trends: array of trend observations (spending increases/decreases, seasonal patterns, etc.)`;
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content:
-              'You are a financial advisor AI assistant. Analyze spending data and provide helpful insights and recommendations. Be specific and actionable in your advice.'
+            content: AI_PROMPTS.SPENDING_ANALYZER
           },
           {
             role: 'user',
@@ -258,6 +248,170 @@ Provide analysis in JSON format with:
     } catch (error) {
       this.logger.error('Error analyzing spending patterns:', error);
       return this.getMockSpendingAnalysis();
+    }
+  }
+
+  async processAudioMessage(audioBuffer: Buffer, mimeType: string): Promise<AudioTranscriptionResult> {
+    if (!this.isEnabled || !this.openai) {
+      this.logger.warn('AI audio processing requested but not enabled - returning mock data');
+      return {
+        transcription: 'Transcripción de prueba - IA no configurada',
+        confidence: 0.1
+      };
+    }
+
+    try {
+      // Create a temporary file for Whisper
+      const fs = require('fs');
+      const path = require('path');
+      const tempFilePath = path.join(process.cwd(), 'temp', `audio_${Date.now()}.ogg`);
+
+      // Ensure temp directory exists
+      const tempDir = path.dirname(tempFilePath);
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      // Write audio buffer to temp file
+      fs.writeFileSync(tempFilePath, audioBuffer);
+
+      // Transcribe with Whisper
+      const transcription = await this.openai.audio.transcriptions.create({
+        file: fs.createReadStream(tempFilePath),
+        model: 'whisper-1',
+        language: 'es', // Spanish by default, can be auto-detected
+        response_format: 'json',
+        temperature: 0.0
+      });
+
+      // Clean up temp file
+      fs.unlinkSync(tempFilePath);
+
+      const transcribedText = transcription.text;
+      this.logger.log(`Audio transcribed: "${transcribedText}"`);
+
+      // Check if transcription contains transaction information
+      let processedTransaction;
+      if (this.containsTransactionInformation(transcribedText)) {
+        processedTransaction = await this.extractTransactionFromText(transcribedText);
+      }
+
+      return {
+        transcription: transcribedText,
+        language: 'es',
+        confidence: 0.9, // Whisper is generally very accurate
+        processedTransaction
+      };
+    } catch (error) {
+      this.logger.error('Error processing audio with Whisper:', error);
+
+      // Clean up temp file on error
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const tempFilePath = path.join(process.cwd(), 'temp', `audio_${Date.now()}.ogg`);
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+
+      return {
+        transcription: 'Error procesando audio',
+        confidence: 0.0
+      };
+    }
+  }
+
+  private containsTransactionInformation(text: string): boolean {
+    const transactionKeywords = [
+      // Expense keywords
+      'gasté',
+      'gaste',
+      'spent',
+      'compré',
+      'compre',
+      'pagué',
+      'pague',
+      'costó',
+      'costo',
+      'cuesta',
+      'precio',
+      // Income keywords
+      'recibí',
+      'me pagaron',
+      'cobramos',
+      'venta',
+      'sueldo',
+      'depósito',
+      'transferencia',
+      'reembolso',
+      'ingreso',
+      // Currency
+      'pesos',
+      'dólares',
+      'euros'
+    ];
+
+    const lowerText = text.toLowerCase();
+    const hasTransactionKeyword = transactionKeywords.some(keyword => lowerText.includes(keyword));
+    const hasAmount = /\d+/.test(text); // Contains numbers
+
+    return hasTransactionKeyword && hasAmount;
+  }
+
+  private async extractTransactionFromText(text: string): Promise<{
+    type?: 'expense' | 'income';
+    amount?: number;
+    description?: string;
+    category?: string;
+    isRecurring?: boolean;
+    installments?: number;
+    installmentInfo?: string;
+  }> {
+    if (!this.isEnabled || !this.openai) {
+      return {};
+    }
+
+    try {
+      const defaultCategories = ['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Hogar', 'Ropa', 'Tecnología', 'Servicios', 'Ingresos', 'Otros'];
+      const compactPrompt = buildCompactAudioPrompt(text, defaultCategories);
+
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: compactPrompt
+          }
+        ],
+        max_tokens: 150,
+        temperature: 0.1
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return {};
+      }
+
+      const result = JSON.parse(content.trim());
+      if (result.hasTransaction) {
+        return {
+          type: result.type,
+          amount: result.amount,
+          description: result.description || (result.type === 'income' ? 'Ingreso desde audio' : 'Gasto desde audio'),
+          category: result.category || 'Otros',
+          isRecurring: result.isRecurring,
+          installments: result.installments,
+          installmentInfo: result.installmentInfo
+        };
+      }
+
+      return {};
+    } catch (error) {
+      this.logger.error('Error extracting transaction from audio:', error);
+      return {};
     }
   }
 
@@ -326,12 +480,11 @@ Return JSON with suggestedBudgets array containing:
 - reasoning: explanation for the budget amount`;
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-5-nano',
         messages: [
           {
             role: 'system',
-            content:
-              'You are a financial planning assistant. Create realistic monthly budgets based on historical spending patterns. Consider the account type and provide practical, achievable budget recommendations.'
+            content: AI_PROMPTS.BUDGET_ADVISOR
           },
           {
             role: 'user',
@@ -370,6 +523,95 @@ Return JSON with suggestedBudgets array containing:
   // Utility method to check if AI features are enabled
   isAiEnabled(): boolean {
     return this.isEnabled;
+  }
+
+  // Método optimizado para procesar mensajes de texto con mínimos tokens
+  async processTextMessage(
+    message: string,
+    userCategories: string[]
+  ): Promise<{
+    hasTransaction: boolean;
+    type?: 'expense' | 'income';
+    amount?: number;
+    description?: string;
+    category?: string;
+    isRecurring?: boolean;
+    installments?: number;
+    installmentInfo?: string;
+    confidence?: number;
+  }> {
+    if (!this.isEnabled || !this.openai) {
+      this.logger.warn('AI text processing requested but not enabled');
+      return { hasTransaction: false };
+    }
+
+    try {
+      const compactPrompt = buildCompactCategorizationPrompt(message, userCategories);
+
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: compactPrompt
+          }
+        ],
+        max_tokens: 150, // Mínimo necesario para JSON response
+        temperature: 0.1
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return { hasTransaction: false };
+      }
+
+      return JSON.parse(content.trim());
+    } catch (error) {
+      this.logger.error('Error processing text message:', error);
+      return { hasTransaction: false };
+    }
+  }
+
+  // Método para detectar comandos del usuario
+  async detectCommand(message: string): Promise<{
+    isCommand: boolean;
+    commandType?: 'expense' | 'income' | 'export' | 'balance' | 'help' | 'budget' | 'report' | 'general';
+    details?: {
+      month?: string;
+      year?: string;
+      category?: string;
+      period?: string;
+    };
+    confidence?: number;
+  }> {
+    if (!this.isEnabled || !this.openai) {
+      this.logger.warn('AI command detection requested but not enabled');
+      return { isCommand: false };
+    }
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: `${AI_PROMPTS.COMMAND_DETECTOR}\n\nMensaje: "${message}"`
+          }
+        ],
+        max_tokens: 150,
+        temperature: 0.1
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        return { isCommand: false };
+      }
+
+      return JSON.parse(content.trim());
+    } catch (error) {
+      this.logger.error('Error detecting command:', error);
+      return { isCommand: false };
+    }
   }
 
   // Method to get AI service status

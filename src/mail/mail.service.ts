@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
-import { requestContext } from '@common/interceptors/logging.interceptor';
+import { RequestContextService } from '@common/interceptors/request-context';
 
 export interface MailOptions {
   to: string | string[];
@@ -66,7 +66,7 @@ export class MailService {
   }
 
   async sendMail(mailOptions: MailOptions): Promise<boolean> {
-    const contextData = requestContext.getStore();
+    const contextData = RequestContextService.getContext();
     const traceId = contextData?.traceId;
 
     try {

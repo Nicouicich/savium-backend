@@ -5,6 +5,9 @@ export { default as jwtConfig } from './jwt.config';
 export { default as swaggerConfig } from './swagger.config';
 export { default as integrationsConfig } from './integrations.config';
 export { default as stripeConfig } from './stripe.config';
+export { default as googleConfig } from './google.config';
+export { default as facebookConfig } from './facebook.config';
+export { default as awsConfig } from './aws.config';
 
 // Configuration validation schema
 import * as Joi from 'joi';
@@ -68,6 +71,16 @@ export const configValidationSchema = Joi.object({
   EMAIL_PASSWORD: Joi.string().optional(),
   EMAIL_FROM: Joi.string().email().optional(),
 
+  // Google OAuth Configuration
+  GOOGLE_CLIENT_ID: Joi.string().optional(),
+  GOOGLE_CLIENT_SECRET: Joi.string().optional(),
+  GOOGLE_CALLBACK_URL: Joi.string().uri().optional(),
+
+  // Facebook OAuth Configuration
+  FACEBOOK_CLIENT_ID: Joi.string().optional(),
+  FACEBOOK_CLIENT_SECRET: Joi.string().optional(),
+  FACEBOOK_CALLBACK_URL: Joi.string().uri().optional(),
+
   // Stripe Configuration
   STRIPE_SECRET_KEY: Joi.string().optional(),
   STRIPE_PUBLISHABLE_KEY: Joi.string().optional(),
@@ -96,5 +109,28 @@ export const configValidationSchema = Joi.object({
   STRIPE_MAX_RETRIES: Joi.number().default(3),
   STRIPE_RETRY_DELAY: Joi.number().default(1000),
   STRIPE_TEST_CLOCK_ID: Joi.string().optional(),
-  STRIPE_WEBHOOK_TESTING: Joi.boolean().default(false)
+  STRIPE_WEBHOOK_TESTING: Joi.boolean().default(false),
+
+  // AWS Configuration
+  AWS_REGION: Joi.string().default('us-east-1'),
+  AWS_ACCESS_KEY_ID: Joi.string().optional(),
+  AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
+  AWS_S3_BUCKET_NAME: Joi.string().optional(),
+  AWS_S3_ENDPOINT: Joi.string().uri().optional(),
+  AWS_S3_FORCE_PATH_STYLE: Joi.boolean().default(false),
+  AWS_S3_UPLOAD_TIMEOUT: Joi.number().default(60000),
+  AWS_S3_MAX_FILE_SIZE: Joi.number().default(52428800), // 50MB
+  AWS_S3_ALLOWED_MIME_TYPES: Joi.string().default('image/jpeg,image/png,image/gif,image/webp,audio/mpeg,audio/wav,audio/ogg,audio/mp4,application/pdf'),
+  AWS_S3_PRESIGNED_URL_EXPIRATION: Joi.number().default(3600),
+  AWS_S3_CDN_DOMAIN: Joi.string().uri().optional(),
+  AWS_S3_PUBLIC_READ: Joi.boolean().default(false),
+  AWS_S3_ENCRYPTION_ENABLED: Joi.boolean().default(true),
+  AWS_S3_ENCRYPTION_ALGORITHM: Joi.string().valid('AES256', 'aws:kms').default('AES256'),
+  AWS_S3_KMS_KEY_ID: Joi.string().optional(),
+  AWS_S3_STORAGE_CLASS: Joi.string()
+    .valid('STANDARD', 'REDUCED_REDUNDANCY', 'STANDARD_IA', 'ONEZONE_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE')
+    .default('STANDARD'),
+  AWS_S3_TRANSITION_TO_IA: Joi.number().default(30),
+  AWS_S3_TRANSITION_TO_GLACIER: Joi.number().default(90),
+  AWS_S3_EXPIRATION: Joi.number().default(2555)
 });

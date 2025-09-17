@@ -6,6 +6,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ReferralsController } from './referrals.controller';
 import { ReferralsService } from './referrals.service';
 import { ReferralCronService } from './referral-cron.service';
+import { ReferralsRepository } from './referrals.repository';
+import { ReferralQueryService, ReferralCommandService } from './services';
 
 // Import schemas
 import { User, UserSchema } from '../users/schemas/user.schema';
@@ -35,7 +37,7 @@ import { CommonModule } from '@common/common.module';
 
   controllers: [ReferralsController],
 
-  providers: [ReferralsService, ReferralCronService],
+  providers: [ReferralsRepository, ReferralQueryService, ReferralCommandService, ReferralsService, ReferralCronService],
 
   exports: [ReferralsService, ReferralCronService]
 })

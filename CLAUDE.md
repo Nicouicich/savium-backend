@@ -45,6 +45,14 @@ npm run format         # Format code with Prettier
 - The project uses strict backend-oriented ESLint rules
 - Custom path mapping: `@common/*` points to `common/` directory (outside src)
 
+## Critical Coding Standards
+
+### TypeScript Strict Rules
+- **NEVER use `as any` type assertions** - This is strictly prohibited in the codebase
+- Use proper TypeScript typing and interfaces instead of type assertions
+- If you encounter type issues, create proper interfaces or use generic types
+- When working with external libraries, create proper type definitions rather than using `any`
+
 ## Architecture Overview
 
 ### Module Structure

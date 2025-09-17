@@ -1,25 +1,44 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { Public } from '@common/decorators/public.decorator';
 import { AppService } from './app.service';
+import { WhatsappService } from './integrations/whatsapp/whatsapp.service';
 
 @ApiTags('Health')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly whatsappService: WhatsappService
+  ) {}
 
   @Get()
   @Public()
-  @ApiOperation({ summary: 'Application welcome message' })
+  @ApiOperation({ summary: 'Application welcome message or WhatsApp webhook verification' })
+  @ApiQuery({ name: 'hub.mode', required: false, description: 'WhatsApp verification mode' })
+  @ApiQuery({ name: 'hub.verify_token', required: false, description: 'WhatsApp verification token' })
+  @ApiQuery({ name: 'hub.challenge', required: false, description: 'WhatsApp challenge string' })
   @ApiResponse({
     status: 200,
-    description: 'Welcome message',
+    description: 'Welcome message or webhook verification response',
     schema: {
-      type: 'string',
-      example: 'Welcome to Savium AI Backend!'
+      oneOf: [
+        { type: 'string', example: 'Welcome to Savium AI Backend!' },
+        { type: 'string', example: 'challenge_response_string' }
+      ]
     }
   })
-  getHello(): string {
+  getHello(@Query('hub.mode') mode?: string, @Query('hub.verify_token') verifyToken?: string, @Query('hub.challenge') challenge?: string): string {
+    // Si tiene parámetros de WhatsApp, manejar verificación
+    if (mode && verifyToken && challenge) {
+      const result = this.whatsappService.verifyWebhook(mode, verifyToken, challenge);
+      if (result) {
+        return result;
+      }
+      throw new Error('Webhook verification failed');
+    }
+
+    // Si no, devolver mensaje normal
     return this.appService.getHello();
   }
 

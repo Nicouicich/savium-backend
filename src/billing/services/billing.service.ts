@@ -24,7 +24,7 @@ export class BillingService {
   // Customer Management
   async createCustomer(createCustomerDto: CreateCustomerDto, stripeCustomerId: string): Promise<BillingCustomerDocument> {
     const customer = new this.billingCustomerModel({
-      userId: new Types.ObjectId(createCustomerDto.userId),
+      userId: createCustomerDto.userId,
       stripeCustomerId,
       email: createCustomerDto.email,
       name: createCustomerDto.name,
@@ -57,7 +57,7 @@ export class BillingService {
   }
 
   async getCustomerByUserId(userId: string): Promise<BillingCustomerDocument> {
-    const customer = await this.billingCustomerModel.findOne({ userId: new Types.ObjectId(userId) });
+    const customer = await this.billingCustomerModel.findOne({ userId: userId });
     if (!customer) {
       throw new NotFoundException('Billing customer not found');
     }
@@ -73,7 +73,7 @@ export class BillingService {
   }
 
   async updateCustomer(userId: string, updateData: Partial<CreateCustomerDto>): Promise<BillingCustomerDocument> {
-    const updatedCustomer = await this.billingCustomerModel.findOneAndUpdate({ userId: new Types.ObjectId(userId) }, { $set: updateData }, { new: true });
+    const updatedCustomer = await this.billingCustomerModel.findOneAndUpdate({ userId: userId }, { $set: updateData }, { new: true });
 
     if (!updatedCustomer) {
       throw new NotFoundException('Billing customer not found');
@@ -100,12 +100,12 @@ export class BillingService {
 
     // If this is set as default, remove default from other methods
     if (paymentMethodData.isDefault) {
-      await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { 'paymentMethods.$[].isDefault': false } });
+      await this.billingCustomerModel.updateOne({ userId: userId }, { $set: { 'paymentMethods.$[].isDefault': false } });
     }
 
     // Add the new payment method
     await this.billingCustomerModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $push: {
           paymentMethods: {
@@ -121,7 +121,7 @@ export class BillingService {
   }
 
   async removePaymentMethod(userId: string, stripePaymentMethodId: string): Promise<void> {
-    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { paymentMethods: { stripePaymentMethodId } } });
+    await this.billingCustomerModel.updateOne({ userId: userId }, { $pull: { paymentMethods: { stripePaymentMethodId } } });
 
     this.logger.log(`Payment method removed for user: ${userId}`);
   }
@@ -132,7 +132,7 @@ export class BillingService {
     const features = this.getPlanFeatures(createSubscriptionDto.plan);
 
     const subscription = new this.subscriptionModel({
-      userId: new Types.ObjectId(createSubscriptionDto.userId),
+      userId: createSubscriptionDto.userId,
       stripeSubscriptionId: createSubscriptionDto.stripeSubscriptionId,
       stripeCustomerId: createSubscriptionDto.stripeCustomerId,
       stripePriceId: createSubscriptionDto.stripePriceId,
@@ -159,17 +159,14 @@ export class BillingService {
     const savedSubscription = await subscription.save();
 
     // Update customer's active subscription
-    await this.billingCustomerModel.updateOne(
-      { userId: new Types.ObjectId(createSubscriptionDto.userId) },
-      { $set: { activeSubscriptionId: savedSubscription._id } }
-    );
+    await this.billingCustomerModel.updateOne({ userId: createSubscriptionDto.userId }, { $set: { activeSubscriptionId: savedSubscription._id } });
 
     this.logger.log(`Subscription created: ${savedSubscription._id} for user: ${createSubscriptionDto.userId}`);
     return savedSubscription;
   }
 
   async getSubscriptionByUserId(userId: string): Promise<SubscriptionDocument | null> {
-    return this.subscriptionModel.findOne({ userId: new Types.ObjectId(userId) }, {}, { sort: { createdAt: -1 } });
+    return this.subscriptionModel.findOne({ userId: userId }, {}, { sort: { createdAt: -1 } });
   }
 
   async updateSubscriptionStatus(subscriptionId: string, status: string, metadata?: any): Promise<void> {
@@ -193,19 +190,19 @@ export class BillingService {
       updateData.cancelAt = cancelAt;
     }
 
-    await this.subscriptionModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: updateData });
+    await this.subscriptionModel.updateOne({ userId: userId }, { $set: updateData });
 
     this.logger.log(`Subscription canceled for user: ${userId}`);
   }
 
   // Usage tracking
   async incrementUsage(userId: string, usageType: keyof Subscription['usage'], amount: number = 1): Promise<void> {
-    await this.subscriptionModel.updateOne({ userId: new Types.ObjectId(userId), status: 'active' }, { $inc: { [`usage.${String(usageType)}`]: amount } });
+    await this.subscriptionModel.updateOne({ userId: userId, status: 'active' }, { $inc: { [`usage.${String(usageType)}`]: amount } });
   }
 
   async resetMonthlyUsage(userId: string): Promise<void> {
     await this.subscriptionModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: {
           'usage.expensesThisMonth': 0,
@@ -247,7 +244,7 @@ export class BillingService {
   // Payment Management
   async createPayment(createPaymentDto: CreatePaymentDto): Promise<PaymentDocument> {
     const payment = new this.paymentModel({
-      userId: new Types.ObjectId(createPaymentDto.userId),
+      userId: createPaymentDto.userId,
       subscriptionId: createPaymentDto.subscriptionId ? new Types.ObjectId(createPaymentDto.subscriptionId) : undefined,
       stripePaymentIntentId: createPaymentDto.stripePaymentIntentId,
       stripeChargeId: createPaymentDto.stripeChargeId,
@@ -270,12 +267,7 @@ export class BillingService {
   }
 
   async getPaymentsByUserId(userId: string, limit: number = 20, skip: number = 0): Promise<PaymentDocument[]> {
-    return this.paymentModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip(skip)
-      .exec();
+    return this.paymentModel.find({ userId: userId }).sort({ createdAt: -1 }).limit(limit).skip(skip).exec();
   }
 
   // Helper methods
@@ -358,7 +350,7 @@ export class BillingService {
 
   // Risk and fraud management
   async updateRiskScore(userId: string, riskScore: number): Promise<void> {
-    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { riskScore } });
+    await this.billingCustomerModel.updateOne({ userId: userId }, { $set: { riskScore } });
   }
 
   async addRiskEvent(
@@ -370,7 +362,7 @@ export class BillingService {
     }
   ): Promise<void> {
     await this.billingCustomerModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $push: {
           riskEvents: {
@@ -385,7 +377,7 @@ export class BillingService {
 
   // Analytics and reporting
   async getBillingStats(userId?: string): Promise<any> {
-    const matchStage = userId ? { userId: new Types.ObjectId(userId) } : {};
+    const matchStage = userId ? { userId: userId } : {};
 
     const stats = await this.subscriptionModel.aggregate([
       { $match: matchStage },
@@ -509,7 +501,7 @@ export class BillingService {
       billingPreferences.enhancedPrivacy = true;
     }
 
-    await this.billingCustomerModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { preferences: billingPreferences } });
+    await this.billingCustomerModel.updateOne({ userId: userId }, { $set: { preferences: billingPreferences } });
 
     this.logger.log(`Billing preferences updated for user: ${userId}, profile: ${profileId}`);
   }

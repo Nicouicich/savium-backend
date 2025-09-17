@@ -8,7 +8,7 @@ export type UserDocument = User & Document;
   timestamps: true,
   toJSON: {
     transform: (doc, ret) => {
-      (ret as any).id = (ret as any)._id;
+      (ret as any).id = (ret as any).uuid; // Use UUID as public ID
       delete (ret as any)._id;
       delete (ret as any).__v;
       delete (ret as any).password; // Never expose password
@@ -52,6 +52,20 @@ export class User {
   @Prop({ default: false })
   isEmailVerified: boolean;
 
+  // Phone verification
+  @Prop({
+    type: String,
+    sparse: true,
+    match: [/^\+[1-9]\d{1,14}$/, 'Please enter a valid international phone number']
+  })
+  phoneNumber?: string;
+
+  @Prop({ default: false })
+  isPhoneVerified: boolean;
+
+  @Prop()
+  phoneVerifiedAt?: Date;
+
   @Prop([
     {
       token: { type: String, required: true },
@@ -75,6 +89,39 @@ export class User {
 
   @Prop()
   oauthProviderId?: string; // Provider's user ID
+
+  // Messaging platform integration
+  @Prop({
+    type: {
+      telegram: {
+        chatId: { type: String, sparse: true },
+        username: { type: String, sparse: true },
+        firstName: { type: String },
+        lastName: { type: String },
+        connectedAt: { type: Date }
+      },
+      whatsapp: {
+        phoneNumber: { type: String, sparse: true },
+        name: { type: String },
+        connectedAt: { type: Date }
+      }
+    },
+    default: {}
+  })
+  messagingIntegrations?: {
+    telegram?: {
+      chatId?: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      connectedAt?: Date;
+    };
+    whatsapp?: {
+      phoneNumber?: string;
+      name?: string;
+      connectedAt?: Date;
+    };
+  };
 
   // Multi-profile system
   @Prop({ type: Types.ObjectId, ref: 'UserProfile' })
@@ -338,6 +385,45 @@ UserSchema.index(
   }
 );
 
+// Messaging integration indexes
+UserSchema.index(
+  { 'messagingIntegrations.telegram.chatId': 1 },
+  {
+    name: 'telegram_chat_id_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+UserSchema.index(
+  { 'messagingIntegrations.whatsapp.phoneNumber': 1 },
+  {
+    name: 'whatsapp_phone_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+// Phone verification indexes
+UserSchema.index(
+  { phoneNumber: 1 },
+  {
+    name: 'phone_number_idx',
+    background: true,
+    unique: true,
+    sparse: true
+  }
+);
+
+UserSchema.index(
+  { phoneNumber: 1, isPhoneVerified: 1 },
+  {
+    name: 'phone_verified_idx',
+    background: true,
+    sparse: true
+  }
+);
+
 // Virtual for full name
 UserSchema.virtual('fullName').get(function (this: User) {
   return `${this.firstName} ${this.lastName}`;
@@ -362,4 +448,4 @@ UserSchema.virtual('userProfiles', {
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
 
-// Pre-save middleware for password hashing will be handled in the service
+// No additional pre-save middleware needed

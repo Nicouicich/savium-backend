@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from '../schemas/user.schema';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -14,7 +15,10 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 export class UserCommandService {
   private readonly logger = new Logger(UserCommandService.name);
 
-  constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfileDocument>
+  ) {}
 
   /**
    * Create a new user
@@ -70,6 +74,9 @@ export class UserCommandService {
 
       const user = new this.userModel(userData);
       const savedUser = await user.save();
+
+      // Create default personal profile automatically
+      await this.createDefaultProfile((savedUser as any)._id.toString(), savedUser.firstName, savedUser.lastName);
 
       this.logger.log(`User created successfully: ${savedUser.email}`);
       return savedUser;
@@ -143,6 +150,9 @@ export class UserCommandService {
 
       const user = new this.userModel(userData);
       const savedUser = await user.save();
+
+      // Create default personal profile automatically
+      await this.createDefaultProfile((savedUser as any)._id.toString(), savedUser.firstName, savedUser.lastName);
 
       this.logger.log(`OAuth user created successfully: ${savedUser.email}`);
       return savedUser;
@@ -382,5 +392,43 @@ export class UserCommandService {
       oauthProvider: undefined,
       oauthProviderId: undefined
     });
+  }
+
+  /**
+   * Create default personal profile for a new user
+   */
+  private async createDefaultProfile(userId: string, firstName: string, lastName: string): Promise<UserProfileDocument> {
+    try {
+      const defaultProfile = new this.userProfileModel({
+        userId: userId,
+        name: `${firstName} ${lastName}`,
+        displayName: firstName,
+        profileType: 'personal',
+        isDefault: true,
+        isActive: true,
+        privacy: {
+          visibility: 'private',
+          showContactInfo: false,
+          showSocialLinks: false,
+          indexInSearchEngines: false
+        },
+        associatedAccounts: [],
+        metadata: {}
+      });
+
+      const savedProfile = await defaultProfile.save();
+
+      // Update user to reference this profile
+      await this.userModel.findByIdAndUpdate(userId, {
+        $push: { profiles: savedProfile._id },
+        activeProfileId: savedProfile._id
+      });
+
+      this.logger.log(`Default personal profile created for user: ${userId}, profileId: ${(savedProfile as any)._id.toString()}`);
+      return savedProfile;
+    } catch (error) {
+      this.logger.error(`Error creating default profile for user ${userId}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to create default profile');
+    }
   }
 }

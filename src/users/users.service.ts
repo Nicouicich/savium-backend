@@ -63,6 +63,14 @@ export class UsersService {
     return user;
   }
 
+  async findByIdWithPassword(id: string): Promise<UserDocument> {
+    const user = await this.userQueryService.findByIdWithPassword(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async findByEmail(email: string): Promise<UserDocument> {
     const user = await this.userQueryService.findByEmail(email);
     if (!user) {
@@ -220,6 +228,15 @@ export class UsersService {
     this.logger.log(`OAuth info removed for user: ${id}, provider: ${provider}`);
   }
 
+  async linkOAuthAccount(userId: string, provider: string, providerId: string): Promise<void> {
+    await this.userCommandService.updateOAuthInfo(userId, {
+      provider,
+      providerId,
+      isEmailVerified: true
+    });
+    this.logger.log(`OAuth account linked for user: ${userId}, provider: ${provider}`);
+  }
+
   // Profile Management Methods
   async createProfile(userId: string, profileData: CreateProfileDto): Promise<any> {
     return this.userProfileService.createProfile(userId, profileData);
@@ -284,6 +301,70 @@ export class UsersService {
 
   async isAccountLocked(userId: string): Promise<boolean> {
     return this.userAuthService.isAccountLocked(userId);
+  }
+
+  // Phone Verification Methods
+  async updateUserPhone(
+    userId: string,
+    phoneData: {
+      phoneNumber?: string;
+      isPhoneVerified?: boolean;
+      phoneVerifiedAt?: Date;
+    }
+  ): Promise<void> {
+    try {
+      const updateData: any = {};
+
+      if (phoneData.phoneNumber !== undefined) {
+        updateData.phoneNumber = phoneData.phoneNumber;
+      }
+
+      if (phoneData.isPhoneVerified !== undefined) {
+        updateData.isPhoneVerified = phoneData.isPhoneVerified;
+      }
+
+      if (phoneData.phoneVerifiedAt !== undefined) {
+        updateData.phoneVerifiedAt = phoneData.phoneVerifiedAt;
+      }
+
+      await this.userCommandService.updateInternal(userId, updateData);
+
+      this.logger.log('User phone data updated successfully', {
+        userId,
+        hasPhoneNumber: !!phoneData.phoneNumber,
+        isVerified: phoneData.isPhoneVerified
+      });
+    } catch (error) {
+      this.logger.error('Failed to update user phone data', {
+        userId,
+        error: error.message
+      });
+      throw new InternalServerErrorException('Failed to update phone information');
+    }
+  }
+
+  async findByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
+    try {
+      return await this.userQueryService.findByPhoneNumber(phoneNumber);
+    } catch (error) {
+      this.logger.error('Error finding user by phone number', {
+        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Mask phone number for logging (security)
+   */
+  private maskPhoneNumber(phoneNumber: string): string {
+    if (!phoneNumber || phoneNumber.length < 4) {
+      return '***';
+    }
+    const start = phoneNumber.substring(0, 2);
+    const end = phoneNumber.substring(phoneNumber.length - 2);
+    return `${start}***${end}`;
   }
 
   private async hashPassword(password: string): Promise<string> {

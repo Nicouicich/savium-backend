@@ -1,4 +1,17 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UsersService } from './users.service';
@@ -10,6 +23,8 @@ import { Roles } from '@common/decorators/roles.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { UserRole } from '@common/constants/user-roles';
 import { ApiErrorResponse, ApiPaginatedResponse, ApiSuccessResponse } from '@common/decorators/api-response.decorator';
+import type { UserForJWT } from './index';
+import { UserMapper } from './index';
 
 @ApiTags('Users')
 @Controller('users')
@@ -58,6 +73,9 @@ export class UsersController {
   @ApiSuccessResponse(UserResponseDto, 'User profile retrieved successfully')
   async getProfile(@CurrentUser() user: any): Promise<UserResponseDto> {
     const userData = await this.usersService.findById(user.id);
+    if (!userData) {
+      throw new NotFoundException('User not found');
+    }
     return userData.toJSON() as UserResponseDto;
   }
 
@@ -87,6 +105,9 @@ export class UsersController {
   @ApiErrorResponse(404, 'User not found')
   async findOne(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user.toJSON() as UserResponseDto;
   }
 
@@ -94,8 +115,12 @@ export class UsersController {
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiSuccessResponse(UserResponseDto, 'Profile updated successfully')
   @ApiErrorResponse(400, 'Validation failed')
-  async updateProfile(@CurrentUser() user: any, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    const updatedUser = await this.usersService.update(user.id, updateUserDto);
+  async updateProfile(@CurrentUser() user: UserForJWT, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const userData = await this.usersService.findById(user.id);
+    if (!userData) {
+      throw new NotFoundException('User not found');
+    }
+    const updatedUser = await this.usersService.update(UserMapper.getMongoId(userData), updateUserDto);
     return updatedUser.toJSON() as UserResponseDto;
   }
 

@@ -7,7 +7,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 // Configuration imports
-import { appConfig, configValidationSchema, databaseConfig, integrationsConfig, jwtConfig, redisConfig, swaggerConfig, stripeConfig } from './config';
+import {
+  appConfig,
+  awsConfig,
+  configValidationSchema,
+  databaseConfig,
+  googleConfig,
+  facebookConfig,
+  integrationsConfig,
+  jwtConfig,
+  redisConfig,
+  swaggerConfig,
+  stripeConfig
+} from './config';
 
 // Module imports
 import { CommonModule } from '@common/common.module';
@@ -22,11 +34,13 @@ import { GoalsModule } from './goals/goals.module';
 import { AiModule } from './integrations/ai/ai.module';
 import { WhatsappModule } from './integrations/whatsapp/whatsapp.module';
 import { TelegramModule } from './integrations/telegram/telegram.module';
+import { MessagingIntegrationModule } from './integrations/messaging/messaging-integration.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MailModule } from './mail/mail.module';
 import { BillingModule } from './billing/billing.module';
 import { SettingsModule } from './settings/settings.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -41,7 +55,7 @@ import { ReferralsModule } from './referrals/referrals.module';
         allowUnknown: true,
         abortEarly: false
       },
-      load: [appConfig, databaseConfig, redisConfig, jwtConfig, swaggerConfig, integrationsConfig, stripeConfig]
+      load: [appConfig, databaseConfig, redisConfig, jwtConfig, swaggerConfig, integrationsConfig, stripeConfig, googleConfig, facebookConfig, awsConfig]
     }),
 
     // Database Module
@@ -108,13 +122,16 @@ import { ReferralsModule } from './referrals/referrals.module';
     AiModule,
     WhatsappModule,
     TelegramModule,
+    MessagingIntegrationModule,
     NotificationsModule,
     MailModule,
     BillingModule,
     SettingsModule,
-    ReferralsModule
+    ReferralsModule,
+    FilesModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService],
+  exports: []
 })
 export class AppModule {}

@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 import { StripePaymentsController } from './stripe-payments.controller';
 import { StripeService } from '../services/stripe.service';
 import { StripeWebhookService } from '../services/stripe-webhook.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
 

@@ -17,7 +17,7 @@ export class UserAuthService {
 
   async createAuthRecord(userId: string): Promise<UserAuthDocument> {
     const authRecord = new this.userAuthModel({
-      userId: new Types.ObjectId(userId),
+      userId: userId,
       refreshTokens: [],
       isEmailVerified: false,
       failedLoginAttempts: 0,
@@ -31,7 +31,7 @@ export class UserAuthService {
   }
 
   async findByUserId(userId: string): Promise<UserAuthDocument> {
-    const authRecord = await this.userAuthModel.findOne({ userId: new Types.ObjectId(userId) });
+    const authRecord = await this.userAuthModel.findOne({ userId: userId });
     if (!authRecord) {
       throw new NotFoundException('User auth record not found');
     }
@@ -46,7 +46,7 @@ export class UserAuthService {
     this.logger.debug(`Adding refresh token for user: ${userId}, token starts with: ${refreshToken.substring(0, 20)}...`);
 
     const result = await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $push: {
           refreshTokens: {
@@ -67,14 +67,14 @@ export class UserAuthService {
   }
 
   async removeRefreshToken(userId: string, refreshToken: string): Promise<void> {
-    await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { refreshTokens: { token: refreshToken } } });
+    await this.userAuthModel.updateOne({ userId: userId }, { $pull: { refreshTokens: { token: refreshToken } } });
 
     this.logger.log(`Refresh token removed for user: ${userId}`);
   }
 
   async clearAllRefreshTokens(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: { refreshTokens: [] },
         $unset: { activeSessions: 1 }
@@ -93,7 +93,7 @@ export class UserAuthService {
         authRecord.refreshTokens?.some(tokenData => {
           const isMatch = tokenData.token === refreshToken;
           const isValid = tokenData.expiresAt > new Date();
-          this.logger.log(`Token match: ${isMatch}, valid: ${isValid}, expires: ${tokenData.expiresAt}`);
+          this.logger.log(`Token match: ${isMatch}, valid: ${isValid}, expires: ${tokenData.expiresAt.toISOString()}`);
           return isMatch && isValid;
         }) || false;
 
@@ -111,12 +111,12 @@ export class UserAuthService {
 
   // Email verification
   async setEmailVerificationToken(userId: string, token: string): Promise<void> {
-    await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $set: { emailVerificationToken: token } });
+    await this.userAuthModel.updateOne({ userId: userId }, { $set: { emailVerificationToken: token } });
   }
 
   async verifyEmail(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: { isEmailVerified: true },
         $unset: { emailVerificationToken: 1 }
@@ -132,7 +132,7 @@ export class UserAuthService {
   // Password reset
   async setPasswordResetToken(userId: string, token: string, expires: Date): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: {
           passwordResetToken: token,
@@ -144,7 +144,7 @@ export class UserAuthService {
 
   async clearPasswordResetToken(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $unset: {
           passwordResetToken: 1,
@@ -174,7 +174,7 @@ export class UserAuthService {
     const deviceId = deviceInfo.deviceId || uuidv4();
 
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $push: {
           activeSessions: {
@@ -193,7 +193,7 @@ export class UserAuthService {
   async updateSessionActivity(userId: string, deviceId: string): Promise<void> {
     await this.userAuthModel.updateOne(
       {
-        userId: new Types.ObjectId(userId),
+        userId: userId,
         'activeSessions.deviceId': deviceId
       },
       {
@@ -207,7 +207,7 @@ export class UserAuthService {
 
   async revokeSession(userId: string, deviceId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $pull: {
           activeSessions: { deviceId }
@@ -224,7 +224,7 @@ export class UserAuthService {
   // Security features
   async recordFailedLogin(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $inc: { failedLoginAttempts: 1 }
       }
@@ -233,7 +233,7 @@ export class UserAuthService {
 
   async resetFailedLoginAttempts(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: { failedLoginAttempts: 0 },
         $unset: { lockedUntil: 1 }
@@ -245,7 +245,7 @@ export class UserAuthService {
     const lockUntil = new Date(Date.now() + lockDurationMinutes * 60 * 1000);
 
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: { lockedUntil: lockUntil }
       }
@@ -262,7 +262,7 @@ export class UserAuthService {
   // Two-factor authentication
   async enableTwoFactor(userId: string, secret: string, backupCodes: string[]): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: {
           twoFactorEnabled: true,
@@ -276,7 +276,7 @@ export class UserAuthService {
 
   async disableTwoFactor(userId: string): Promise<void> {
     await this.userAuthModel.updateOne(
-      { userId: new Types.ObjectId(userId) },
+      { userId: userId },
       {
         $set: { twoFactorEnabled: false },
         $unset: {
@@ -289,14 +289,14 @@ export class UserAuthService {
   }
 
   async consumeBackupCode(userId: string, code: string): Promise<boolean> {
-    const result = await this.userAuthModel.updateOne({ userId: new Types.ObjectId(userId) }, { $pull: { backupCodes: code } });
+    const result = await this.userAuthModel.updateOne({ userId: userId }, { $pull: { backupCodes: code } });
 
     return result.modifiedCount > 0;
   }
 
   // Cleanup methods for maintenance
   async cleanupExpiredRefreshTokens(userId?: string): Promise<number> {
-    const query = userId ? { userId: new Types.ObjectId(userId) } : {};
+    const query = userId ? { userId: userId } : {};
 
     const result = await this.userAuthModel.updateMany(query, {
       $pull: {

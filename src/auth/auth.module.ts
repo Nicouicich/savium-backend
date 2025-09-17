@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 import { UsersModule } from '../users/users.module';
 import { CommonModule } from '@common/common.module';
 
@@ -35,8 +37,8 @@ import { CommonModule } from '@common/common.module';
 
   controllers: [AuthController],
 
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, GoogleStrategy, FacebookStrategy],
 
-  exports: [AuthService, JwtStrategy, JwtRefreshStrategy]
+  exports: [AuthService, JwtStrategy, JwtRefreshStrategy, GoogleStrategy, FacebookStrategy]
 })
 export class AuthModule {}

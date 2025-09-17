@@ -4,7 +4,7 @@ export default registerAs('integrations', () => ({
   // OpenAI Configuration
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4o-mini',
+    model: 'gpt-5-nano',
     maxTokens: 1000,
     temperature: 0.3,
     timeout: 30000 // 30 seconds

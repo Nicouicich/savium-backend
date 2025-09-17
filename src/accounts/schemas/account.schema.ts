@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { AccountStatus, AccountType } from '@common/constants/account-types';
 import { AccountRole } from '@common/constants/user-roles';
+import { CoupleFinancialModel } from '@common/constants/couple-types';
 
 export type AccountDocument = Account & Document;
 
@@ -123,6 +124,24 @@ export class Account {
 
   @Prop({ type: Date })
   deletedAt?: Date;
+
+  // Couple-specific settings (only for COUPLE account type)
+  @Prop({
+    type: String,
+    enum: Object.values(CoupleFinancialModel),
+    sparse: true
+  })
+  coupleFinancialModel?: CoupleFinancialModel;
+
+  @Prop({ type: Boolean, sparse: true })
+  bothPartnersAccepted?: boolean;
+
+  @Prop({ type: Date, sparse: true })
+  coupleSettingsLastUpdated?: Date;
+
+  // Reference to detailed couple settings
+  @Prop({ type: Types.ObjectId, ref: 'CoupleSettings', sparse: true })
+  coupleSettingsId?: Types.ObjectId;
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);
@@ -203,6 +222,25 @@ AccountSchema.index(
   { 'pendingInvitations.status': 1, 'pendingInvitations.expiresAt': 1 },
   {
     name: 'invitation_status_expires_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+// Couple-specific indexes
+AccountSchema.index(
+  { type: 1, coupleFinancialModel: 1, bothPartnersAccepted: 1 },
+  {
+    name: 'couple_type_model_accepted_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+AccountSchema.index(
+  { coupleSettingsId: 1 },
+  {
+    name: 'couple_settings_ref_idx',
     background: true,
     sparse: true
   }

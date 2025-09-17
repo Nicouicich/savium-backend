@@ -68,11 +68,16 @@ export class AiController {
       return {
         message: 'AI integration not implemented',
         note: 'This endpoint structure is ready but AI processing is not active',
-        mockData: await this.aiService.categorizeExpense(description, amount, vendor)
+        mockData: await this.aiService.categorizeExpense(
+          description,
+          amount,
+          ['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Hogar', 'Otros'],
+          vendor
+        )
       };
     }
 
-    return this.aiService.categorizeExpense(description, amount, vendor);
+    return this.aiService.categorizeExpense(description, amount, ['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Hogar', 'Otros'], vendor);
   }
 
   @Post('analyze-spending')

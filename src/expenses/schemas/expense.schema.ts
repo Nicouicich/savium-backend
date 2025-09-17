@@ -1,13 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Currency, PaymentMethod } from '@common/constants/expense-categories';
+import { CoupleExpenseType, CoupleReactionType } from '@common/constants/couple-types';
 
-export type ExpenseDocument = Expense & Document;
+export type ExpenseDocument = Expense &
+  Document & {
+    createdAt: Date;
+    updatedAt: Date;
+  };
 
 @Schema()
 export class AttachedFile {
   @Prop({ required: true })
-  filename: string;
+  fileId: string; // References FileMetadata.fileId
 
   @Prop({ required: true })
   originalName: string;
@@ -19,13 +24,125 @@ export class AttachedFile {
   size: number;
 
   @Prop({ required: true })
-  path: string;
+  fileType: string; // image, audio, document, video
 
   @Prop()
-  url?: string;
+  purpose?: string; // receipt, invoice, proof_of_payment, etc.
+
+  @Prop()
+  url?: string; // Direct S3 URL or CDN URL
 
   @Prop({ type: Date, default: Date.now })
-  uploadedAt: Date;
+  attachedAt: Date;
+
+  @Prop()
+  uploadSource?: string; // whatsapp, telegram, web, mobile
+
+  // Legacy fields for backward compatibility (deprecated)
+  @Prop()
+  filename?: string; // @deprecated: use fileId instead
+
+  @Prop()
+  path?: string; // @deprecated: use S3 key from FileMetadata instead
+}
+
+@Schema()
+export class ExpenseComment {
+  @Prop({ type: String, required: true, index: true })
+  userId: string; // User UUID
+
+  @Prop({ required: true, trim: true })
+  text: string;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  editedAt?: Date;
+
+  @Prop({ default: false })
+  isEdited: boolean;
+}
+
+@Schema()
+export class ExpenseReaction {
+  @Prop({ type: String, required: true, index: true })
+  userId: string; // User UUID
+
+  @Prop({ enum: CoupleReactionType, required: true })
+  type: CoupleReactionType;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
+}
+
+@Schema()
+export class CoupleExpenseData {
+  @Prop({
+    type: String,
+    enum: Object.values(CoupleExpenseType),
+    default: CoupleExpenseType.SHARED
+  })
+  expenseType: CoupleExpenseType;
+
+  // For shared expenses - split details
+  @Prop({
+    type: {
+      partner1UserId: { type: String },
+      partner2UserId: { type: String },
+      partner1Amount: { type: Number, min: 0 },
+      partner2Amount: { type: Number, min: 0 },
+      splitMethod: {
+        type: String,
+        enum: ['equal', 'percentage', 'amount'],
+        default: 'equal'
+      },
+      partner1Percentage: { type: Number, min: 0, max: 100 },
+      partner2Percentage: { type: Number, min: 0, max: 100 }
+    }
+  })
+  splitDetails?: {
+    partner1UserId: string; // User UUID
+    partner2UserId: string; // User UUID
+    partner1Amount: number;
+    partner2Amount: number;
+    splitMethod: 'equal' | 'percentage' | 'amount';
+    partner1Percentage?: number;
+    partner2Percentage?: number;
+  };
+
+  // Gift mode
+  @Prop({ default: false })
+  isGift: boolean;
+
+  @Prop({ type: String, index: true })
+  giftFor?: string; // User UUID
+
+  @Prop({ type: Date })
+  revealDate?: Date;
+
+  @Prop({ default: false })
+  isRevealed: boolean;
+
+  @Prop({ type: Date })
+  revealedAt?: Date;
+
+  // Comments and reactions (couple-specific features)
+  @Prop({ type: [ExpenseComment], default: [] })
+  comments: ExpenseComment[];
+
+  @Prop({ type: [ExpenseReaction], default: [] })
+  reactions: ExpenseReaction[];
+
+  // Settlement tracking
+  @Prop({ default: false })
+  isSettled: boolean;
+
+  @Prop({ type: Date })
+  settledAt?: Date;
+
+  @Prop({ type: String, index: true })
+  settledBy?: string; // User UUID
 }
 
 @Schema()
@@ -54,6 +171,16 @@ export class ExpenseMetadata {
 
   @Prop({ type: Object, default: {} })
   additional?: Record<string, any>;
+
+  // Context parsing information
+  @Prop()
+  parsedContext?: string; // 'couple', 'personal', 'family', 'business'
+
+  @Prop()
+  originalContext?: string; // Original @context from message
+
+  @Prop()
+  contextConfidence?: number; // Confidence in parsed context (0-1)
 }
 
 @Schema({ timestamps: true })
@@ -79,8 +206,8 @@ export class Expense {
   @Prop({ type: Types.ObjectId, ref: 'Account', required: true })
   accountId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  userId: Types.ObjectId;
+  @Prop({ type: String, required: true, index: true })
+  userId: string; // User UUID
 
   @Prop({ enum: PaymentMethod, default: PaymentMethod.CASH })
   paymentMethod: PaymentMethod;
@@ -93,6 +220,10 @@ export class Expense {
 
   @Prop({ type: [AttachedFile], default: [] })
   attachedFiles: AttachedFile[];
+
+  // New file references using our S3 file system
+  @Prop({ type: [String], default: [] })
+  fileIds: string[]; // Array of FileMetadata.fileId references
 
   @Prop({ default: false })
   isRecurring: boolean;
@@ -108,14 +239,14 @@ export class Expense {
   @Prop({ default: false })
   isSharedExpense: boolean;
 
-  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
-  sharedWith: Types.ObjectId[];
+  @Prop({ type: [String], default: [], index: true })
+  sharedWith: string[]; // User UUIDs
 
   @Prop({ type: Object })
   splitDetails?: {
     totalAmount: number;
     splits: {
-      userId: Types.ObjectId;
+      userId: string; // User UUID
       amount: number;
       percentage?: number;
       paid: boolean;
@@ -129,8 +260,8 @@ export class Expense {
   @Prop()
   reviewReason?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  reviewedBy?: Types.ObjectId;
+  @Prop({ type: String, index: true })
+  reviewedBy?: string; // User UUID
 
   @Prop({ type: Date })
   reviewedAt?: Date;
@@ -156,8 +287,12 @@ export class Expense {
   @Prop({ type: Date })
   deletedAt?: Date;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  deletedBy?: Types.ObjectId;
+  @Prop({ type: String, index: true })
+  deletedBy?: string; // User UUID
+
+  // Couple-specific data (only for couple account expenses)
+  @Prop({ type: CoupleExpenseData })
+  coupleData?: CoupleExpenseData;
 }
 
 export const ExpenseSchema = SchemaFactory.createForClass(Expense);
@@ -256,5 +391,60 @@ ExpenseSchema.index(
   {
     name: 'account_amount_date_idx',
     background: true
+  }
+);
+
+// Couple-specific indexes
+ExpenseSchema.index(
+  { accountId: 1, 'coupleData.expenseType': 1, date: -1 },
+  {
+    name: 'couple_expense_type_date_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+ExpenseSchema.index(
+  { accountId: 1, 'coupleData.isGift': 1, 'coupleData.revealDate': 1 },
+  {
+    name: 'couple_gift_reveal_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+ExpenseSchema.index(
+  { accountId: 1, 'coupleData.isSettled': 1, createdAt: -1 },
+  {
+    name: 'couple_settlement_status_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+ExpenseSchema.index(
+  { 'coupleData.splitDetails.partner1UserId': 1, 'coupleData.splitDetails.partner2UserId': 1 },
+  {
+    name: 'couple_split_partners_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+ExpenseSchema.index(
+  { accountId: 1, 'coupleData.comments.userId': 1, 'coupleData.comments.createdAt': -1 },
+  {
+    name: 'couple_comments_user_date_idx',
+    background: true,
+    sparse: true
+  }
+);
+
+ExpenseSchema.index(
+  { 'metadata.parsedContext': 1, userId: 1, date: -1 },
+  {
+    name: 'context_user_date_idx',
+    background: true,
+    sparse: true
   }
 );

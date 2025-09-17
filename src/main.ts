@@ -131,6 +131,33 @@ async function bootstrap() {
     customCssUrl: ['https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css']
   });
 
+  // Graceful shutdown handlers
+  const gracefulShutdown = async (signal: string) => {
+    logger.log(`📴 Received ${signal}. Starting graceful shutdown...`);
+    try {
+      await app.close();
+      logger.log('✅ Application closed successfully');
+      process.exit(0);
+    } catch (error) {
+      logger.error('❌ Error during shutdown:', error);
+      process.exit(1);
+    }
+  };
+
+  // Listen for termination signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  // Handle unhandled rejections and exceptions
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  });
+
+  process.on('uncaughtException', error => {
+    logger.error('Uncaught Exception:', error);
+    gracefulShutdown('UNCAUGHT_EXCEPTION');
+  });
+
   // Start server
   const port = configService.get('app.port');
   await app.listen(port);

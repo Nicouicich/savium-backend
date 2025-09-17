@@ -1,9 +1,10 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { ValidationPipe } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from '../src/users/users.module';
 
 // Interceptors
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
@@ -29,6 +30,7 @@ import { ErrorRecoveryService } from './services/error-recovery.service';
 import { HealthCheckService } from './services/health-check.service';
 import { TokenBlacklistService } from './services/token-blacklist.service';
 import { TwoFactorAuthService } from './services/two-factor-auth.service';
+import { SmsVerificationService } from './services/sms-verification.service';
 
 // Filters
 import { HttpExceptionFilter } from './filters/http-exception.filter';
@@ -64,6 +66,7 @@ export * from './services/error-recovery.service';
 export * from './services/health-check.service';
 export * from './services/token-blacklist.service';
 export * from './services/two-factor-auth.service';
+export * from './services/sms-verification.service';
 export * from './guards/two-factor-auth.guard';
 
 @Global()
@@ -81,7 +84,9 @@ export * from './guards/two-factor-auth.guard';
         }
       }),
       inject: [ConfigService]
-    })
+    }),
+    // Import UsersModule to access UsersService for SMS verification
+    forwardRef(() => UsersModule)
   ],
   providers: [
     // Global Response Transform Interceptor
@@ -121,6 +126,7 @@ export * from './guards/two-factor-auth.guard';
     HealthCheckService,
     TokenBlacklistService,
     TwoFactorAuthService,
+    SmsVerificationService,
   ],
   exports: [
     JwtAuthGuard,
@@ -139,6 +145,7 @@ export * from './guards/two-factor-auth.guard';
     HealthCheckService,
     TokenBlacklistService,
     TwoFactorAuthService,
+    SmsVerificationService,
   ],
 })
 export class CommonModule {}

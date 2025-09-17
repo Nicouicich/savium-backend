@@ -5,6 +5,7 @@ import { ExpensesService } from './expenses.service';
 import { ExpensesController } from './expenses.controller';
 import { ExpensesRepository } from './expenses.repository';
 import { FileUploadService } from './file-upload.service';
+import { PdfExportService } from './pdf-export.service';
 import { Expense, ExpenseSchema } from './schemas/expense.schema';
 import { AccountsModule } from '../accounts/accounts.module';
 import { CategoriesModule } from '../categories/categories.module';
@@ -31,7 +32,7 @@ import { CommonModule } from '@common/common.module';
     CommonModule
   ],
   controllers: [ExpensesController],
-  providers: [ExpensesService, ExpensesRepository, FileUploadService],
+  providers: [ExpensesService, ExpensesRepository, FileUploadService, PdfExportService],
   exports: [ExpensesService, ExpensesRepository]
 })
 export class ExpensesModule {}

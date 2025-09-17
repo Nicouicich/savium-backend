@@ -77,8 +77,8 @@ export class Budget {
   @Prop({ type: Types.ObjectId, ref: 'Account', required: true })
   accountId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  createdBy: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
+  createdBy: Types.ObjectId; // User ObjectId
 
   @Prop({ enum: Currency, default: Currency.USD })
   currency: Currency;
@@ -116,8 +116,8 @@ export class Budget {
   @Prop()
   renewedFromId?: Types.ObjectId; // Reference to previous budget if auto-renewed
 
-  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
-  allowedUsers: Types.ObjectId[]; // Users who can view this budget
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [], index: true })
+  allowedUsers: Types.ObjectId[]; // User ObjectIds who can view this budget
 
   @Prop({ default: false })
   isTemplate: boolean; // Can be used as template for new budgets

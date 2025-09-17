@@ -15,7 +15,7 @@ describe('AI Service Validation', () => {
           useValue: {
             get: jest.fn().mockImplementation((key: string) => {
               const config = {
-                'integrations.openai.apiKey': 'test-api-key'
+                OPENAI_API_KEY: 'mock-test-api-key-for-testing'
               };
               return config[key];
             })
@@ -57,7 +57,7 @@ describe('AI Service Validation', () => {
             useValue: {
               get: jest.fn().mockImplementation((key: string) => {
                 const config = {
-                  'integrations.openai.apiKey': 'placeholder-openai-key'
+                  OPENAI_API_KEY: 'placeholder-openai-key'
                 };
                 return config[key];
               })
@@ -83,7 +83,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should return mock category suggestions', async () => {
-      const result = await mockService.categorizeExpense('Coffee purchase', 5.99, 'Starbucks');
+      const result = await mockService.categorizeExpense('Coffee purchase', 5.99, ['Food'], 'Starbucks');
 
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
@@ -155,7 +155,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should handle categorization structure correctly', async () => {
-      const result = await service.categorizeExpense('Test expense', 100);
+      const result = await service.categorizeExpense('Test expense', 100, ['Food', 'Transport']);
 
       expect(Array.isArray(result)).toBe(true);
       if (result.length > 0) {
@@ -164,6 +164,58 @@ describe('AI Service Validation', () => {
         expect(result[0]).toHaveProperty('confidence');
         expect(result[0]).toHaveProperty('reasoning');
       }
+    });
+  });
+
+  describe('New Transaction Processing Features', () => {
+    it('should process text messages for transactions', async () => {
+      const categories = ['Alimentación', 'Transporte', 'Ingresos', 'Otros'];
+
+      // Test expense detection
+      const expenseResult = await mockService.processTextMessage('gasté 50 en almuerzo', categories);
+      expect(expenseResult).toBeDefined();
+      expect(expenseResult).toHaveProperty('hasTransaction');
+
+      // Test income detection
+      const incomeResult = await mockService.processTextMessage('recibí 1000 de sueldo', categories);
+      expect(incomeResult).toBeDefined();
+      expect(incomeResult).toHaveProperty('hasTransaction');
+    });
+
+    it('should detect commands in messages', async () => {
+      // Test export command
+      const exportResult = await mockService.detectCommand('exportar transacciones de enero');
+      expect(exportResult).toBeDefined();
+      expect(exportResult).toHaveProperty('isCommand');
+
+      // Test balance command
+      const balanceResult = await mockService.detectCommand('cuánto gasté este mes');
+      expect(balanceResult).toBeDefined();
+      expect(balanceResult).toHaveProperty('isCommand');
+    });
+
+    it('should handle installment detection', async () => {
+      const categories = ['Tecnología', 'Otros'];
+      const installmentResult = await mockService.processTextMessage('compré laptop en 12 cuotas de 100', categories);
+      expect(installmentResult).toBeDefined();
+      expect(installmentResult).toHaveProperty('hasTransaction');
+      // Should detect installments if enabled
+    });
+  });
+
+  describe('Enhanced Ticket Processing', () => {
+    it('should support income/expense categorization in images', async () => {
+      const buffer = Buffer.from('test-receipt-data');
+      const result = await mockService.processTicketImage(buffer, 'image/jpeg');
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('confidence');
+      expect(result).toHaveProperty('extractedText');
+      // New properties for enhanced categorization
+      expect(result).toHaveProperty('type'); // 'expense' | 'income'
+      expect(result).toHaveProperty('isRecurring');
+      expect(result).toHaveProperty('installments');
+      expect(result).toHaveProperty('installmentInfo');
     });
   });
 
@@ -179,6 +231,19 @@ describe('AI Service Validation', () => {
       const result = await service.generateBudgetSuggestions([], 'personal');
       expect(result).toBeDefined();
       expect(result.suggestedBudgets).toBeDefined();
+    });
+
+    it('should handle invalid commands gracefully', async () => {
+      const result = await mockService.detectCommand('this is not a command');
+      expect(result).toBeDefined();
+      expect(result.isCommand).toBe(false);
+    });
+
+    it('should handle non-transaction text gracefully', async () => {
+      const categories = ['Alimentación', 'Otros'];
+      const result = await mockService.processTextMessage('hello world', categories);
+      expect(result).toBeDefined();
+      expect(result.hasTransaction).toBe(false);
     });
   });
 });
@@ -202,12 +267,12 @@ describe('AI Service Production Configuration', () => {
 
   it('should validate AI service configuration structure', () => {
     const expectedModels = {
-      vision: 'gpt-4-vision-preview',
-      text: 'gpt-3.5-turbo'
+      vision: 'gpt-4o',
+      text: 'gpt-4o-mini'
     };
 
     // Validate that the service uses appropriate models
-    expect(expectedModels.vision).toBe('gpt-4-vision-preview');
-    expect(expectedModels.text).toBe('gpt-3.5-turbo');
+    expect(expectedModels.vision).toBe('gpt-4o');
+    expect(expectedModels.text).toBe('gpt-4o-mini');
   });
 });

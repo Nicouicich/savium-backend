@@ -1,5 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { WhatsappService } from './whatsapp.service';
 
 @ApiTags('WhatsApp Integration')
@@ -21,38 +23,56 @@ export class WhatsappController {
   }
 
   @Get('webhook')
+  @Public()
   @ApiOperation({
     summary: 'Verify WhatsApp webhook',
     description: 'Webhook verification endpoint for WhatsApp Business API'
   })
   @ApiQuery({
     name: 'hub.mode',
-    required: true,
+    required: false,
     description: 'Verification mode'
   })
   @ApiQuery({
     name: 'hub.verify_token',
-    required: true,
+    required: false,
     description: 'Verification token'
   })
   @ApiQuery({
     name: 'hub.challenge',
-    required: true,
+    required: false,
     description: 'Challenge string'
   })
   @ApiResponse({ status: 200, description: 'Webhook verified successfully' })
   @ApiResponse({ status: 403, description: 'Webhook verification failed' })
-  async verifyWebhook(@Query('hub.mode') mode: string, @Query('hub.verify_token') verifyToken: string, @Query('hub.challenge') challenge: string) {
-    const result = this.whatsappService.verifyWebhook(mode, verifyToken, challenge);
-
-    if (result) {
-      return result;
+  async verifyWebhook(@Query('hub.mode') mode?: string, @Query('hub.verify_token') verifyToken?: string, @Query('hub.challenge') challenge?: string) {
+    // If no parameters provided, return a simple OK response for Facebook's initial check
+    if (!mode && !verifyToken && !challenge) {
+      return {
+        status: 'ok',
+        message: 'WhatsApp webhook endpoint is ready',
+        timestamp: new Date().toISOString()
+      };
     }
 
-    throw new Error('Webhook verification failed');
+    // If verification parameters are provided, perform verification
+    if (mode && verifyToken && challenge) {
+      const result = this.whatsappService.verifyWebhook(mode, verifyToken, challenge);
+
+      if (result) {
+        // Return the challenge directly for Facebook verification
+        return result;
+      }
+
+      throw new Error('Webhook verification failed');
+    }
+
+    // If partial parameters provided, return error
+    throw new Error('Invalid webhook verification request');
   }
 
   @Post('webhook')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Handle WhatsApp webhook',

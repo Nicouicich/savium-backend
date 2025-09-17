@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { TelegramService } from './telegram.service';
 
 @ApiTags('Telegram Integration')
@@ -21,10 +22,11 @@ export class TelegramController {
   }
 
   @Post('webhook')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Handle Telegram webhook',
-    description: 'Process incoming Telegram bot updates (structure only - not implemented)'
+    description: 'Process incoming Telegram bot updates and messages'
   })
   @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   async handleWebhook(@Body() update: any) {
@@ -44,11 +46,11 @@ export class TelegramController {
   @Post('set-webhook')
   @ApiOperation({
     summary: 'Set Telegram webhook',
-    description: 'Configure webhook URL for Telegram bot (structure only - not implemented)'
+    description: 'Configure webhook URL for Telegram bot using real API'
   })
   @ApiResponse({
     status: 200,
-    description: 'Webhook configured successfully (mock)'
+    description: 'Webhook configured successfully'
   })
   async setWebhook(@Body() body: { url: string }) {
     const { url } = body;
@@ -68,9 +70,9 @@ export class TelegramController {
   @Post('send')
   @ApiOperation({
     summary: 'Send Telegram message',
-    description: 'Send a message via Telegram Bot API (structure only - not implemented)'
+    description: 'Send a message via Telegram Bot API'
   })
-  @ApiResponse({ status: 200, description: 'Message sent successfully (mock)' })
+  @ApiResponse({ status: 200, description: 'Message sent successfully' })
   async sendMessage(@Body() body: { chatId: number; message: string }) {
     const { chatId, message } = body;
 

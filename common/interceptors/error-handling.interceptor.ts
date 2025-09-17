@@ -11,7 +11,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Request } from 'express';
 import { BaseException } from '../exceptions/base.exception';
-import { requestContext } from './logging.interceptor';
+import { RequestContextService } from './request-context';
 
 @Injectable()
 export class ErrorHandlingInterceptor implements NestInterceptor {
@@ -23,7 +23,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       catchError((error) => {
-        const contextData = requestContext.getStore();
+        const contextData = RequestContextService.getContext();
         
         // Simplified error logging - only log if it's a server error or in development
         const isDevelopment = process.env.NODE_ENV === 'development';

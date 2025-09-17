@@ -16,10 +16,10 @@ export class AccountsRepository {
   async create(userId: string, createAccountDto: CreateAccountDto): Promise<AccountDocument> {
     const account = new this.accountModel({
       ...createAccountDto,
-      owner: new Types.ObjectId(userId),
+      owner: userId,
       members: [
         {
-          userId: new Types.ObjectId(userId),
+          userId: userId,
           role: AccountRole.OWNER,
           joinedAt: new Date(),
           isActive: true,
@@ -56,9 +56,9 @@ export class AccountsRepository {
       {
         $match: {
           $or: [
-            { owner: new Types.ObjectId(userId) },
+            { owner: userId },
             {
-              'members.userId': new Types.ObjectId(userId),
+              'members.userId': userId,
               'members.isActive': true
             }
           ],
@@ -174,7 +174,7 @@ export class AccountsRepository {
         {
           $push: {
             members: {
-              userId: new Types.ObjectId(userId),
+              userId: userId,
               role,
               joinedAt: new Date(),
               isActive: true,
@@ -263,7 +263,7 @@ export class AccountsRepository {
           $push: {
             pendingInvitations: {
               ...invitation,
-              invitedBy: new Types.ObjectId(invitation.invitedBy),
+              invitedBy: invitation.invitedBy,
               invitedAt: new Date(),
               status: 'pending'
             }

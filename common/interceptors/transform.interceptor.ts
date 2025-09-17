@@ -35,6 +35,11 @@ export class TransformInterceptor<T>
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.url;
 
+    // Skip transform for WhatsApp webhook verification endpoint
+    if (path.includes('/webhook') && request.query['hub.challenge']) {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => {
         // Handle different response types
@@ -51,10 +56,12 @@ export class TransformInterceptor<T>
 
         if (data && typeof data === 'object' && 'message' in data) {
           // Response with custom message
+          const messageData = data as Record<string, unknown> & { message: unknown };
+          const message = typeof messageData.message === 'string' ? messageData.message : undefined;
           return {
             success: true,
-            data: data.data || data,
-            message: data.message,
+            data: 'data' in messageData ? messageData.data : data,
+            message,
             timestamp: new Date().toISOString(),
             path,
           };

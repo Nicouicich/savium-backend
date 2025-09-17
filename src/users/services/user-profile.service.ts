@@ -32,7 +32,9 @@ export interface CreateProfileDto {
   };
 }
 
-export interface UpdateProfileDto extends Partial<CreateProfileDto> {}
+export interface UpdateProfileDto extends Partial<CreateProfileDto> {
+  // Additional properties for update operations can be added here
+}
 
 @Injectable()
 export class UserProfileService {
@@ -45,12 +47,12 @@ export class UserProfileService {
 
   async createProfile(userId: string, createProfileDto: CreateProfileDto): Promise<UserProfileDocument> {
     // Check if this is the first profile for the user
-    const existingProfiles = await this.userProfileModel.find({ userId: new Types.ObjectId(userId) });
+    const existingProfiles = await this.userProfileModel.find({ userId: userId });
     const isFirstProfile = existingProfiles.length === 0;
 
     // Create the new profile
     const profile = new this.userProfileModel({
-      userId: new Types.ObjectId(userId),
+      userId: userId,
       ...createProfileDto,
       isDefault: isFirstProfile, // First profile becomes default
       isActive: true,
@@ -67,21 +69,21 @@ export class UserProfileService {
 
     // Update user's profile references
     await this.userModel.updateOne(
-      { _id: new Types.ObjectId(userId) },
+      { _id: userId },
       {
         $push: { profiles: savedProfile._id },
         ...(isFirstProfile ? { activeProfileId: savedProfile._id } : {})
       }
     );
 
-    this.logger.log(`Profile created for user: ${userId}, profileId: ${savedProfile._id}`);
+    this.logger.log(`Profile created for user: ${userId}, profileId: ${(savedProfile._id as any).toString()}`);
     return savedProfile;
   }
 
   async getProfilesByUserId(userId: string): Promise<UserProfileDocument[]> {
     return this.userProfileModel
       .find({
-        userId: new Types.ObjectId(userId),
+        userId: userId,
         isActive: true
       })
       .sort({ isDefault: -1, createdAt: -1 });
@@ -89,7 +91,7 @@ export class UserProfileService {
 
   async getProfileById(profileId: string): Promise<UserProfileDocument> {
     const profile = await this.userProfileModel.findOne({
-      _id: new Types.ObjectId(profileId),
+      _id: profileId,
       isActive: true
     });
 
@@ -114,7 +116,7 @@ export class UserProfileService {
 
   async getDefaultProfile(userId: string): Promise<UserProfileDocument | null> {
     return this.userProfileModel.findOne({
-      userId: new Types.ObjectId(userId),
+      userId: userId,
       isDefault: true,
       isActive: true
     });
@@ -138,8 +140,8 @@ export class UserProfileService {
   async switchActiveProfile(userId: string, profileId: string): Promise<void> {
     // Verify the profile belongs to the user
     const profile = await this.userProfileModel.findOne({
-      _id: new Types.ObjectId(profileId),
-      userId: new Types.ObjectId(userId),
+      _id: profileId,
+      userId: userId,
       isActive: true
     });
 
@@ -148,7 +150,7 @@ export class UserProfileService {
     }
 
     // Update user's active profile
-    await this.userModel.updateOne({ _id: new Types.ObjectId(userId) }, { $set: { activeProfileId: new Types.ObjectId(profileId) } });
+    await this.userModel.updateOne({ _id: userId }, { $set: { activeProfileId: profileId } });
 
     this.logger.log(`Active profile switched for user: ${userId} to profile: ${profileId}`);
   }
@@ -156,8 +158,8 @@ export class UserProfileService {
   async setDefaultProfile(userId: string, profileId: string): Promise<void> {
     // Verify the profile belongs to the user
     const profile = await this.userProfileModel.findOne({
-      _id: new Types.ObjectId(profileId),
-      userId: new Types.ObjectId(userId),
+      _id: profileId,
+      userId: userId,
       isActive: true
     });
 
@@ -166,10 +168,10 @@ export class UserProfileService {
     }
 
     // Remove default from all other profiles of this user
-    await this.userProfileModel.updateMany({ userId: new Types.ObjectId(userId) }, { $set: { isDefault: false } });
+    await this.userProfileModel.updateMany({ userId: userId }, { $set: { isDefault: false } });
 
     // Set this profile as default
-    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $set: { isDefault: true } });
+    await this.userProfileModel.updateOne({ _id: profileId }, { $set: { isDefault: true } });
 
     this.logger.log(`Default profile set for user: ${userId} to profile: ${profileId}`);
   }
@@ -188,14 +190,14 @@ export class UserProfileService {
     // Mark as inactive instead of hard delete
     await this.userProfileModel.updateOne(
       {
-        _id: new Types.ObjectId(profileId),
-        userId: new Types.ObjectId(userId)
+        _id: profileId,
+        userId: userId
       },
       { $set: { isActive: false } }
     );
 
     // Remove from user's profile array
-    await this.userModel.updateOne({ _id: new Types.ObjectId(userId) }, { $pull: { profiles: new Types.ObjectId(profileId) } });
+    await this.userModel.updateOne({ _id: userId }, { $pull: { profiles: profileId } });
 
     // If this was the active profile, switch to default
     if (isActiveProfile) {
@@ -216,11 +218,11 @@ export class UserProfileService {
   }
 
   async associateWithAccount(profileId: string, accountId: string): Promise<void> {
-    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $addToSet: { associatedAccounts: new Types.ObjectId(accountId) } });
+    await this.userProfileModel.updateOne({ _id: profileId }, { $addToSet: { associatedAccounts: new Types.ObjectId(accountId) } });
   }
 
   async dissociateFromAccount(profileId: string, accountId: string): Promise<void> {
-    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $pull: { associatedAccounts: new Types.ObjectId(accountId) } });
+    await this.userProfileModel.updateOne({ _id: profileId }, { $pull: { associatedAccounts: new Types.ObjectId(accountId) } });
   }
 
   async getProfilesByAccountId(accountId: string): Promise<UserProfileDocument[]> {
@@ -258,7 +260,7 @@ export class UserProfileService {
   }
 
   async updateProfileMetadata(profileId: string, metadata: Record<string, any>): Promise<void> {
-    await this.userProfileModel.updateOne({ _id: new Types.ObjectId(profileId) }, { $set: { metadata } });
+    await this.userProfileModel.updateOne({ _id: profileId }, { $set: { metadata } });
   }
 
   async getProfileStats(userId: string): Promise<any> {

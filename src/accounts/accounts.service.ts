@@ -7,6 +7,7 @@ import * as crypto from 'crypto';
 import { AccountsRepository } from './accounts.repository';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { AccountResponseDto, CreateAccountDto, InviteMemberDto, UpdateAccountDto, UpdateMemberDto } from './dto';
+import { CoupleService } from './services/couple.service';
 
 import { ACCOUNT_TYPE_CONFIG, AccountType, DEFAULT_PRIVACY_SETTINGS, InvitationStatus } from '@common/constants/account-types';
 import { AccountRole, Permission, ROLE_PERMISSIONS } from '@common/constants/user-roles';
@@ -17,7 +18,8 @@ export class AccountsService {
     private readonly accountsRepository: AccountsRepository,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly coupleService: CoupleService
   ) {}
 
   async create(userId: string, createAccountDto: CreateAccountDto): Promise<AccountResponseDto> {
@@ -45,6 +47,17 @@ export class AccountsService {
     };
 
     const account = await this.accountsRepository.create(userId, accountData);
+
+    // Initialize couple settings if this is a couple account
+    if (createAccountDto.type === AccountType.COUPLE) {
+      try {
+        await this.coupleService.initializeCoupleSettings((account as any).id);
+      } catch (error) {
+        console.error('Error initializing couple settings:', error);
+        // Continue without failing account creation
+      }
+    }
+
     return this.mapToResponseDto(account);
   }
 

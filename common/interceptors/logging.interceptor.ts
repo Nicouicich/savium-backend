@@ -9,10 +9,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { AsyncLocalStorage } from 'async_hooks';
-
-// Global request context storage
-export const requestContext = new AsyncLocalStorage<{ traceId: string; userId?: string }>();
+import { RequestContextService, RequestContext } from './request-context';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -24,23 +21,27 @@ export class LoggingInterceptor implements NestInterceptor {
     const { method, url, ip, headers } = request;
     const userAgent = headers['user-agent'] || '';
     const startTime = Date.now();
-    
+
     // Generate unique trace ID for this request
     const traceId = request.headers['x-trace-id'] as string || uuidv4();
     const userId = request.user?.id;
-    
+
     // Set trace ID in response headers for client tracking
     response.setHeader('x-trace-id', traceId);
-    
+
     // Store trace ID in request for use in controllers/services
     request.traceId = traceId;
-    
-    const logContext = {
+
+    // Create request context
+    const requestContext: RequestContext = {
       traceId,
       userId,
+      userEmail: request.user?.email,
+      startTime,
       method,
       url: url.split('?')[0], // Remove query params from logs for cleaner output
       ip,
+      ipAddress: ip,
       userAgent: userAgent.substring(0, 100), // Truncate user agent
     };
 
@@ -50,7 +51,8 @@ export class LoggingInterceptor implements NestInterceptor {
       this.logger.log(`→ ${method} ${url}`);
     }
 
-    return requestContext.run({ traceId, userId }, () =>
+    // Set the request context for the entire request lifecycle using AsyncLocalStorage
+    return RequestContextService.als.run(requestContext, () =>
       next.handle().pipe(
         tap({
           next: (data) => {
