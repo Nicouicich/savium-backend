@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsNumber, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export enum ReferralHistoryStatus {
   ALL = 'all',

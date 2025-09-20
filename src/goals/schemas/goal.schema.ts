@@ -1,7 +1,7 @@
+import { Currency } from '@common/constants/transaction-categories';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { Currency } from '@common/constants/transaction-categories';
 
 export type GoalDocument = Goal & Document;
 
@@ -182,14 +182,14 @@ export class Goal {
 export const GoalSchema = SchemaFactory.createForClass(Goal);
 
 // Add virtual for id field to ensure compatibility
-GoalSchema.virtual('publicId').get(function () {
+GoalSchema.virtual('publicId').get(function() {
   return this.id;
 });
 
 // Ensure virtual fields are serialized
 GoalSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc, ret) {
+  transform: function(doc, ret) {
     delete (ret as any)._id;
     delete (ret as any).__v;
     return ret;
@@ -319,7 +319,7 @@ GoalSchema.index(
 );
 
 // Pre-save middleware to calculate remaining amount and update status
-GoalSchema.pre('save', function () {
+GoalSchema.pre('save', function() {
   // Calculate remaining amount
   this.remainingAmount = Math.max(0, this.targetAmount - this.currentAmount);
 

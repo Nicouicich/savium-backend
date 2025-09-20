@@ -1,12 +1,12 @@
-import { Injectable, Logger, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { User, UserDocument } from '../schemas/user.schema';
-import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { Model, Types } from 'mongoose';
+import { PersonalProfileRepository } from '../../financial-profiles/repositories/personal-profile.repository';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { PersonalProfileRepository } from '../../financial-profiles/repositories/personal-profile.repository';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 
 /**
  * UserCommandService - Handles all write operations for User entities
@@ -105,15 +105,17 @@ export class UserCommandService {
   /**
    * Create OAuth user
    */
-  async createOAuthUser(oauthData: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-    oauthProvider: string;
-    oauthProviderId: string;
-    isEmailVerified?: boolean;
-  }): Promise<UserDocument> {
+  async createOAuthUser(
+    oauthData: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      avatar?: string;
+      oauthProvider: string;
+      oauthProviderId: string;
+      isEmailVerified?: boolean;
+    }
+  ): Promise<UserDocument> {
     try {
       const userData = {
         email: oauthData.email.toLowerCase(),

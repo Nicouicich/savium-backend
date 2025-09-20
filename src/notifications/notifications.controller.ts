@@ -1,8 +1,8 @@
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -33,8 +33,7 @@ export class NotificationsController {
     description: 'Notification sent successfully (mock)'
   })
   async sendNotification(
-    @Body()
-    body: {
+    @Body() body: {
       title: string;
       message: string;
       type?: 'info' | 'success' | 'warning' | 'error';

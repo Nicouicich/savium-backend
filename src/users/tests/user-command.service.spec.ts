@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 import { ConflictException, InternalServerErrorException } from '@nestjs/common';
-import { UserCommandService } from '../services/user-command.service';
-import { User, UserDocument } from '../schemas/user.schema';
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserCommandService } from '../services/user-command.service';
 
 describe('UserCommandService', () => {
   let service: UserCommandService;

@@ -1,9 +1,9 @@
-import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnhancedCacheService } from './enhanced-cache.service';
-import * as speakeasy from 'speakeasy';
-import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
+import * as QRCode from 'qrcode';
+import * as speakeasy from 'speakeasy';
+import { EnhancedCacheService } from './enhanced-cache.service';
 
 export interface TwoFactorSecret {
   secret: string;
@@ -47,7 +47,7 @@ export class TwoFactorAuthService {
   async generateSecret(userId: string, userEmail: string): Promise<TwoFactorSecret> {
     try {
       const appName = this.configService.get<string>('app.name') || 'Savium';
-      
+
       // Generate secret
       const secret = speakeasy.generateSecret({
         name: `${appName} (${userEmail})`,
@@ -95,13 +95,13 @@ export class TwoFactorAuthService {
   async verifySetup(userId: string, token: string): Promise<{ verified: boolean; backupCodes?: string[] }> {
     try {
       const setupData = await this.cacheService.get<TwoFactorSecret>(`2fa_setup:${userId}`);
-      
+
       if (!setupData) {
         throw new BadRequestException('No 2FA setup in progress');
       }
 
       const isValid = this.verifyToken(setupData.secret, token);
-      
+
       if (!isValid) {
         this.logger.warn(`Invalid 2FA token during setup for user ${userId}`);
         return { verified: false };
@@ -142,19 +142,19 @@ export class TwoFactorAuthService {
    * Verify 2FA token for authentication
    */
   async verify2FA(
-    userId: string, 
-    token: string, 
+    userId: string,
+    token: string,
     operation: string = 'login'
   ): Promise<TwoFactorVerificationResult> {
     try {
       // Check for rate limiting
       const rateLimitKey = `2fa_attempts:${userId}`;
       const attempts = await this.cacheService.get<number>(rateLimitKey) || 0;
-      
+
       if (attempts >= this.maxAttempts) {
         const lockoutExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
         this.logger.warn(`2FA verification locked out for user ${userId}`, { attempts, operation });
-        
+
         return {
           isValid: false,
           remainingAttempts: 0,
@@ -163,17 +163,17 @@ export class TwoFactorAuthService {
       }
 
       const secretData = await this.cacheService.get<TwoFactorSecret>(`2fa_secret:${userId}`);
-      
+
       if (!secretData || !secretData.isVerified) {
         throw new BadRequestException('2FA not enabled for this user');
       }
 
       // Check if it's a backup code
       const isBackupCode = this.verifyBackupCode(userId, token, secretData.backupCodes);
-      
+
       // Verify TOTP token
       const isValidTotp = this.verifyToken(secretData.secret, token);
-      
+
       const isValid = isValidTotp || isBackupCode;
 
       if (!isValid) {
@@ -213,7 +213,7 @@ export class TwoFactorAuthService {
   async createChallenge(userId: string, operation: string): Promise<string> {
     try {
       const challengeId = crypto.randomBytes(16).toString('hex');
-      
+
       const challenge: TwoFactorChallenge = {
         challengeId,
         userId,
@@ -248,7 +248,7 @@ export class TwoFactorAuthService {
   async verifyChallenge(challengeId: string, token: string): Promise<boolean> {
     try {
       const challenge = await this.cacheService.get<TwoFactorChallenge>(`2fa_challenge:${challengeId}`);
-      
+
       if (!challenge) {
         throw new BadRequestException('Invalid or expired challenge');
       }
@@ -312,7 +312,7 @@ export class TwoFactorAuthService {
     try {
       await this.cacheService.delete(`2fa_secret:${userId}`, '2fa');
       await this.cacheService.delete(`2fa_setup:${userId}`, '2fa');
-      
+
       // Clear any active challenges
       await this.cacheService.invalidateByTags([`user:${userId}`, '2fa_challenge']);
 
@@ -329,13 +329,13 @@ export class TwoFactorAuthService {
   async regenerateBackupCodes(userId: string): Promise<string[]> {
     try {
       const secretData = await this.cacheService.get<TwoFactorSecret>(`2fa_secret:${userId}`);
-      
+
       if (!secretData || !secretData.isVerified) {
         throw new BadRequestException('2FA not enabled for this user');
       }
 
       const newBackupCodes = this.generateBackupCodes();
-      
+
       const updatedSecret: TwoFactorSecret = {
         ...secretData,
         backupCodes: newBackupCodes
@@ -381,12 +381,12 @@ export class TwoFactorAuthService {
   private async verifyBackupCode(userId: string, code: string, backupCodes: string[]): Promise<boolean> {
     const upperCode = code.toUpperCase();
     const isValid = backupCodes.includes(upperCode);
-    
+
     if (isValid) {
       // Remove used backup code
       const updatedCodes = backupCodes.filter(c => c !== upperCode);
       const secretData = await this.cacheService.get<TwoFactorSecret>(`2fa_secret:${userId}`);
-      
+
       if (secretData) {
         const updatedSecret: TwoFactorSecret = {
           ...secretData,
@@ -406,7 +406,7 @@ export class TwoFactorAuthService {
         this.logger.log(`Backup code used for user ${userId}`);
       }
     }
-    
+
     return isValid;
   }
 }

@@ -3,7 +3,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 export abstract class BaseException extends HttpException {
   abstract readonly code: string;
   abstract readonly userMessage: string;
-  
+
   constructor(
     message: string,
     status: HttpStatus,
@@ -18,7 +18,7 @@ export abstract class BaseException extends HttpException {
       code: this.code,
       message: this.userMessage,
       timestamp: new Date().toISOString(),
-      context: this.context,
+      context: this.context
     };
   }
 }

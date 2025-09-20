@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { AiService, IAMsgAnswer, IAAction } from './ai.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AiService, IAAction, IAMsgAnswer } from './ai.service';
 import { MessageSentToIA } from './message-processor.service';
 
 describe('Enhanced AI Prompt Tests', () => {
@@ -175,28 +175,20 @@ describe('Enhanced AI Prompt Tests', () => {
 
   describe('Transaction Detection Enhancement', () => {
     it('should recognize various expense keywords', () => {
-      const expenseKeywords = [
-        'gasté', 'spent', 'compré', 'bought',
-        'pagué', 'paid', 'costó', 'cost', 'invertí'
-      ];
+      const expenseKeywords = ['gasté', 'spent', 'compré', 'bought', 'pagué', 'paid', 'costó', 'cost', 'invertí'];
 
       // All these should be recognized as expense indicators
       expenseKeywords.forEach(keyword => {
-        expect(['gasté', 'spent', 'compré', 'bought', 'pagué', 'paid', 'costó', 'cost', 'invertí'])
-          .toContain(keyword);
+        expect(['gasté', 'spent', 'compré', 'bought', 'pagué', 'paid', 'costó', 'cost', 'invertí']).toContain(keyword);
       });
     });
 
     it('should recognize various income keywords', () => {
-      const incomeKeywords = [
-        'recibí', 'received', 'cobré', 'earned',
-        'gané', 'won', 'me pagaron', 'got paid'
-      ];
+      const incomeKeywords = ['recibí', 'received', 'cobré', 'earned', 'gané', 'won', 'me pagaron', 'got paid'];
 
       // All these should be recognized as income indicators
       incomeKeywords.forEach(keyword => {
-        expect(['recibí', 'received', 'cobré', 'earned', 'gané', 'won', 'me pagaron', 'got paid'])
-          .toContain(keyword);
+        expect(['recibí', 'received', 'cobré', 'earned', 'gané', 'won', 'me pagaron', 'got paid']).toContain(keyword);
       });
     });
   });

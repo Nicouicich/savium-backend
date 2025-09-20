@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CreateTransactionDto } from './create-transaction.dto';
 
 export class UpdateTransactionDto extends PartialType(OmitType(CreateTransactionDto, ['profileId'] as const)) {

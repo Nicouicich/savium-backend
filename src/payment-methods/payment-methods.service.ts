@@ -1,8 +1,8 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { PaymentMethodsRepository } from './payment-methods.repository';
-import { PaymentMethodEntity } from './entities/payment-method.entity';
-import { PaymentMethodType, DEFAULT_PAYMENT_METHODS } from '@common/constants/card-types';
+import { DEFAULT_PAYMENT_METHODS, PaymentMethodType } from '@common/constants/card-types';
 import { BusinessLogicException, NotFoundResourceException } from '@common/exceptions/business.exceptions';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { PaymentMethodEntity } from './entities/payment-method.entity';
+import { PaymentMethodsRepository } from './payment-methods.repository';
 
 @Injectable()
 export class PaymentMethodsService implements OnModuleInit {
@@ -72,14 +72,9 @@ export class PaymentMethodsService implements OnModuleInit {
   /**
    * Create a new payment method
    */
-  async create(paymentMethodData: {
-    name: string;
-    code: string;
-    type: PaymentMethodType;
-    requiresCard?: boolean;
-    icon?: string;
-    sortOrder?: number;
-  }): Promise<PaymentMethodEntity> {
+  async create(
+    paymentMethodData: { name: string; code: string; type: PaymentMethodType; requiresCard?: boolean; icon?: string; sortOrder?: number }
+  ): Promise<PaymentMethodEntity> {
     // Check if code already exists
     const codeExists = await this.paymentMethodsRepository.codeExists(paymentMethodData.code);
     if (codeExists) {

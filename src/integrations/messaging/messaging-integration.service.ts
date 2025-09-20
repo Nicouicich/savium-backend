@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../../users/schemas/user.schema';
 import { TelegramService } from '../telegram/telegram.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
-import { SendMessageRequest, ConnectUserRequest, MessageResult } from './messaging.types';
+import { ConnectUserRequest, MessageResult, SendMessageRequest } from './messaging.types';
 
 @Injectable()
 export class MessagingIntegrationService {

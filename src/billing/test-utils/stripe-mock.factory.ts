@@ -681,12 +681,12 @@ export class StripeMockFactory {
           id: type.includes('payment_intent')
             ? 'pi_' + this.generateId()
             : type.includes('customer')
-              ? 'cus_' + this.generateId()
-              : type.includes('subscription')
-                ? 'sub_' + this.generateId()
-                : type.includes('invoice')
-                  ? 'in_' + this.generateId()
-                  : 'obj_' + this.generateId(),
+            ? 'cus_' + this.generateId()
+            : type.includes('subscription')
+            ? 'sub_' + this.generateId()
+            : type.includes('invoice')
+            ? 'in_' + this.generateId()
+            : 'obj_' + this.generateId(),
           object: type.split('.')[0],
           ...data
         }

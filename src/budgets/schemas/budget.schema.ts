@@ -1,6 +1,6 @@
+import { Currency } from '@common/constants/transaction-categories';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Currency } from '@common/constants/transaction-categories';
 
 export type BudgetDocument = Budget & Document;
 
@@ -249,7 +249,7 @@ BudgetSchema.index(
 );
 
 // Pre-save middleware to calculate remaining amounts
-BudgetSchema.pre('save', function () {
+BudgetSchema.pre('save', function() {
   if (this.isModified('totalAmount') || this.isModified('spentAmount')) {
     this.remainingAmount = Math.max(0, this.totalAmount - this.spentAmount);
   }

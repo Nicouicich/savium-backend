@@ -1,10 +1,10 @@
-import { ValidateIf, ValidationOptions, registerDecorator, ValidationArguments } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { registerDecorator, ValidateIf, ValidationArguments, ValidationOptions } from 'class-validator';
 import * as validator from 'validator';
 
 // Enhanced financial validation decorators
 export function IsMonetaryAmount(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isMonetaryAmount',
       target: object.constructor,
@@ -21,14 +21,14 @@ export function IsMonetaryAmount(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a valid monetary amount (0-999,999,999.99 with max 2 decimal places)`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 export function IsCurrencyCode(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isCurrencyCode',
       target: object.constructor,
@@ -40,15 +40,15 @@ export function IsCurrencyCode(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a valid 3-letter ISO currency code`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 // Enhanced security decorators
 export function IsStrongPassword(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isStrongPassword',
       target: object.constructor,
@@ -62,14 +62,14 @@ export function IsStrongPassword(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must contain at least 8 characters with uppercase, lowercase, number, and special character`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 export function IsSafeText(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isSafeText',
       target: object.constructor,
@@ -93,8 +93,8 @@ export function IsSafeText(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} contains potentially unsafe content`;
-        },
-      },
+        }
+      }
     });
   };
 }
@@ -118,7 +118,7 @@ export function SanitizeMonetaryAmount() {
 
 // Account name validation
 export function IsValidAccountName(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isValidAccountName',
       target: object.constructor,
@@ -132,15 +132,15 @@ export function IsValidAccountName(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must contain only safe characters and be at least 2 characters long`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 // Enhanced email validation with additional security checks
 export function IsSecureEmail(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isSecureEmail',
       target: object.constructor,
@@ -160,15 +160,15 @@ export function IsSecureEmail(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a valid and secure email address`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 // Rate limiting based on complexity
 export function IsValidDescription(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isValidDescription',
       target: object.constructor,
@@ -184,19 +184,19 @@ export function IsValidDescription(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a safe description (max 1000 characters)`;
-        },
-      },
+        }
+      }
     });
   };
 }
 
 // Conditional validation helpers
-export const IsOptionalButNotEmpty = (validationOptions?: ValidationOptions) => 
+export const IsOptionalButNotEmpty = (validationOptions?: ValidationOptions) =>
   ValidateIf((object, value) => value !== undefined && value !== null && value !== '', validationOptions);
 
 // MongoDB ObjectId validation
 export function IsMongoObjectId(validationOptions?: ValidationOptions) {
-  return function (object: Record<string, any>, propertyName: string) {
+  return function(object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'isMongoObjectId',
       target: object.constructor,
@@ -208,8 +208,8 @@ export function IsMongoObjectId(validationOptions?: ValidationOptions) {
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a valid MongoDB ObjectId`;
-        },
-      },
+        }
+      }
     });
   };
 }

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 
+import { Request } from 'express';
+import { UserRole } from '../../common/constants/user-roles';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ChangePasswordDto, RefreshTokenDto, AuthResponseDto } from './dto';
-import { UserRole } from '../../common/constants/user-roles';
-import { Request } from 'express';
+import { AuthResponseDto, ChangePasswordDto, LoginDto, RefreshTokenDto, RegisterDto } from './dto';
 
 describe('AuthController - Unit Tests', () => {
   let controller: AuthController;
@@ -724,7 +724,7 @@ describe('AuthController - Unit Tests', () => {
     it('should handle special characters in names', async () => {
       // Arrange
       const specialCharDto = createMockRegisterDto({
-        firstName: "O'Connor",
+        firstName: 'O\'Connor',
         lastName: 'Smith-Johnson'
       });
 

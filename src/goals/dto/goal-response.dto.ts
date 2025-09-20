@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Currency } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GoalPriority, GoalStatus, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class GoalMilestoneResponseDto {

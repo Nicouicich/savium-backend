@@ -1,9 +1,9 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { FinancialProfilesService } from './financial-profiles.service';
-import { PersonalProfileRepository, CoupleProfileRepository, FamilyProfileRepository, CompanyProfileRepository } from './repositories';
-import { PROFILE_SCHEMAS } from './schemas';
 import { UsersModule } from '../users/users.module';
+import { FinancialProfilesService } from './financial-profiles.service';
+import { CompanyProfileRepository, CoupleProfileRepository, FamilyProfileRepository, PersonalProfileRepository } from './repositories';
+import { PROFILE_SCHEMAS } from './schemas';
 
 @Module({
   imports: [

@@ -1,12 +1,12 @@
+import { CardBrand, CardStatus, CardType, StatsPeriod } from '@common/constants/card-types';
+import { CardLimitExceededException, CardNotFoundException, DuplicateCardNameException } from '@common/exceptions/card.exceptions';
 import { Test, TestingModule } from '@nestjs/testing';
+import { IUser } from '../users/interfaces/user.interface';
 import { CardsController } from './cards.controller';
 import { CardsService } from './cards.service';
-import { CardAnalyticsService } from './services/card-analytics.service';
-import { CreateCardDto, UpdateCardDto, CardQueryDto, CreateCardBalanceDto } from './dto';
-import { IUser } from '../users/interfaces/user.interface';
+import { CardQueryDto, CreateCardBalanceDto, CreateCardDto, UpdateCardDto } from './dto';
 import { IMaskedCard } from './interfaces/card.interface';
-import { CardType, CardBrand, CardStatus, StatsPeriod } from '@common/constants/card-types';
-import { CardNotFoundException, CardLimitExceededException, DuplicateCardNameException } from '@common/exceptions/card.exceptions';
+import { CardAnalyticsService } from './services/card-analytics.service';
 
 describe('CardsController', () => {
   let controller: CardsController;

@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose';
 import { UserRole } from '@common/constants/user-roles';
+import { Document, Types } from 'mongoose';
 
 export interface IUser {
   firstName: string;
@@ -65,8 +65,10 @@ export interface IUser {
   updatedAt?: Date;
 }
 
-export type UserDocumentType = IUser &
-  Document & {
+export type UserDocumentType =
+  & IUser
+  & Document
+  & {
     _id: Types.ObjectId;
     fullName: string;
   };

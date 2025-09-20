@@ -1,5 +1,5 @@
-import { IsOptional, IsEnum, IsObject } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsObject, IsOptional } from 'class-validator';
 
 export class UpdateSubscriptionDto {
   @ApiPropertyOptional({

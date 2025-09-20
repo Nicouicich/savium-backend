@@ -1,5 +1,5 @@
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
 import { Injectable } from '@nestjs/common';
+import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
 
 @ValidatorConstraint({ name: 'isUniqueCardName', async: true })
 @Injectable()
@@ -58,7 +58,7 @@ export class IsCreditLimitRequiredForCreditConstraint implements ValidatorConstr
 
 // Decorator functions
 export function IsUniqueCardName(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return function(object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
@@ -70,7 +70,7 @@ export function IsUniqueCardName(validationOptions?: ValidationOptions) {
 }
 
 export function IsValidCardExpiry(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return function(object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
@@ -82,7 +82,7 @@ export function IsValidCardExpiry(validationOptions?: ValidationOptions) {
 }
 
 export function IsCreditLimitRequiredForCredit(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return function(object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

@@ -1,34 +1,34 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
   Param,
+  Post,
+  Put,
   Query,
+  type RawBodyRequest,
   Req,
   UseGuards,
-  UseInterceptors,
-  HttpStatus,
-  HttpCode,
-  Headers,
-  type RawBodyRequest
+  UseInterceptors
 } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { Request, Response } from 'express';
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
 import { GetUser } from '../../common/decorators/get-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
 
-import { StripeService } from '../services/stripe.service';
 import { StripeWebhookService } from '../services/stripe-webhook.service';
+import { StripeService } from '../services/stripe.service';
 
-import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
+import { CreateCustomerDto, CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto } from '../dto';
 
 import type { UserProfileDocument } from '../../users/schemas/user-profile.schema';
 
@@ -298,12 +298,12 @@ export class StripePaymentsController {
         type: pm.type,
         card: pm.card
           ? {
-              brand: pm.card.brand,
-              last4: pm.card.last4,
-              expMonth: pm.card.exp_month,
-              expYear: pm.card.exp_year,
-              country: pm.card.country
-            }
+            brand: pm.card.brand,
+            last4: pm.card.last4,
+            expMonth: pm.card.exp_month,
+            expYear: pm.card.exp_year,
+            country: pm.card.country
+          }
           : null,
         created: new Date(pm.created * 1000)
       }))

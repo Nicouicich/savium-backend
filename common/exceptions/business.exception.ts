@@ -11,7 +11,7 @@ export class BusinessException extends HttpException {
         success: false,
         message,
         errorCode,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       },
       statusCode
     );

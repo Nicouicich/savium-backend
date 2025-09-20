@@ -3,13 +3,13 @@ export enum CardBrand {
   MASTERCARD = 'MASTERCARD',
   AMEX = 'AMEX',
   DISCOVER = 'DISCOVER',
-  OTHER = 'OTHER',
+  OTHER = 'OTHER'
 }
 
 export enum CardType {
   CREDIT = 'CREDIT',
   DEBIT = 'DEBIT',
-  PREPAID = 'PREPAID',
+  PREPAID = 'PREPAID'
 }
 
 export enum CardStatus {
@@ -17,7 +17,7 @@ export enum CardStatus {
   INACTIVE = 'INACTIVE',
   EXPIRED = 'EXPIRED',
   BLOCKED = 'BLOCKED',
-  PENDING = 'PENDING',
+  PENDING = 'PENDING'
 }
 
 export enum PaymentMethodType {
@@ -26,20 +26,20 @@ export enum PaymentMethodType {
   BANK_TRANSFER = 'BANK_TRANSFER',
   DIGITAL_WALLET = 'DIGITAL_WALLET',
   CHECK = 'CHECK',
-  OTHER = 'OTHER',
+  OTHER = 'OTHER'
 }
 
 export enum BalanceUpdateSource {
   MANUAL = 'MANUAL',
   API = 'API',
-  CALCULATED = 'CALCULATED',
+  CALCULATED = 'CALCULATED'
 }
 
 export enum StatsPeriod {
   WEEK = 'WEEK',
   MONTH = 'MONTH',
   QUARTER = 'QUARTER',
-  YEAR = 'YEAR',
+  YEAR = 'YEAR'
 }
 
 // Card limits per account type
@@ -47,7 +47,7 @@ export const CARD_LIMITS_BY_ACCOUNT_TYPE = {
   personal: 10,
   couple: 15,
   family: 20,
-  business: 25,
+  business: 25
 } as const;
 
 // Default payment methods that should be created on system initialization
@@ -58,7 +58,7 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.CASH,
     requiresCard: false,
     icon: '💵',
-    sortOrder: 1,
+    sortOrder: 1
   },
   {
     name: 'Credit Card',
@@ -66,7 +66,7 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.CARD,
     requiresCard: true,
     icon: '💳',
-    sortOrder: 2,
+    sortOrder: 2
   },
   {
     name: 'Debit Card',
@@ -74,7 +74,7 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.CARD,
     requiresCard: true,
     icon: '💳',
-    sortOrder: 3,
+    sortOrder: 3
   },
   {
     name: 'Bank Transfer',
@@ -82,7 +82,7 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.BANK_TRANSFER,
     requiresCard: false,
     icon: '🏦',
-    sortOrder: 4,
+    sortOrder: 4
   },
   {
     name: 'Digital Wallet',
@@ -90,7 +90,7 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.DIGITAL_WALLET,
     requiresCard: false,
     icon: '📱',
-    sortOrder: 5,
+    sortOrder: 5
   },
   {
     name: 'Check',
@@ -98,6 +98,6 @@ export const DEFAULT_PAYMENT_METHODS = [
     type: PaymentMethodType.CHECK,
     requiresCard: false,
     icon: '📝',
-    sortOrder: 6,
-  },
+    sortOrder: 6
+  }
 ] as const;

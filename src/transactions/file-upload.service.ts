@@ -1,8 +1,8 @@
+import { FileSizeExceededException, InvalidFileTypeException } from '@common/exceptions';
 import { Injectable, Logger } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { FileSizeExceededException, InvalidFileTypeException } from '@common/exceptions';
 
 export interface UploadedFile {
   filename: string;

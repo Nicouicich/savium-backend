@@ -1,10 +1,10 @@
+import { Currency } from '@common/constants/transaction-categories';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, PipelineStage, Types, ClientSession } from 'mongoose';
-import { Transaction, TransactionDocument } from './schemas/transaction.schema';
-import { CreateTransactionDto, TransactionQueryDto, UpdateTransactionDto } from './dto';
-import { Currency } from '@common/constants/transaction-categories';
+import { ClientSession, Model, PipelineStage, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateTransactionDto, TransactionQueryDto, UpdateTransactionDto } from './dto';
+import { Transaction, TransactionDocument } from './schemas/transaction.schema';
 
 export interface TransactionStats {
   totalAmount: number;
@@ -30,8 +30,7 @@ export interface PaginatedResult<T> {
 @Injectable()
 export class TransactionsRepository {
   constructor(
-    @InjectModel(Transaction.name)
-    private readonly transactionModel: Model<TransactionDocument>
+    @InjectModel(Transaction.name) private readonly transactionModel: Model<TransactionDocument>
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto): Promise<TransactionDocument[]> {
@@ -87,7 +86,7 @@ export class TransactionsRepository {
          source: createTransactionDto.metadata?.source || 'manual'
        }
      });
- 
+
      return transaction.save({ session });
    } */
 
@@ -105,22 +104,22 @@ export class TransactionsRepository {
 
   /*   async findManyOptimized(query: TransactionQueryDto): Promise<PaginatedResult<TransactionDocument>> {
       const { page = 1, limit = 20, sortBy = 'date', sortOrder = 'desc', ...filters } = query;
-  
+
       // Build MongoDB query for match stage
       const matchQuery = this.buildMongoQuery(filters);
-  
+
       // Build sort object
       const sort: any = {};
       sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
-  
+
       // Calculate skip
       const skip = (page - 1) * limit;
-  
+
       // Optimized aggregation pipeline to avoid N+1 queries
       const aggregationPipeline: PipelineStage[] = [
         // Match stage (filter documents early)
         { $match: matchQuery },
-  
+
         // Lookup user information
         {
           $lookup: {
@@ -131,7 +130,7 @@ export class TransactionsRepository {
             pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
           }
         },
-  
+
         // Lookup category information
         {
           $lookup: {
@@ -142,7 +141,7 @@ export class TransactionsRepository {
             pipeline: [{ $project: { name: 1, displayName: 1, icon: 1, color: 1 } }]
           }
         },
-  
+
         // Lookup shared users information
         {
           $lookup: {
@@ -153,7 +152,7 @@ export class TransactionsRepository {
             pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
           }
         },
-  
+
         // Lookup reviewer information
         {
           $lookup: {
@@ -164,7 +163,7 @@ export class TransactionsRepository {
             pipeline: [{ $project: { email: 1, firstName: 1, lastName: 1, uuid: 1 } }]
           }
         },
-  
+
         // Unwind single value lookups
         {
           $addFields: {
@@ -174,7 +173,7 @@ export class TransactionsRepository {
             sharedWith: '$sharedUsers'
           }
         },
-  
+
         // Remove temporary fields
         {
           $project: {
@@ -184,10 +183,10 @@ export class TransactionsRepository {
             sharedUsers: 0
           }
         },
-  
+
         // Sort the results
         { $sort: sort },
-  
+
         // Facet for pagination and counting
         {
           $facet: {
@@ -196,13 +195,13 @@ export class TransactionsRepository {
           }
         }
       ];
-  
+
       const [result] = await this.transactionModel.aggregate(aggregationPipeline).exec();
-  
+
       const transactions = result.data;
       const total = result.totalCount[0]?.count || 0;
       const totalPages = Math.ceil(total / limit);
-  
+
       return {
         data: transactions,
         total,
@@ -216,17 +215,17 @@ export class TransactionsRepository {
 
   /*   async update(id: string, updateTransactionDto: UpdateTransactionDto): Promise<TransactionDocument | null> {
       const updateData: any = { ...updateTransactionDto };
-  
+
       if (updateTransactionDto.categoryId) {
         updateData.categoryId = new Types.ObjectId(updateTransactionDto.categoryId);
       }
       if (updateTransactionDto.sharedWith) {
         updateData.sharedWith = updateTransactionDto.sharedWith; // UUID strings
       }
-  
+
       // Update the transaction first
       await this.transactionModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
-  
+
       // Use optimized aggregation pipeline to get updated transaction (PERF-001)
       const updatedTransactions = await this.getTransactionByIdWithAggregation(id);
       return updatedTransactions[0] || null;

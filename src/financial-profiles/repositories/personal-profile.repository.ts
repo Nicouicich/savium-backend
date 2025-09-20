@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ProfileType } from '../schemas';
 import { PersonalProfile, PersonalProfileDocument } from '../schemas/personal-profile.schema';
 import { BaseProfileRepository } from './base-profile.repository';
-import { ProfileType } from '../schemas';
 
 @Injectable()
 export class PersonalProfileRepository extends BaseProfileRepository<PersonalProfile, PersonalProfileDocument> {

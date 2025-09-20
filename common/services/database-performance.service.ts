@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { DATABASE_INDEXES, CRITICAL_INDEXES, IndexDefinition } from '../../src/database/indexes';
+import { CRITICAL_INDEXES, DATABASE_INDEXES, IndexDefinition } from '../../src/database/indexes';
 
 export interface QueryPerformanceMetrics {
   averageExecutionTime: number;
@@ -26,7 +26,7 @@ export interface IndexStatus {
 export class DatabasePerformanceService implements OnModuleInit {
   private readonly logger = new Logger(DatabasePerformanceService.name);
 
-  constructor (
+  constructor(
     @InjectConnection() private connection: Connection
   ) {}
 
@@ -92,8 +92,8 @@ export class DatabasePerformanceService implements OnModuleInit {
 
         // Check by name or by key pattern to avoid conflicts
         const exists = existingIndexes.some(idx =>
-          idx.name === indexName ||
-          JSON.stringify(idx.key) === JSON.stringify(indexDef.index)
+          idx.name === indexName
+          || JSON.stringify(idx.key) === JSON.stringify(indexDef.index)
         );
 
         if (!exists) {
@@ -304,9 +304,9 @@ export class DatabasePerformanceService implements OnModuleInit {
 
       // Find indexes with zero usage (excluding _id_ index)
       const unusedIndexes = indexStats.filter(stat =>
-        stat.usage.ops === 0 &&
-        stat.name !== '_id_' &&
-        new Date().getTime() - stat.usage.since.getTime() > 7 * 24 * 60 * 60 * 1000 // Older than 7 days
+        stat.usage.ops === 0
+        && stat.name !== '_id_'
+        && new Date().getTime() - stat.usage.since.getTime() > 7 * 24 * 60 * 60 * 1000 // Older than 7 days
       );
 
       for (const unusedIndex of unusedIndexes) {
@@ -382,26 +382,22 @@ export class DatabasePerformanceService implements OnModuleInit {
     const recommendations: string[] = [];
 
     // Analyze query patterns
-    const collectionScans = slowQueries.filter(q =>
-      q.executionStats?.executionStages?.stage === 'COLLSCAN'
-    ).length;
+    const collectionScans = slowQueries.filter(q => q.executionStats?.executionStages?.stage === 'COLLSCAN').length;
 
     if (collectionScans > 5) {
       recommendations.push('Consider adding indexes to eliminate collection scans');
     }
 
     const sortWithoutIndex = slowQueries.filter(q =>
-      q.executionStats?.executionStages?.stage === 'SORT' &&
-      !q.executionStats?.executionStages?.inputStage?.indexName
+      q.executionStats?.executionStages?.stage === 'SORT'
+      && !q.executionStats?.executionStages?.inputStage?.indexName
     ).length;
 
     if (sortWithoutIndex > 3) {
       recommendations.push('Add indexes to support sorting operations');
     }
 
-    const highExamined = slowQueries.filter(q =>
-      q.executionStats?.totalDocsExamined > q.executionStats?.totalDocsReturned * 10
-    ).length;
+    const highExamined = slowQueries.filter(q => q.executionStats?.totalDocsExamined > q.executionStats?.totalDocsReturned * 10).length;
 
     if (highExamined > 2) {
       recommendations.push('Optimize queries that examine many more documents than returned');

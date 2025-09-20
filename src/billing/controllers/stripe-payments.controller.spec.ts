@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';
-import * as request from 'supertest';
 import { Types } from 'mongoose';
+import * as request from 'supertest';
 
-import { StripePaymentsController } from './stripe-payments.controller';
-import { StripeService } from '../services/stripe.service';
-import { StripeWebhookService } from '../services/stripe-webhook.service';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { RequestTracingInterceptor } from '../../common/interceptors/request-tracing.interceptor';
+import { StripeWebhookService } from '../services/stripe-webhook.service';
+import { StripeService } from '../services/stripe.service';
+import { StripePaymentsController } from './stripe-payments.controller';
 
+import { NotFoundResourceException } from '../../common/exceptions/not-found-resource.exception';
 import { PaymentException } from '../../common/exceptions/payment.exception';
 import { ValidationException } from '../../common/exceptions/validation.exception';
-import { NotFoundResourceException } from '../../common/exceptions/not-found-resource.exception';
 
-import { CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto, CreateCustomerDto } from '../dto';
+import { CreateCustomerDto, CreatePaymentIntentDto, CreateSubscriptionDto, UpdateSubscriptionDto } from '../dto';
 
 describe('StripePaymentsController - Integration Tests', () => {
   let app: INestApplication;

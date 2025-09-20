@@ -1,6 +1,6 @@
-import { Types, Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { UserDocument } from '../schemas/user.schema';
-import type { UserPublicInfo, UserForJWT } from '../types';
+import type { UserForJWT, UserPublicInfo } from '../types';
 
 interface UserWithId extends UserDocument {
   _id: Types.ObjectId;

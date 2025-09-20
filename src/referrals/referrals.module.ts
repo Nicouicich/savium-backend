@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 
-import { ReferralsController } from './referrals.controller';
-import { ReferralsService } from './referrals.service';
 import { ReferralCronService } from './referral-cron.service';
-import { ReferralsRepository } from './referrals.repository';
 import { ReferralRewardRepository } from './referral-reward.repository';
-import { ReferralQueryService, ReferralCommandService } from './services';
+import { ReferralsController } from './referrals.controller';
+import { ReferralsRepository } from './referrals.repository';
+import { ReferralsService } from './referrals.service';
+import { ReferralCommandService, ReferralQueryService } from './services';
 
 // Import schemas
 import { User, UserSchema } from '../users/schemas/user.schema';

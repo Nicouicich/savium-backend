@@ -1,6 +1,6 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsEnum, Min, MaxLength, IsIn } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsArray, IsEnum, IsIn, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export class CreatePaymentIntentDto {
   @ApiProperty({
@@ -18,7 +18,7 @@ export class CreatePaymentIntentDto {
   accountId: string;
 
   @ApiProperty({
-    description: "Payment amount in the currency's smallest unit (e.g., cents for USD)",
+    description: 'Payment amount in the currency\'s smallest unit (e.g., cents for USD)',
     example: 2999,
     minimum: 1
   })

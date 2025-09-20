@@ -32,7 +32,7 @@ export enum TransactionCategory {
   PERSONAL_CARE = 'personal_care',
   CHILDCARE = 'childcare',
   PET_CARE = 'pet_care',
-  MISCELLANEOUS = 'miscellaneous',
+  MISCELLANEOUS = 'miscellaneous'
 }
 
 export enum PaymentMethod {
@@ -42,7 +42,7 @@ export enum PaymentMethod {
   BANK_TRANSFER = 'bank_transfer',
   DIGITAL_WALLET = 'digital_wallet',
   CHECK = 'check',
-  OTHER = 'other',
+  OTHER = 'other'
 }
 
 export enum Currency {
@@ -60,7 +60,7 @@ export enum Currency {
   ARS = 'ARS', // Argentine Peso
   COP = 'COP', // Colombian Peso
   CLP = 'CLP', // Chilean Peso
-  PEN = 'PEN', // Peruvian Sol
+  PEN = 'PEN' // Peruvian Sol
 }
 
 // Category configurations with icons and colors
@@ -74,8 +74,8 @@ export const CATEGORY_CONFIG = {
       'groceries',
       'coffee',
       'alcohol',
-      'delivery',
-    ],
+      'delivery'
+    ]
   },
 
   [TransactionCategory.TRANSPORTATION]: {
@@ -87,8 +87,8 @@ export const CATEGORY_CONFIG = {
       'taxi_uber',
       'parking',
       'maintenance',
-      'car_insurance',
-    ],
+      'car_insurance'
+    ]
   },
 
   [TransactionCategory.HOUSING]: {
@@ -99,8 +99,8 @@ export const CATEGORY_CONFIG = {
       'maintenance',
       'furniture',
       'home_improvement',
-      'security',
-    ],
+      'security'
+    ]
   },
 
   [TransactionCategory.UTILITIES]: {
@@ -112,8 +112,8 @@ export const CATEGORY_CONFIG = {
       'gas',
       'internet',
       'phone',
-      'cable_tv',
-    ],
+      'cable_tv'
+    ]
   },
 
   [TransactionCategory.HEALTHCARE]: {
@@ -125,8 +125,8 @@ export const CATEGORY_CONFIG = {
       'dental',
       'vision',
       'therapy',
-      'medical_equipment',
-    ],
+      'medical_equipment'
+    ]
   },
 
   [TransactionCategory.ENTERTAINMENT]: {
@@ -138,8 +138,8 @@ export const CATEGORY_CONFIG = {
       'games',
       'streaming_services',
       'books',
-      'hobbies',
-    ],
+      'hobbies'
+    ]
   },
 
   [TransactionCategory.SHOPPING]: {
@@ -150,8 +150,8 @@ export const CATEGORY_CONFIG = {
       'electronics',
       'home_goods',
       'personal_items',
-      'gifts',
-    ],
+      'gifts'
+    ]
   },
 
   [TransactionCategory.TRAVEL]: {
@@ -163,8 +163,8 @@ export const CATEGORY_CONFIG = {
       'car_rental',
       'activities',
       'meals',
-      'souvenirs',
-    ],
+      'souvenirs'
+    ]
   },
 
   [TransactionCategory.EDUCATION]: {
@@ -175,8 +175,8 @@ export const CATEGORY_CONFIG = {
       'books',
       'supplies',
       'courses',
-      'training',
-    ],
+      'training'
+    ]
   },
 
   [TransactionCategory.FITNESS]: {
@@ -187,8 +187,8 @@ export const CATEGORY_CONFIG = {
       'personal_trainer',
       'sports_equipment',
       'supplements',
-      'classes',
-    ],
+      'classes'
+    ]
   },
 
   [TransactionCategory.MISCELLANEOUS]: {
@@ -196,51 +196,130 @@ export const CATEGORY_CONFIG = {
     color: '#636E72',
     subcategories: [
       'other',
-      'unknown',
-    ],
-  },
+      'unknown'
+    ]
+  }
 };
 
 // AI categorization keywords mapping
 export const CATEGORY_KEYWORDS = {
   [TransactionCategory.FOOD_DINING]: [
-    'restaurant', 'food', 'dining', 'lunch', 'dinner', 'breakfast',
-    'pizza', 'burger', 'coffee', 'starbucks', 'mcdonalds', 'kfc',
-    'grocery', 'supermarket', 'market', 'walmart', 'target',
+    'restaurant',
+    'food',
+    'dining',
+    'lunch',
+    'dinner',
+    'breakfast',
+    'pizza',
+    'burger',
+    'coffee',
+    'starbucks',
+    'mcdonalds',
+    'kfc',
+    'grocery',
+    'supermarket',
+    'market',
+    'walmart',
+    'target'
   ],
 
   [TransactionCategory.TRANSPORTATION]: [
-    'gas', 'fuel', 'uber', 'lyft', 'taxi', 'bus', 'train', 'subway',
-    'parking', 'toll', 'car', 'vehicle', 'automotive', 'shell', 'exxon',
+    'gas',
+    'fuel',
+    'uber',
+    'lyft',
+    'taxi',
+    'bus',
+    'train',
+    'subway',
+    'parking',
+    'toll',
+    'car',
+    'vehicle',
+    'automotive',
+    'shell',
+    'exxon'
   ],
 
   [TransactionCategory.HOUSING]: [
-    'rent', 'mortgage', 'home', 'apartment', 'house', 'property',
-    'furniture', 'ikea', 'home depot', 'lowes',
+    'rent',
+    'mortgage',
+    'home',
+    'apartment',
+    'house',
+    'property',
+    'furniture',
+    'ikea',
+    'home depot',
+    'lowes'
   ],
 
   [TransactionCategory.UTILITIES]: [
-    'electric', 'electricity', 'power', 'water', 'gas', 'internet',
-    'phone', 'mobile', 'cable', 'tv', 'utility',
+    'electric',
+    'electricity',
+    'power',
+    'water',
+    'gas',
+    'internet',
+    'phone',
+    'mobile',
+    'cable',
+    'tv',
+    'utility'
   ],
 
   [TransactionCategory.HEALTHCARE]: [
-    'doctor', 'hospital', 'medical', 'pharmacy', 'medicine', 'dental',
-    'dentist', 'therapy', 'health', 'clinic', 'cvs', 'walgreens',
+    'doctor',
+    'hospital',
+    'medical',
+    'pharmacy',
+    'medicine',
+    'dental',
+    'dentist',
+    'therapy',
+    'health',
+    'clinic',
+    'cvs',
+    'walgreens'
   ],
 
   [TransactionCategory.ENTERTAINMENT]: [
-    'movie', 'cinema', 'theater', 'concert', 'music', 'netflix',
-    'spotify', 'game', 'gaming', 'entertainment', 'fun',
+    'movie',
+    'cinema',
+    'theater',
+    'concert',
+    'music',
+    'netflix',
+    'spotify',
+    'game',
+    'gaming',
+    'entertainment',
+    'fun'
   ],
 
   [TransactionCategory.SHOPPING]: [
-    'shopping', 'store', 'mall', 'amazon', 'ebay', 'clothing',
-    'clothes', 'shoes', 'electronics', 'best buy',
+    'shopping',
+    'store',
+    'mall',
+    'amazon',
+    'ebay',
+    'clothing',
+    'clothes',
+    'shoes',
+    'electronics',
+    'best buy'
   ],
 
   [TransactionCategory.TRAVEL]: [
-    'travel', 'flight', 'airline', 'hotel', 'booking', 'airbnb',
-    'vacation', 'trip', 'tourism', 'expedia',
-  ],
+    'travel',
+    'flight',
+    'airline',
+    'hotel',
+    'booking',
+    'airbnb',
+    'vacation',
+    'trip',
+    'tourism',
+    'expedia'
+  ]
 };

@@ -1,6 +1,5 @@
 // @ts-check
 import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -10,7 +9,6 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
@@ -36,7 +34,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       
       // Backend code style - your preferences
-      'max-len': ['error', { code: 160, ignoreUrls: true, ignoreStrings: true }],
+      'max-len': ['error', { code: 250, ignoreUrls: true, ignoreStrings: true }],
       'comma-dangle': ['error', 'never'],
       'semi': ['error', 'always']
     }

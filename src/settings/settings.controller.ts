@@ -1,11 +1,11 @@
-import { Controller, Put, Body, UseGuards, UseInterceptors, ClassSerializerInterceptor, Get, Post, Delete, Param } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PersonalInfoResponseDto, UpdatePersonalInfoDto } from './dto/personal-info.dto';
+import { CreateTagDto, TagCreatedResponseDto, TagsListResponseDto, UpdateTagDto } from './dto/tag.dto';
 import { SettingsService } from './settings.service';
-import { UpdatePersonalInfoDto, PersonalInfoResponseDto } from './dto/personal-info.dto';
-import { CreateTagDto, UpdateTagDto, TagsListResponseDto, TagCreatedResponseDto } from './dto/tag.dto';
 
 @ApiTags('Settings')
 @Controller('settings')

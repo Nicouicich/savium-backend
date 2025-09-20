@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types } from 'mongoose';
-import { UserQueryService } from '../services/user-query.service';
-import { User, UserDocument } from '../schemas/user.schema';
 import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserQueryService } from '../services/user-query.service';
 
 describe('UserQueryService', () => {
   let service: UserQueryService;

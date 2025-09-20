@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -123,11 +123,9 @@ export class UserProfileService {
   }
 
   async updateProfile(profileId: string, updateProfileDto: UpdateProfileDto): Promise<UserProfileDocument> {
-    const updatedProfile = await this.userProfileModel.findOneAndUpdate(
-      { _id: new Types.ObjectId(profileId), isActive: true },
-      { $set: updateProfileDto },
-      { new: true }
-    );
+    const updatedProfile = await this.userProfileModel.findOneAndUpdate({ _id: new Types.ObjectId(profileId), isActive: true }, { $set: updateProfileDto }, {
+      new: true
+    });
 
     if (!updatedProfile) {
       throw new NotFoundException('Profile not found');

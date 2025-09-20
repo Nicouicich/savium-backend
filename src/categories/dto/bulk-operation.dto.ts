@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsArray, ArrayNotEmpty, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEnum, IsString } from 'class-validator';
 
 export enum BulkOperationType {
   DELETE = 'delete',

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 
 /**
  * DTO for verifying phone number for existing users

@@ -2,21 +2,21 @@ export enum AccountType {
   PERSONAL = 'personal',
   COUPLE = 'couple',
   FAMILY = 'family',
-  BUSINESS = 'business',
+  BUSINESS = 'business'
 }
 
 export enum AccountStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended',
-  PENDING = 'pending',
+  PENDING = 'pending'
 }
 
 export enum InvitationStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
-  EXPIRED = 'expired',
+  EXPIRED = 'expired'
 }
 
 // Account type configurations
@@ -29,8 +29,8 @@ export const ACCOUNT_TYPE_CONFIG = {
       'budgets',
       'goals',
       'reports',
-      'ai_categorization',
-    ],
+      'ai_categorization'
+    ]
   },
 
   [AccountType.COUPLE]: {
@@ -43,8 +43,8 @@ export const ACCOUNT_TYPE_CONFIG = {
       'reports',
       'shared_transactions',
       'privacy_settings',
-      'ai_categorization',
-    ],
+      'ai_categorization'
+    ]
   },
 
   [AccountType.FAMILY]: {
@@ -58,8 +58,8 @@ export const ACCOUNT_TYPE_CONFIG = {
       'member_management',
       'role_permissions',
       'allowances',
-      'ai_categorization',
-    ],
+      'ai_categorization'
+    ]
   },
 
   [AccountType.BUSINESS]: {
@@ -75,9 +75,9 @@ export const ACCOUNT_TYPE_CONFIG = {
       'approval_workflows',
       'integrations',
       'ai_categorization',
-      'receipt_processing',
-    ],
-  },
+      'receipt_processing'
+    ]
+  }
 };
 
 // Default privacy settings by account type
@@ -85,21 +85,21 @@ export const DEFAULT_PRIVACY_SETTINGS = {
   [AccountType.PERSONAL]: {
     transactionVisibility: 'private' as const,
     reportVisibility: 'private' as const,
-    budgetVisibility: 'private' as const,
+    budgetVisibility: 'private' as const
   },
 
   [AccountType.COUPLE]: {
     transactionVisibility: 'members_only' as const, // Can be set to 'private'
     reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
-    allowPrivateTransactions: true,
+    allowPrivateTransactions: true
   },
 
   [AccountType.FAMILY]: {
     transactionVisibility: 'members_only' as const,
     reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
-    childTransactionLimit: 50, // Default limit for children
+    childTransactionLimit: 50 // Default limit for children
   },
 
   [AccountType.BUSINESS]: {
@@ -107,6 +107,6 @@ export const DEFAULT_PRIVACY_SETTINGS = {
     reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
     requireApproval: true,
-    approvalThreshold: 500, // Default approval threshold
-  },
+    approvalThreshold: 500 // Default approval threshold
+  }
 };

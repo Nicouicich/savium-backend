@@ -7,5 +7,5 @@ export const CurrentUser = createParamDecorator(
     const user: UserForJWT = request.user;
 
     return data ? user?.[data] : user;
-  },
+  }
 );

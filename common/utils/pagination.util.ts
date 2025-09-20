@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, Min, Max } from 'class-validator';
+import { IsOptional, Max, Min } from 'class-validator';
 
 export class PaginationDto {
   @IsOptional()
@@ -7,7 +7,7 @@ export class PaginationDto {
   @Min(1)
   page?: number = 1;
 
-  @IsOptional() 
+  @IsOptional()
   @Type(() => Number)
   @Min(1)
   @Max(100)
@@ -38,17 +38,17 @@ export class PaginationHelper {
   static createPaginationMeta(
     page: number,
     limit: number,
-    total: number,
+    total: number
   ): PaginationMeta {
     const totalPages = Math.ceil(total / limit);
-    
+
     return {
       page,
       limit,
       total,
       totalPages,
       hasNext: page < totalPages,
-      hasPrevious: page > 1,
+      hasPrevious: page > 1
     };
   }
 
@@ -60,21 +60,21 @@ export class PaginationHelper {
     data: T[],
     page: number,
     limit: number,
-    total: number,
+    total: number
   ): PaginatedResult<T> {
     return {
       data,
-      pagination: this.createPaginationMeta(page, limit, total),
+      pagination: this.createPaginationMeta(page, limit, total)
     };
   }
 
   static createMongoosePaginationOptions(dto: PaginationDto) {
     const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = dto;
-    
+
     return {
       skip: this.getSkip(page, limit),
       limit,
-      sort: { [sortBy]: sortOrder === 'asc' ? 1 : -1 },
+      sort: { [sortBy]: sortOrder === 'asc' ? 1 : -1 }
     };
   }
 }

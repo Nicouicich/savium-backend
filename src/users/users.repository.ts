@@ -1,9 +1,9 @@
+import { PaginationDto, PaginationHelper } from '@common/utils/pagination.util';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
-import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto';
-import { PaginationDto, PaginationHelper } from '@common/utils/pagination.util';
+import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersRepository {

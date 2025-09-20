@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CardBalanceService } from './card-balance.service';
-import { CardsRepository } from '../cards.repository';
+import { BalanceUpdateSource, CardType } from '@common/constants/card-types';
+import { CardBalanceUpdateException, CardNotFoundException, InvalidBalanceOperationException } from '@common/exceptions/card.exceptions';
 import { RequestContextService } from '@common/services/request-context.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { CardsRepository } from '../cards.repository';
 import { CardBalanceEntity } from '../entities/card-balance.entity';
 import { CardEntity } from '../entities/card.entity';
-import { CardType, BalanceUpdateSource } from '@common/constants/card-types';
-import { CardNotFoundException, CardBalanceUpdateException, InvalidBalanceOperationException } from '@common/exceptions/card.exceptions';
+import { CardBalanceService } from './card-balance.service';
 
 describe('CardBalanceService', () => {
   let service: CardBalanceService;

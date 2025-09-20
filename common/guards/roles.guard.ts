@@ -1,13 +1,13 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  Logger,
+  Injectable,
+  Logger
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { AccountRole, UserRole } from '../constants/user-roles';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { UserRole, AccountRole } from '../constants/user-roles';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -18,7 +18,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
       ROLES_KEY,
-      [context.getHandler(), context.getClass()],
+      [context.getHandler(), context.getClass()]
     );
 
     if (!requiredRoles) {
@@ -40,9 +40,7 @@ export class RolesGuard implements CanActivate {
 
       // Check account-specific roles
       if (user.accountRoles && Array.isArray(user.accountRoles)) {
-        return user.accountRoles.some((accountRole: any) => 
-          accountRole.role === role
-        );
+        return user.accountRoles.some((accountRole: any) => accountRole.role === role);
       }
 
       return false;
@@ -54,7 +52,7 @@ export class RolesGuard implements CanActivate {
         userRoles: user.role,
         accountRoles: user.accountRoles,
         requiredRoles,
-        path: context.switchToHttp().getRequest().url,
+        path: context.switchToHttp().getRequest().url
       });
 
       throw new ForbiddenException(

@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { ProfileType } from '../schemas';
 import { CoupleProfile, CoupleProfileDocument } from '../schemas/couple-profile.schema';
 import { BaseProfileRepository } from './base-profile.repository';
-import { ProfileType } from '../schemas';
 
 @Injectable()
 export class CoupleProfileRepository extends BaseProfileRepository<CoupleProfile, CoupleProfileDocument> {
   constructor(
-    @InjectModel(ProfileType.COUPLE)
-    coupleProfileModel: Model<CoupleProfileDocument>
+    @InjectModel(ProfileType.COUPLE) coupleProfileModel: Model<CoupleProfileDocument>
   ) {
     super(coupleProfileModel);
   }

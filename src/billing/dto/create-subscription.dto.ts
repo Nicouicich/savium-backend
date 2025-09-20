@@ -1,5 +1,5 @@
-import { IsString, IsNumber, IsEnum, IsDateString, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @ApiProperty()

@@ -1,19 +1,19 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
-import { UsersRepository } from './users.repository';
 import { UserAuthService } from './services/user-auth.service';
+import { UserCommandService } from './services/user-command.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserQueryService } from './services/user-query.service';
-import { UserCommandService } from './services/user-command.service';
+import { UsersController } from './users.controller';
+import { UsersRepository } from './users.repository';
+import { UsersService } from './users.service';
 
-import { User, UserSchema } from './schemas/user.schema';
+import { FinancialProfilesModule } from '../financial-profiles/financial-profiles.module';
 import { UserAuth, UserAuthSchema } from './schemas/user-auth.schema';
 import { UserProfile, UserProfileSchema } from './schemas/user-profile.schema';
-import { FinancialProfilesModule } from '../financial-profiles/financial-profiles.module';
+import { User, UserSchema } from './schemas/user.schema';
 
 @Module({
   imports: [

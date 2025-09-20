@@ -1,24 +1,24 @@
+import { Currency } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsDate,
+  IsDecimal,
   IsEnum,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
   MinLength,
-  ValidateNested,
-  Matches,
-  IsDecimal
+  ValidateNested
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/transaction-categories';
 import { AlertType, BudgetPeriod } from '../schemas/budget.schema';
 
 export class CreateBudgetAlertDto {

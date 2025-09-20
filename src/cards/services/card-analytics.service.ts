@@ -1,9 +1,9 @@
+import { StatsPeriod } from '@common/constants/card-types';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { CardsRepository } from '../cards.repository';
-import { StatsPeriod } from '@common/constants/card-types';
-import { ICardStatistics, ICategorySpending, IMonthlySpending, IMerchantSpending } from '../interfaces/card.interface';
+import { ICardStatistics, ICategorySpending, IMerchantSpending, IMonthlySpending } from '../interfaces/card.interface';
 
 @Injectable()
 export class CardAnalyticsService {

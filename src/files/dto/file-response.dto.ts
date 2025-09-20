@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FileType, FilePurpose, FileStatus } from '../schemas/file-metadata.schema';
+import { FilePurpose, FileStatus, FileType } from '../schemas/file-metadata.schema';
 
 export class FileMetadataResponseDto {
   @ApiProperty({

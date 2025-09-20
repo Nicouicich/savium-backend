@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Model, Types, Document } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { BaseProfile } from '../schemas/base-profile.schema';
 
 @Injectable()

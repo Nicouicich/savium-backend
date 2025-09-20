@@ -1,7 +1,7 @@
+import { EncryptionException } from '@common/exceptions/card.exceptions';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { EncryptionException } from '@common/exceptions/card.exceptions';
 
 export interface EncryptedData {
   encrypted: string;
@@ -177,14 +177,14 @@ export class EncryptionService {
    */
   isValidEncryptedData(data: any): data is EncryptedData {
     return (
-      data &&
-      typeof data === 'object' &&
-      typeof data.encrypted === 'string' &&
-      typeof data.iv === 'string' &&
-      typeof data.authTag === 'string' &&
-      data.encrypted.length > 0 &&
-      data.iv.length === 32 && // 16 bytes in hex
-      data.authTag.length === 32 // 16 bytes in hex
+      data
+      && typeof data === 'object'
+      && typeof data.encrypted === 'string'
+      && typeof data.iv === 'string'
+      && typeof data.authTag === 'string'
+      && data.encrypted.length > 0
+      && data.iv.length === 32 // 16 bytes in hex
+      && data.authTag.length === 32 // 16 bytes in hex
     );
   }
 

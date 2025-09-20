@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsHexColor, MinLength, MaxLength, IsMongoId } from 'class-validator';
+import { IsHexColor, IsMongoId, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateTagDto {

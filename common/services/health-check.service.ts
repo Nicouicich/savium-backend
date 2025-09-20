@@ -1,10 +1,10 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Injectable, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import { Connection } from 'mongoose';
 
 export interface HealthCheckResult {
   status: HealthStatus;
@@ -80,13 +80,11 @@ export class HealthCheckService {
       try {
         const result = await Promise.race([
           checkFn(),
-          new Promise<HealthCheckResult>((_, reject) => 
-            setTimeout(() => reject(new Error('Health check timeout')), 10000)
-          )
+          new Promise<HealthCheckResult>((_, reject) => setTimeout(() => reject(new Error('Health check timeout')), 10000))
         ]);
 
         this.lastResults.set(name, result);
-        
+
         return {
           name,
           status: result.status,
@@ -104,7 +102,7 @@ export class HealthCheckService {
           details: {},
           error: error instanceof Error ? error.message : 'Unknown error'
         };
-        
+
         this.lastResults.set(name, {
           status: HealthStatus.UNHEALTHY,
           timestamp: new Date(),
@@ -200,15 +198,13 @@ export class HealthCheckService {
     try {
       // Check critical components only
       const criticalChecks = ['database', 'cache'];
-      
+
       for (const checkName of criticalChecks) {
         const checkFn = this.healthChecks.get(checkName);
         if (checkFn) {
           const result = await Promise.race([
             checkFn(),
-            new Promise<HealthCheckResult>((_, reject) => 
-              setTimeout(() => reject(new Error('Readiness check timeout')), 5000)
-            )
+            new Promise<HealthCheckResult>((_, reject) => setTimeout(() => reject(new Error('Readiness check timeout')), 5000))
           ]);
 
           if (result.status === HealthStatus.UNHEALTHY) {
@@ -232,7 +228,7 @@ export class HealthCheckService {
       // Basic checks - memory, process health
       const memUsage = process.memoryUsage();
       const heapUsedRatio = memUsage.heapUsed / memUsage.heapTotal;
-      
+
       // If heap usage is above 95%, consider unhealthy
       if (heapUsedRatio > 0.95) {
         return false;
@@ -251,11 +247,11 @@ export class HealthCheckService {
     // Database health check
     this.registerHealthCheck('database', async () => {
       const startTime = Date.now();
-      
+
       try {
         // Test database connection
         const isConnected = this.connection.readyState === 1; // 1 = connected
-        
+
         if (!isConnected) {
           return {
             status: HealthStatus.UNHEALTHY,
@@ -267,10 +263,10 @@ export class HealthCheckService {
 
         // Test with a simple query
         await this.connection.db?.admin().ping();
-        
+
         // Get connection stats
         const serverStatus = await this.connection.db?.admin().serverStatus();
-        
+
         return {
           status: HealthStatus.HEALTHY,
           timestamp: new Date(),
@@ -295,20 +291,20 @@ export class HealthCheckService {
     // Cache health check
     this.registerHealthCheck('cache', async () => {
       const startTime = Date.now();
-      
+
       try {
         const testKey = 'health_check_' + Date.now();
         const testValue = 'test';
-        
+
         // Test set operation
         await this.cacheManager.set(testKey, testValue, 10);
-        
+
         // Test get operation
         const retrieved = await this.cacheManager.get(testKey);
-        
+
         // Test delete operation
         await this.cacheManager.del(testKey);
-        
+
         if (retrieved !== testValue) {
           return {
             status: HealthStatus.DEGRADED,
@@ -341,14 +337,14 @@ export class HealthCheckService {
     // Memory health check
     this.registerHealthCheck('memory', async () => {
       const startTime = Date.now();
-      
+
       try {
         const memUsage = process.memoryUsage();
         const heapUsedRatio = memUsage.heapUsed / memUsage.heapTotal;
         const rssInMB = Math.round(memUsage.rss / 1024 / 1024);
-        
+
         let status = HealthStatus.HEALTHY;
-        
+
         if (heapUsedRatio > 0.9) {
           status = HealthStatus.UNHEALTHY;
         } else if (heapUsedRatio > 0.75) {
@@ -380,16 +376,16 @@ export class HealthCheckService {
     // CPU health check
     this.registerHealthCheck('cpu', async () => {
       const startTime = Date.now();
-      
+
       try {
         const cpuUsage = process.cpuUsage();
         const uptime = process.uptime();
-        
+
         // Calculate CPU usage percentage (this is a simplified calculation)
         const cpuPercent = (cpuUsage.user + cpuUsage.system) / (uptime * 1000000) * 100;
-        
+
         let status = HealthStatus.HEALTHY;
-        
+
         if (cpuPercent > 90) {
           status = HealthStatus.UNHEALTHY;
         } else if (cpuPercent > 75) {
@@ -420,7 +416,7 @@ export class HealthCheckService {
     // Disk space health check (basic)
     this.registerHealthCheck('disk', async () => {
       const startTime = Date.now();
-      
+
       try {
         // This is a basic implementation - in production you might want to use a library
         // to get actual disk usage statistics
@@ -451,7 +447,7 @@ export class HealthCheckService {
     setInterval(async () => {
       try {
         const health = await this.performSystemHealthCheck();
-        
+
         if (health.status !== HealthStatus.HEALTHY) {
           const unhealthyComponents = health.components
             .filter(c => c.status === HealthStatus.UNHEALTHY)
@@ -488,7 +484,7 @@ export class HealthCheckService {
     unknown: number;
   }): HealthStatus {
     const total = summary.healthy + summary.degraded + summary.unhealthy + summary.unknown;
-    
+
     if (total === 0) {
       return HealthStatus.UNKNOWN;
     }

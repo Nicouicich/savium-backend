@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsEnum, IsDate, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum ExportFormat {
   PDF = 'pdf',

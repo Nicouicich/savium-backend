@@ -1,14 +1,14 @@
-import { Injectable, Logger, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { PaginationDto } from '@common/utils/pagination.util';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { ProfileType } from 'src/financial-profiles/schemas';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { UserDocument } from './schemas/user.schema';
-import { PaginationDto } from '@common/utils/pagination.util';
 import { UserAuthService } from './services/user-auth.service';
-import { UserProfileService, CreateProfileDto } from './services/user-profile.service';
-import { UserQueryService } from './services/user-query.service';
 import { UserCommandService } from './services/user-command.service';
-import { ProfileType } from 'src/financial-profiles/schemas';
+import { CreateProfileDto, UserProfileService } from './services/user-profile.service';
+import { UserQueryService } from './services/user-query.service';
 
 @Injectable()
 export class UsersService {
@@ -162,15 +162,9 @@ export class UsersService {
   }
 
   // OAuth-related methods
-  async createFromOAuth(oauthData: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-    isEmailVerified: boolean;
-    oauthProvider: string;
-    oauthProviderId: string;
-  }): Promise<UserDocument> {
+  async createFromOAuth(
+    oauthData: { email: string; firstName: string; lastName: string; avatar?: string; isEmailVerified: boolean; oauthProvider: string; oauthProviderId: string }
+  ): Promise<UserDocument> {
     try {
       // Check if user already exists
       const existingUser = await this.userQueryService.findByEmail(oauthData.email);

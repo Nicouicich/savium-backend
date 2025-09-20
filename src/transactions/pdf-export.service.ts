@@ -1,8 +1,8 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import * as puppeteer from 'puppeteer';
-import { TransactionDocument } from './schemas/transaction.schema';
-import { TransactionExportDto, ExportPeriod } from './dto/transaction-export.dto';
 import { Currency } from '@common/constants/transaction-categories';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import * as puppeteer from 'puppeteer';
+import { ExportPeriod, TransactionExportDto } from './dto/transaction-export.dto';
+import { TransactionDocument } from './schemas/transaction.schema';
 
 interface ExportData {
   transactions: TransactionDocument[];
@@ -102,13 +102,15 @@ export class PdfExportService {
             <div class="account-info">
               <h2>${data.profileInfo.name}</h2>
               <p>Período: ${data.summary.dateRange}</p>
-              <p>Generado el: ${new Date().toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}</p>
+              <p>Generado el: ${
+      new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }</p>
             </div>
           </div>
 

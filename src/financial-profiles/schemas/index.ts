@@ -2,10 +2,10 @@
 export * from './base-profile.schema';
 
 // Specialized profile schemas
-export * from './personal-profile.schema';
+export * from './business-profile.schema';
 export * from './couple-profile.schema';
 export * from './family-profile.schema';
-export * from './business-profile.schema';
+export * from './personal-profile.schema';
 
 // Profile type enum for consistency
 export enum ProfileType {
@@ -18,21 +18,17 @@ export enum ProfileType {
 export type AnyProfileDocument = PersonalProfileDocument | CoupleProfileDocument | FamilyProfileDocument | CompanyProfileDocument;
 
 // Helper type to get profile document type from profile type
-export type ProfileDocumentType<T extends ProfileType> = T extends ProfileType.PERSONAL
-  ? import('./personal-profile.schema').PersonalProfileDocument
-  : T extends ProfileType.COUPLE
-    ? import('./couple-profile.schema').CoupleProfileDocument
-    : T extends ProfileType.FAMILY
-      ? import('./family-profile.schema').FamilyProfileDocument
-      : T extends ProfileType.BUSINESS
-        ? import('./business-profile.schema').CompanyProfileDocument
-        : never;
+export type ProfileDocumentType<T extends ProfileType> = T extends ProfileType.PERSONAL ? import('./personal-profile.schema').PersonalProfileDocument
+  : T extends ProfileType.COUPLE ? import('./couple-profile.schema').CoupleProfileDocument
+  : T extends ProfileType.FAMILY ? import('./family-profile.schema').FamilyProfileDocument
+  : T extends ProfileType.BUSINESS ? import('./business-profile.schema').CompanyProfileDocument
+  : never;
 
 // Schema mappings for static access
-import { PersonalProfileDocument, PersonalProfileSchema } from './personal-profile.schema';
+import { CompanyProfileDocument, CompanyProfileSchema } from './business-profile.schema';
 import { CoupleProfileDocument, CoupleProfileSchema } from './couple-profile.schema';
 import { FamilyProfileDocument, FamilyProfileSchema } from './family-profile.schema';
-import { CompanyProfileDocument, CompanyProfileSchema } from './business-profile.schema';
+import { PersonalProfileDocument, PersonalProfileSchema } from './personal-profile.schema';
 
 export const PROFILE_SCHEMAS = {
   [ProfileType.PERSONAL]: {

@@ -1,21 +1,19 @@
+import { CardStatus, CardType } from '@common/constants/card-types';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Card, CardDocument } from './schemas/card.schema';
-import { CardBalance, CardBalanceDocument } from './schemas/card-balance.schema';
-import { CardEntity } from './entities/card.entity';
-import { CardBalanceEntity } from './entities/card-balance.entity';
-import { ICard, ICardBalance } from './interfaces/card.interface';
-import { CardStatus, CardType } from '@common/constants/card-types';
 import { CardQueryDto } from './dto/card-query.dto';
+import { CardBalanceEntity } from './entities/card-balance.entity';
+import { CardEntity } from './entities/card.entity';
+import { ICard, ICardBalance } from './interfaces/card.interface';
+import { CardBalance, CardBalanceDocument } from './schemas/card-balance.schema';
+import { Card, CardDocument } from './schemas/card.schema';
 
 @Injectable()
 export class CardsRepository {
   constructor(
-    @InjectModel(Card.name)
-    private readonly cardModel: Model<CardDocument>,
-    @InjectModel(CardBalance.name)
-    private readonly cardBalanceModel: Model<CardBalanceDocument>
+    @InjectModel(Card.name) private readonly cardModel: Model<CardDocument>,
+    @InjectModel(CardBalance.name) private readonly cardBalanceModel: Model<CardBalanceDocument>
   ) {}
 
   /**

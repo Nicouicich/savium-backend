@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, FilterQuery, UpdateQuery, QueryOptions, ClientSession } from 'mongoose';
+import { ClientSession, FilterQuery, Model, QueryOptions, Types, UpdateQuery } from 'mongoose';
 import { ReferralReward, ReferralRewardDocument, RewardStatus, RewardType } from './schemas/referral-reward.schema';
 
 @Injectable()

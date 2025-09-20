@@ -1,6 +1,6 @@
+import { UserRole } from '@common/constants/user-roles';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
-import { UserRole } from '@common/constants/user-roles';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'User ID' })

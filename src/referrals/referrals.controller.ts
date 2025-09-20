@@ -1,19 +1,19 @@
-import { Controller, Get, Post, Put, Body, Query, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
-import { ReferralsService } from './referrals.service';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplyReferralDto } from './dto/apply-referral.dto';
+import { RedeemRewardsDto, RedeemRewardsResponseDto } from './dto/redeem-rewards.dto';
 import { ReferralCodeResponseDto } from './dto/referral-code-response.dto';
-import { ValidateReferralResponseDto } from './dto/validate-referral-response.dto';
-import { ReferralStatsQueryDto } from './dto/referral-stats-query.dto';
-import { ReferralStatsResponseDto } from './dto/referral-stats-response.dto';
 import { ReferralHistoryQueryDto } from './dto/referral-history-query.dto';
 import { ReferralHistoryResponseDto } from './dto/referral-history-response.dto';
+import { ReferralSettingsResponseDto, UpdateReferralSettingsDto } from './dto/referral-settings.dto';
+import { ReferralStatsQueryDto } from './dto/referral-stats-query.dto';
+import { ReferralStatsResponseDto } from './dto/referral-stats-response.dto';
 import { RewardsQueryDto } from './dto/rewards-query.dto';
 import { RewardsResponseDto } from './dto/rewards-response.dto';
-import { RedeemRewardsDto, RedeemRewardsResponseDto } from './dto/redeem-rewards.dto';
-import { UpdateReferralSettingsDto, ReferralSettingsResponseDto } from './dto/referral-settings.dto';
+import { ValidateReferralResponseDto } from './dto/validate-referral-response.dto';
+import { ReferralsService } from './referrals.service';
 
 @ApiTags('Referrals')
 @Controller('referrals')
@@ -25,7 +25,7 @@ export class ReferralsController {
   @Get('my-code')
   @ApiOperation({
     summary: 'Get my referral code and statistics',
-    description: "Retrieves the current user's referral code along with basic statistics including total referrals, successful referrals, and conversion rate."
+    description: 'Retrieves the current user\'s referral code along with basic statistics including total referrals, successful referrals, and conversion rate.'
   })
   @ApiResponse({
     status: 200,
@@ -284,7 +284,7 @@ export class ReferralsController {
   @Get('settings')
   @ApiOperation({
     summary: 'Get referral settings',
-    description: "Retrieves the current user's referral settings including notification preferences, privacy settings, and reward preferences."
+    description: 'Retrieves the current user\'s referral settings including notification preferences, privacy settings, and reward preferences.'
   })
   @ApiResponse({
     status: 200,
@@ -302,7 +302,7 @@ export class ReferralsController {
   @Put('settings')
   @ApiOperation({
     summary: 'Update referral settings',
-    description: "Updates the current user's referral settings. All fields are optional and only provided fields will be updated."
+    description: 'Updates the current user\'s referral settings. All fields are optional and only provided fields will be updated.'
   })
   @ApiResponse({
     status: 200,

@@ -10,9 +10,10 @@ export default registerAs('aws', () => ({
     forcePathStyle: process.env.AWS_S3_FORCE_PATH_STYLE === 'true',
     uploadTimeout: parseInt(process.env.AWS_S3_UPLOAD_TIMEOUT || '60000'),
     maxFileSize: parseInt(process.env.AWS_S3_MAX_FILE_SIZE || '52428800'), // 50MB default
-    allowedMimeTypes: (
-      process.env.AWS_S3_ALLOWED_MIME_TYPES || 'image/jpeg,image/png,image/gif,image/webp,audio/mpeg,audio/wav,audio/ogg,audio/mp4,application/pdf'
-    ).split(','),
+    allowedMimeTypes:
+      (process.env.AWS_S3_ALLOWED_MIME_TYPES || 'image/jpeg,image/png,image/gif,image/webp,audio/mpeg,audio/wav,audio/ogg,audio/mp4,application/pdf').split(
+        ','
+      ),
     presignedUrlExpiration: parseInt(process.env.AWS_S3_PRESIGNED_URL_EXPIRATION || '3600'), // 1 hour
     cdnDomain: process.env.AWS_S3_CDN_DOMAIN, // For CloudFront or custom CDN
     publicRead: process.env.AWS_S3_PUBLIC_READ === 'true',

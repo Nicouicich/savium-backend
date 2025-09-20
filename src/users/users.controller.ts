@@ -14,17 +14,17 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto';
-import { PaginationDto } from '@common/utils/pagination.util';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '@common/guards/roles.guard';
-import { Roles } from '@common/decorators/roles.decorator';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { UserRole } from '@common/constants/user-roles';
 import { ApiErrorResponse, ApiPaginatedResponse, ApiSuccessResponse } from '@common/decorators/api-response.decorator';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { Roles } from '@common/decorators/roles.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { PaginationDto } from '@common/utils/pagination.util';
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from './dto';
 import type { UserForJWT } from './index';
 import { UserMapper } from './index';
+import { UsersService } from './users.service';
 
 @ApiTags('Users')
 @Controller('users')

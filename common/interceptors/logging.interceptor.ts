@@ -1,15 +1,15 @@
 import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
   CallHandler,
+  ExecutionContext,
+  Injectable,
   Logger,
+  NestInterceptor
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { RequestContextService, RequestContext } from './request-context';
+import { RequestContext, RequestContextService } from './request-context';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -42,7 +42,7 @@ export class LoggingInterceptor implements NestInterceptor {
       url: url.split('?')[0], // Remove query params from logs for cleaner output
       ip,
       ipAddress: ip,
-      userAgent: userAgent.substring(0, 100), // Truncate user agent
+      userAgent: userAgent.substring(0, 100) // Truncate user agent
     };
 
     // Log incoming request - simplified
@@ -78,9 +78,8 @@ export class LoggingInterceptor implements NestInterceptor {
             } else if (isDevelopment) {
               this.logger.warn(`✗ ${statusCode} ${method} ${url} [${duration}ms]`);
             }
-          },
-        }),
-      )
-    );
+          }
+        })
+      ));
   }
 }

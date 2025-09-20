@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from '../users.controller';
-import { UsersService } from '../users.service';
+import { Types } from 'mongoose';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { NotFoundException, ConflictException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { UsersController } from '../users.controller';
+import { UsersService } from '../users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;

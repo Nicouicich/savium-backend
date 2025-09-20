@@ -1,11 +1,13 @@
+import { CoupleReactionType, CoupleTransactionType } from '@common/constants/couple-types';
+import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
-import { CoupleTransactionType, CoupleReactionType } from '@common/constants/couple-types';
 import { CategoryDocument } from 'src/categories/schemas/category.schema';
 
-export type TransactionDocument = Transaction &
-  Document & {
+export type TransactionDocument =
+  & Transaction
+  & Document
+  & {
     createdAt: Date;
     updatedAt: Date;
   };

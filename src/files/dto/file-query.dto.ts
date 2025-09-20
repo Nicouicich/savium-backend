@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsBoolean, IsArray, IsDateString, IsUUID, IsNumber, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { FileType, FilePurpose, FileStatus } from '../schemas/file-metadata.schema';
+import { IsArray, IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { FilePurpose, FileStatus, FileType } from '../schemas/file-metadata.schema';
 
 export class FileQueryDto {
   @ApiProperty({

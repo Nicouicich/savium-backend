@@ -1,1 +1,1 @@
-export type { RequestWithUser, AuthenticatedUser } from './request-with-user.interface';
+export type { AuthenticatedUser, RequestWithUser } from './request-with-user.interface';

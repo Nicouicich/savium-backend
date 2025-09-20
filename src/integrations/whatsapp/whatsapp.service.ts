@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import axios from 'axios';
 import { Model } from 'mongoose';
+import { TransactionsService } from 'src/transactions/transactions.service';
+import { UsersService } from 'src/users/users.service';
 import { MessagingFileService } from '../../files/services/messaging-file.service';
 import { UserProfile } from '../../users/schemas/user-profile.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
@@ -12,8 +14,6 @@ import { AiService } from '../ai/ai.service';
 import { MessageProcessorService, UnifiedMessage } from '../ai/message-processor.service';
 import { ReceiptProcessorService } from '../ai/receipt-processor.service';
 import { WhatsAppMessageDto, WhatsAppWebhookDto } from './dto/whatsapp-webhook.dto';
-import { UsersService } from 'src/users/users.service';
-import { TransactionsService } from 'src/transactions/transactions.service';
 
 interface WhatsAppMessage {
   from: string;
@@ -31,11 +31,10 @@ export class WhatsappService {
   private readonly phoneNumberId: string | undefined;
   private readonly verifyToken: string | undefined;
 
-  constructor (
+  constructor(
     private configService: ConfigService,
     private messageProcessor: MessageProcessorService,
     private userService: UsersService,
-
     private messagingFileService: MessagingFileService,
     private receiptProcessorService: ReceiptProcessorService,
     private transactionsService: TransactionsService,
@@ -482,7 +481,7 @@ export class WhatsappService {
     return text;
   }
 
-  private extractTransactionData(text: string): { amount?: number; description?: string; } {
+  private extractTransactionData(text: string): { amount?: number; description?: string } {
     // Parse transaction from text like "25 lunch" or "spent 30 on groceries" or "gasté 45 en cena"
     const patterns = [
       /(?:spent|gasté|gaste)\s+(?:\$)?(\d+(?:\.\d{2})?)\s+(?:on|en)\s+(.+)/i,

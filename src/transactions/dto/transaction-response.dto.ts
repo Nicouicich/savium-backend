@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AttachedFileResponseDto {
   @ApiProperty({ description: 'File ID' })

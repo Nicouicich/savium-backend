@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ExecutionContext, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { AdvancedRateLimiterService } from '../services/advanced-rate-limiter.service';
@@ -114,13 +114,13 @@ export class EnhancedThrottlerGuard {
 
       // Wait for all rate limit checks
       const results = await Promise.all(rateLimitChecks);
-      
+
       // Find the most restrictive result
       const blockedResult = results.find(result => !result.allowed);
-      
+
       if (blockedResult) {
         const identifier = userId || ipAddress;
-        
+
         // Log the rate limit violation
         this.logger.warn(`Rate limit exceeded`, {
           identifier,
@@ -152,21 +152,20 @@ export class EnhancedThrottlerGuard {
       // Set success rate limit headers
       const response = context.switchToHttp().getResponse();
       const successResult = results.find(result => result.allowed) || results[0];
-      
+
       if (successResult) {
         response.setHeader('X-RateLimit-Remaining', successResult.remainingRequests);
         response.setHeader('X-RateLimit-Reset', Math.ceil(successResult.resetTime / 1000));
       }
 
       return true;
-
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
 
       this.logger.error('Error in enhanced throttler guard', error);
-      
+
       // On error, allow the request but log it (fail open for availability)
       return true;
     }

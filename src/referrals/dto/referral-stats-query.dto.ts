@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsDateString, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum StatsPeriod {
   LAST_7_DAYS = '7d',

@@ -69,15 +69,8 @@ export class CompanyProfile extends BaseProfile {
   team: {
     userId: Types.ObjectId;
     role: 'owner' | 'admin' | 'accountant' | 'employee';
-    permissions: (
-      | 'view_transactions'
-      | 'create_transactions'
-      | 'approve_transactions'
-      | 'manage_budgets'
-      | 'view_reports'
-      | 'manage_team'
-      | 'manage_settings'
-    )[];
+    permissions:
+      ('view_transactions' | 'create_transactions' | 'approve_transactions' | 'manage_budgets' | 'view_reports' | 'manage_team' | 'manage_settings')[];
     department?: string;
     employeeId?: string;
     joinedAt: Date;

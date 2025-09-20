@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BillingService } from './services/billing.service';
 import { BillingController } from './billing.controller';
+import { BillingService } from './services/billing.service';
 
-import { BillingCustomer, BillingCustomerSchema } from './schemas/billing-customer.schema';
-import { Subscription, SubscriptionSchema } from './schemas/subscription.schema';
-import { Payment, PaymentSchema } from './schemas/payment.schema';
 import { UserProfile, UserProfileSchema } from '../users/schemas/user-profile.schema';
+import { BillingCustomer, BillingCustomerSchema } from './schemas/billing-customer.schema';
+import { Payment, PaymentSchema } from './schemas/payment.schema';
+import { Subscription, SubscriptionSchema } from './schemas/subscription.schema';
 
 @Module({
   imports: [

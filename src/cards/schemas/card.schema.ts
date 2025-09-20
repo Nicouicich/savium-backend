@@ -1,9 +1,11 @@
+import { CardBrand, CardStatus, CardType } from '@common/constants/card-types';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { CardBrand, CardType, CardStatus } from '@common/constants/card-types';
 
-export type CardDocument = Card &
-  Document & {
+export type CardDocument =
+  & Card
+  & Document
+  & {
     createdAt: Date;
     updatedAt: Date;
   };

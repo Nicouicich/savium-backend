@@ -1,7 +1,7 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import type { Cache } from 'cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { Cache } from 'cache-manager';
 
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds
@@ -27,7 +27,7 @@ export class EnhancedCacheService {
     misses: 0
   };
 
-  constructor (
+  constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService
   ) {}

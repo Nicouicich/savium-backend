@@ -1,4 +1,9 @@
+import { Currency } from '@common/constants/transaction-categories';
+import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { CategoriesService } from '../categories/categories.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { UsersService } from '../users/users.service';
 import {
   CategoryBreakdownDto,
   CategoryReportDto,
@@ -13,11 +18,6 @@ import {
   SummaryStatsDto,
   UserBreakdownDto
 } from './dto';
-import { TransactionsService } from '../transactions/transactions.service';
-import { CategoriesService } from '../categories/categories.service';
-import { UsersService } from '../users/users.service';
-import { Currency } from '@common/constants/transaction-categories';
-import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
 @Injectable()
 export class ReportsService {
@@ -27,5 +27,4 @@ export class ReportsService {
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService
   ) {}
-
 }

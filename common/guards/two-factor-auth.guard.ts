@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, ForbiddenException, Logger, SetMetadata } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, Injectable, Logger, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { TwoFactorAuthService } from '../services/two-factor-auth.service';
@@ -56,7 +56,7 @@ export class TwoFactorAuthGuard {
     try {
       // Check if user has 2FA enabled
       const has2FA = await this.twoFactorService.is2FAEnabled(userId);
-      
+
       if (!has2FA) {
         // If 2FA is not enabled but required for this operation, deny access
         this.logger.warn(`2FA required but not enabled for user ${userId}`, {
@@ -77,7 +77,7 @@ export class TwoFactorAuthGuard {
       if (extractedChallengeId && twoFactorCode) {
         // Verify challenge-based 2FA
         const isValid = await this.twoFactorService.verifyChallenge(extractedChallengeId, twoFactorCode);
-        
+
         if (!isValid) {
           this.logger.warn(`Invalid 2FA challenge response for user ${userId}`, {
             challengeId: extractedChallengeId,
@@ -148,7 +148,6 @@ export class TwoFactorAuthGuard {
         challengeId,
         operation: require2FAOptions.operation
       });
-
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw error;
@@ -198,27 +197,32 @@ export class TwoFactorAuthGuard {
 }
 
 // Convenience decorators for common critical operations
-export const RequirePasswordChange2FA = () => Require2FA({
-  operation: 'password_change',
-  allowBackupCodes: true
-});
+export const RequirePasswordChange2FA = () =>
+  Require2FA({
+    operation: 'password_change',
+    allowBackupCodes: true
+  });
 
-export const RequireAccountSettings2FA = () => Require2FA({
-  operation: 'account_settings',
-  allowBackupCodes: true
-});
+export const RequireAccountSettings2FA = () =>
+  Require2FA({
+    operation: 'account_settings',
+    allowBackupCodes: true
+  });
 
-export const RequireFinancialOperation2FA = () => Require2FA({
-  operation: 'financial_operation',
-  allowBackupCodes: false // More strict for financial operations
-});
+export const RequireFinancialOperation2FA = () =>
+  Require2FA({
+    operation: 'financial_operation',
+    allowBackupCodes: false // More strict for financial operations
+  });
 
-export const RequireDataExport2FA = () => Require2FA({
-  operation: 'data_export',
-  allowBackupCodes: true
-});
+export const RequireDataExport2FA = () =>
+  Require2FA({
+    operation: 'data_export',
+    allowBackupCodes: true
+  });
 
-export const RequireAdminOperation2FA = () => Require2FA({
-  operation: 'admin_operation',
-  allowBackupCodes: false
-});
+export const RequireAdminOperation2FA = () =>
+  Require2FA({
+    operation: 'admin_operation',
+    allowBackupCodes: false
+  });

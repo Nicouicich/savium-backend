@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Injectable, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Cache } from 'cache-manager';
 
 export interface SecurityEvent {
@@ -25,23 +25,23 @@ export enum SecurityEventType {
   TOKEN_REFRESH = 'TOKEN_REFRESH',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
   UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
-  
+
   // Rate limiting events
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   TEMPORARY_BAN_APPLIED = 'TEMPORARY_BAN_APPLIED',
   SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
-  
+
   // Data access events
   SENSITIVE_DATA_ACCESS = 'SENSITIVE_DATA_ACCESS',
   FINANCIAL_TRANSACTION = 'FINANCIAL_TRANSACTION',
   BULK_DATA_EXPORT = 'BULK_DATA_EXPORT',
   ADMIN_OPERATION = 'ADMIN_OPERATION',
-  
+
   // Input validation events
   VALIDATION_FAILURE = 'VALIDATION_FAILURE',
   XSS_ATTEMPT = 'XSS_ATTEMPT',
   SQL_INJECTION_ATTEMPT = 'SQL_INJECTION_ATTEMPT',
-  
+
   // System events
   CONFIGURATION_CHANGE = 'CONFIGURATION_CHANGE',
   SYSTEM_ERROR = 'SYSTEM_ERROR',
@@ -115,7 +115,7 @@ export class SecurityAuditService {
     traceId?: string
   ): Promise<void> {
     const severity = this.getAuthEventSeverity(type);
-    
+
     await this.logSecurityEvent({
       type,
       severity,
@@ -220,7 +220,7 @@ export class SecurityAuditService {
     try {
       const ipFailures = (await this.cacheManager.get<number>(key)) || 0;
       const newIpFailures = ipFailures + 1;
-      
+
       await this.cacheManager.set(key, newIpFailures, 3600); // 1 hour TTL
 
       // Check user-specific failures if user is identified
@@ -301,7 +301,7 @@ export class SecurityAuditService {
     try {
       // In production: integrate with alerting systems
       // - Send email alerts
-      // - Trigger Slack/Teams notifications  
+      // - Trigger Slack/Teams notifications
       // - Call webhook endpoints
       // - Update monitoring dashboards
 
@@ -323,7 +323,7 @@ export class SecurityAuditService {
 
     try {
       const eventsToFlush = this.eventBuffer.splice(0, this.eventBuffer.length);
-      
+
       // In production: send to persistent storage, analytics service, etc.
       // For now, just log the count
       this.logger.debug(`Flushed ${eventsToFlush.length} security events`);
@@ -402,7 +402,7 @@ export class SecurityAuditService {
     try {
       // In production: implement export logic
       this.logger.log(`Exporting security events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
-      
+
       return {
         exportDate: new Date().toISOString(),
         dateRange: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },

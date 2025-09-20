@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ReferralsRepository } from '../referrals.repository';
 import { ReferralCodeResponseDto } from '../dto/referral-code-response.dto';
-import { ValidateReferralResponseDto } from '../dto/validate-referral-response.dto';
-import { ReferralStatsQueryDto, StatsPeriod } from '../dto/referral-stats-query.dto';
-import { ReferralStatsResponseDto } from '../dto/referral-stats-response.dto';
 import { ReferralHistoryQueryDto, ReferralHistoryStatus } from '../dto/referral-history-query.dto';
 import { ReferralHistoryResponseDto } from '../dto/referral-history-response.dto';
+import { ReferralSettingsResponseDto } from '../dto/referral-settings.dto';
+import { ReferralStatsQueryDto, StatsPeriod } from '../dto/referral-stats-query.dto';
+import { ReferralStatsResponseDto } from '../dto/referral-stats-response.dto';
 import { RewardsQueryDto, RewardStatusFilter } from '../dto/rewards-query.dto';
 import { RewardsResponseDto } from '../dto/rewards-response.dto';
-import { ReferralSettingsResponseDto } from '../dto/referral-settings.dto';
+import { ValidateReferralResponseDto } from '../dto/validate-referral-response.dto';
+import { ReferralsRepository } from '../referrals.repository';
 import { RewardStatus } from '../schemas/referral-reward.schema';
 
 @Injectable()
@@ -173,14 +173,13 @@ export class ReferralQueryService {
     const { page = 1, limit = 20, status } = query;
     const skip = (page - 1) * limit;
 
-    const statusFilter =
-      status === RewardStatusFilter.AVAILABLE
-        ? RewardStatus.AVAILABLE
-        : status === RewardStatusFilter.PENDING
-          ? RewardStatus.PENDING
-          : status === RewardStatusFilter.REDEEMED
-            ? RewardStatus.REDEEMED
-            : undefined;
+    const statusFilter = status === RewardStatusFilter.AVAILABLE
+      ? RewardStatus.AVAILABLE
+      : status === RewardStatusFilter.PENDING
+      ? RewardStatus.PENDING
+      : status === RewardStatusFilter.REDEEMED
+      ? RewardStatus.REDEEMED
+      : undefined;
 
     const result = await this.referralsRepository.findRewardsByUser(userId, skip, limit, statusFilter);
 

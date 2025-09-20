@@ -103,14 +103,9 @@ export class ReferralsRepository {
   }
 
   // Reward-related operations
-  async createReward(rewardData: {
-    userId: string;
-    referredUserId: string;
-    rewardType: RewardType;
-    amount: number;
-    currency: string;
-    status: RewardStatus;
-  }): Promise<ReferralRewardDocument> {
+  async createReward(
+    rewardData: { userId: string; referredUserId: string; rewardType: RewardType; amount: number; currency: string; status: RewardStatus }
+  ): Promise<ReferralRewardDocument> {
     return this.rewardModel.create({
       ...rewardData,
       userId: new Types.ObjectId(rewardData.userId),

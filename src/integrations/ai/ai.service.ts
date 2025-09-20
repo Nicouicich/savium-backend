@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { AI_PROMPT } from './prompts/ai-prompts';
 import { MessageSentToIA } from './message-processor.service';
+import { AI_PROMPT } from './prompts/ai-prompts';
 
 export interface TicketProcessingResult {
   type?: 'transaction' | 'income';

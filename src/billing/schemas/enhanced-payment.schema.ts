@@ -351,24 +351,24 @@ EnhancedPaymentSchema.index({
 });
 
 // Virtual for computed fields
-EnhancedPaymentSchema.virtual('isRefunded').get(function () {
+EnhancedPaymentSchema.virtual('isRefunded').get(function() {
   return this.refundedAmount > 0;
 });
 
-EnhancedPaymentSchema.virtual('isPartiallyRefunded').get(function () {
+EnhancedPaymentSchema.virtual('isPartiallyRefunded').get(function() {
   return this.refundedAmount > 0 && this.refundedAmount < this.amount;
 });
 
-EnhancedPaymentSchema.virtual('isFullyRefunded').get(function () {
+EnhancedPaymentSchema.virtual('isFullyRefunded').get(function() {
   return this.refundedAmount >= this.amount;
 });
 
-EnhancedPaymentSchema.virtual('remainingAmount').get(function () {
+EnhancedPaymentSchema.virtual('remainingAmount').get(function() {
   return Math.max(0, this.amount - this.refundedAmount);
 });
 
 // Pre-save middleware
-EnhancedPaymentSchema.pre('save', function (next) {
+EnhancedPaymentSchema.pre('save', function(next) {
   // Add status change to history
   if (this.isModified('status')) {
     const statusEntry = {
@@ -390,7 +390,7 @@ EnhancedPaymentSchema.pre('save', function (next) {
 });
 
 // Methods
-EnhancedPaymentSchema.methods.addWebhookEvent = function (eventId: string, eventType: string, success: boolean, error?: string) {
+EnhancedPaymentSchema.methods.addWebhookEvent = function(eventId: string, eventType: string, success: boolean, error?: string) {
   this.webhookEvents.push({
     eventId,
     eventType,
@@ -401,7 +401,7 @@ EnhancedPaymentSchema.methods.addWebhookEvent = function (eventId: string, event
   return this.save();
 };
 
-EnhancedPaymentSchema.methods.addRefund = function (refundId: string, amount: number, reason?: string, status: string = 'succeeded') {
+EnhancedPaymentSchema.methods.addRefund = function(refundId: string, amount: number, reason?: string, status: string = 'succeeded') {
   this.refundHistory.push({
     refundId,
     amount,

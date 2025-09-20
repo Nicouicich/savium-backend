@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { Public } from '@common/decorators/public.decorator';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { WhatsappService } from './integrations/whatsapp/whatsapp.service';
 

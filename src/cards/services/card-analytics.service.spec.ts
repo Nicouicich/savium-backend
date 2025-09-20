@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getConnectionToken } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { CardAnalyticsService } from './card-analytics.service';
-import { CardsRepository } from '../cards.repository';
 import { StatsPeriod } from '@common/constants/card-types';
-import { CardEntity } from '../entities/card.entity';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Connection } from 'mongoose';
+import { CardsRepository } from '../cards.repository';
 import { CardBalanceEntity } from '../entities/card-balance.entity';
+import { CardEntity } from '../entities/card.entity';
+import { CardAnalyticsService } from './card-analytics.service';
 
 describe('CardAnalyticsService', () => {
   let service: CardAnalyticsService;
@@ -133,12 +133,9 @@ describe('CardAnalyticsService', () => {
 
       // Setup collection mock to return different results based on pipeline
       const mockCollection = connection.db.collection();
-      mockCollection
-        .aggregate()
-        .toArray.mockResolvedValueOnce(mockTransactionStats)
-        .mockResolvedValueOnce(mockCategoryBreakdown)
-        .mockResolvedValueOnce(mockMonthlySpending)
-        .mockResolvedValueOnce(mockTopMerchants);
+      mockCollection.aggregate().toArray.mockResolvedValueOnce(mockTransactionStats).mockResolvedValueOnce(mockCategoryBreakdown).mockResolvedValueOnce(
+        mockMonthlySpending
+      ).mockResolvedValueOnce(mockTopMerchants);
 
       // Act
       const result = await service.getCardStatistics('507f1f77bcf86cd799439011', StatsPeriod.MONTH, startDate, endDate);

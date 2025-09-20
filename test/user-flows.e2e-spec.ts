@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { ValidationPipe } from '@nestjs/common';
 
 describe('User Flows (e2e)', () => {
   let app: INestApplication;
@@ -281,10 +281,9 @@ describe('User Flows (e2e)', () => {
     });
 
     it('should get all transactions for account', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/api/v1/transactions/account/${accountId}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get(`/api/v1/transactions/account/${accountId}`).set('Authorization', `Bearer ${authToken}`).expect(
+        200
+      );
 
       expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].amount).toBe(25.99);
@@ -305,10 +304,7 @@ describe('User Flows (e2e)', () => {
     });
 
     it('should get transaction statistics', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/v1/transactions/stats')
-        .query({ accountId })
-        .set('Authorization', `Bearer ${authToken}`)
+      const response = await request(app.getHttpServer()).get('/api/v1/transactions/stats').query({ accountId }).set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('totalTransactions');
@@ -317,11 +313,10 @@ describe('User Flows (e2e)', () => {
     });
 
     it('should get category breakdown', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/v1/transactions/category-breakdown')
-        .query({ accountId })
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/transactions/category-breakdown').query({ accountId }).set(
+        'Authorization',
+        `Bearer ${authToken}`
+      ).expect(200);
 
       expect(response.body).toBeInstanceOf(Array);
       expect(response.body[0]).toHaveProperty('category');
@@ -329,11 +324,10 @@ describe('User Flows (e2e)', () => {
     });
 
     it('should search transactions', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/v1/transactions/search')
-        .query({ q: 'lunch', accountId })
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/api/v1/transactions/search').query({ q: 'lunch', accountId }).set(
+        'Authorization',
+        `Bearer ${authToken}`
+      ).expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].description).toContain('Lunch');

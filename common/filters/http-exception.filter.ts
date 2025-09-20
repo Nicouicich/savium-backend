@@ -1,9 +1,9 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
-  Logger,
+  Logger
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -18,8 +18,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     const errorResponse = exception.getResponse();
-    const errorMessage = typeof errorResponse === 'string' 
-      ? errorResponse 
+    const errorMessage = typeof errorResponse === 'string'
+      ? errorResponse
       : (errorResponse as any).message || exception.message;
 
     const errorDetails = {
@@ -27,16 +27,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error: {
         statusCode: status,
         message: errorMessage,
-        details: typeof errorResponse === 'object' && errorResponse !== null 
+        details: typeof errorResponse === 'object' && errorResponse !== null
           ? (errorResponse as any).errors || null
           : null,
-        code: typeof errorResponse === 'object' && errorResponse !== null 
+        code: typeof errorResponse === 'object' && errorResponse !== null
           ? (errorResponse as any).code || 'HTTP_EXCEPTION'
           : 'HTTP_EXCEPTION',
         timestamp: new Date().toISOString(),
         path: request.url,
-        method: request.method,
-      },
+        method: request.method
+      }
     };
 
     // Add trace ID to response if available
@@ -46,7 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // Log based on error type - expected errors get less verbose logging
     const isExpectedError = this.isExpectedError(status, request.url);
-    
+
     if (isExpectedError) {
       // Don't log common expected errors (401, 403) as these are normal user behavior
       // Only log validation errors and 404s if in development mode
@@ -54,7 +54,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         this.logger.debug(`${status} ${errorMessage}`, {
           statusCode: status,
           path: request.url,
-          method: request.method,
+          method: request.method
         });
       }
     } else {
@@ -64,7 +64,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         stack: exception.stack,
         user: (request as any).user?.id || 'anonymous',
         ip: request.ip,
-        userAgent: request.headers['user-agent'],
+        userAgent: request.headers['user-agent']
       });
     }
 

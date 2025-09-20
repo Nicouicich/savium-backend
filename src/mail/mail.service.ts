@@ -1,8 +1,8 @@
+import { RequestContextService } from '@common/interceptors/request-context';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
-import { RequestContextService } from '@common/interceptors/request-context';
 
 export interface MailOptions {
   to: string | string[];
@@ -112,8 +112,8 @@ export class MailService {
         <p>Hi ${context.firstName},</p>
         <p>Welcome to Savium! We're excited to help you manage your finances with our ${context.accountType} account.</p>
         ${
-          context.activationUrl
-            ? `
+      context.activationUrl
+        ? `
           <div style="text-align: center; margin: 30px 0;">
             <a href="${context.activationUrl}" 
                style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
@@ -121,8 +121,8 @@ export class MailService {
             </a>
           </div>
         `
-            : ''
-        }
+        : ''
+    }
         <p>If you have any questions, feel free to reach out to our support team.</p>
         <p>Best regards,<br>The Savium Team</p>
       </div>
@@ -212,8 +212,8 @@ export class MailService {
         </div>
 
         ${
-          transactions.length > 0
-            ? `
+      transactions.length > 0
+        ? `
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <thead>
               <tr style="background-color: #e9ecef;">
@@ -228,8 +228,8 @@ export class MailService {
           </table>
           ${transactions.length > 10 ? `<p><em>... and ${transactions.length - 10} more transactions</em></p>` : ''}
         `
-            : '<p>No transactions recorded for this period.</p>'
-        }
+        : '<p>No transactions recorded for this period.</p>'
+    }
 
         <p>Log in to Savium to see your complete financial overview and manage your budgets.</p>
         <p>Best regards,<br>The Savium Team</p>

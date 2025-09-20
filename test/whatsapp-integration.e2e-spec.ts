@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { RequestContextService } from '@common/interceptors/request-context';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { WhatsappModule } from '../src/integrations/whatsapp/whatsapp.module';
-import { User, UserSchema } from '../src/users/schemas/user.schema';
 import { UserProfile, UserProfileSchema } from '../src/users/schemas/user-profile.schema';
-import { RequestContextService } from '@common/interceptors/request-context';
+import { User, UserSchema } from '../src/users/schemas/user.schema';
 
 describe('WhatsApp Integration (e2e)', () => {
   let app: INestApplication;

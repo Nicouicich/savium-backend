@@ -1,12 +1,12 @@
 import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
   CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor
 } from '@nestjs/common';
+import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Request } from 'express';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -25,12 +25,10 @@ export interface ApiResponse<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   intercept(
     context: ExecutionContext,
-    next: CallHandler,
+    next: CallHandler
   ): Observable<ApiResponse<T>> {
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.url;
@@ -50,7 +48,7 @@ export class TransformInterceptor<T>
             data: data.data,
             pagination: data.pagination,
             timestamp: new Date().toISOString(),
-            path,
+            path
           };
         }
 
@@ -63,7 +61,7 @@ export class TransformInterceptor<T>
             data: 'data' in messageData ? messageData.data : data,
             message,
             timestamp: new Date().toISOString(),
-            path,
+            path
           };
         }
 
@@ -72,9 +70,9 @@ export class TransformInterceptor<T>
           success: true,
           data,
           timestamp: new Date().toISOString(),
-          path,
+          path
         };
-      }),
+      })
     );
   }
 }

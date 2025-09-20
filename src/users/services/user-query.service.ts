@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, PipelineStage } from 'mongoose';
-import { User, UserDocument } from '../schemas/user.schema';
+import { Model, PipelineStage, Types } from 'mongoose';
 import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 
 /**
  * UserQueryService - Handles all database queries for User entities
@@ -13,10 +13,8 @@ export class UserQueryService {
   private readonly logger = new Logger(UserQueryService.name);
 
   constructor(
-    @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>,
-    @InjectModel(UserProfile.name)
-    private readonly userProfileModel: Model<UserProfileDocument>
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfileDocument>
   ) {}
 
   /**

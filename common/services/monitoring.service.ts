@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as os from 'os';
 import { performance } from 'perf_hooks';
 import * as process from 'process';
-import * as os from 'os';
 
 export interface MetricData {
   name: string;
@@ -23,7 +23,7 @@ export interface PerformanceMetrics {
     p99: number;
   };
   errorRate: number;
-  
+
   // System metrics
   memory: {
     used: number;
@@ -34,14 +34,14 @@ export interface PerformanceMetrics {
     usage: number;
     loadAverage: number[];
   };
-  
+
   // Database metrics
   database: {
     connections: number;
     queryTime: number;
     slowQueries: number;
   };
-  
+
   // Cache metrics
   cache: {
     hitRate: number;
@@ -72,7 +72,7 @@ export class MonitoringService {
   constructor(private configService: ConfigService) {
     // Initialize default alert rules
     this.initializeDefaultAlerts();
-    
+
     // Start metrics collection
     this.startMetricsCollection();
   }
@@ -110,7 +110,7 @@ export class MonitoringService {
    */
   recordResponseTime(timeMs: number, endpoint?: string, statusCode?: number): void {
     this.responseTimes.push(timeMs);
-    
+
     // Keep only recent response times
     if (this.responseTimes.length > this.maxMetricsStorage) {
       this.responseTimes.shift();
@@ -214,24 +214,24 @@ export class MonitoringService {
       requestCount: totalRequests,
       responseTime: responseTimeMetrics,
       errorRate,
-      
+
       memory: {
         used: usedMemory,
         free: freeMemory,
         percentage: (usedMemory / totalMemory) * 100
       },
-      
+
       cpu: {
         usage: (cpuUsage.user + cpuUsage.system) / 1000000, // Convert to ms
         loadAverage
       },
-      
+
       database: {
         connections: 0, // Would be populated from database service
         queryTime: this.getAverageMetricValue('database_query_duration', oneHourAgo),
         slowQueries: this.getMetricCount('database_slow_queries', oneHourAgo)
       },
-      
+
       cache: {
         hitRate: this.calculateCacheHitRate(oneHourAgo),
         memory: 0, // Would be populated from cache service
@@ -245,9 +245,7 @@ export class MonitoringService {
    */
   getMetricsInRange(metricName: string, startTime: Date, endTime: Date): MetricData[] {
     const metrics = this.metrics.get(metricName) || [];
-    return metrics.filter(metric => 
-      metric.timestamp >= startTime && metric.timestamp <= endTime
-    );
+    return metrics.filter(metric => metric.timestamp >= startTime && metric.timestamp <= endTime);
   }
 
   /**
@@ -255,10 +253,10 @@ export class MonitoringService {
    */
   getTopEndpoints(limit = 10): Array<{ endpoint: string; count: number; avgResponseTime: number }> {
     const endpointStats = new Map<string, { count: number; totalTime: number }>();
-    
+
     const httpMetrics = this.metrics.get('http_requests_total') || [];
     const responseTimeMetrics = this.metrics.get('response_time') || [];
-    
+
     // Count requests per endpoint
     httpMetrics.forEach(metric => {
       const endpoint = metric.tags?.endpoint || 'unknown';
@@ -319,7 +317,7 @@ export class MonitoringService {
     version: string;
   }> {
     const checks: Record<string, { status: boolean; message?: string; responseTime?: number }> = {};
-    
+
     // Memory check
     const memUsage = process.memoryUsage();
     const heapUsedPercent = (memUsage.heapUsed / memUsage.heapTotal) * 100;
@@ -346,8 +344,11 @@ export class MonitoringService {
 
     // Determine overall status
     const failedChecks = Object.values(checks).filter(check => !check.status).length;
-    const status = failedChecks === 0 ? 'healthy' : 
-                  failedChecks <= 1 ? 'degraded' : 'unhealthy';
+    const status = failedChecks === 0
+      ? 'healthy'
+      : failedChecks <= 1
+      ? 'degraded'
+      : 'unhealthy';
 
     return {
       status,
@@ -362,27 +363,28 @@ export class MonitoringService {
    */
   exportPrometheusMetrics(): string {
     let output = '';
-    
+
     this.metrics.forEach((metricData, metricName) => {
       if (metricData.length === 0) return;
-      
+
       const latestMetric = metricData[metricData.length - 1];
       const sanitizedName = metricName.replace(/[^a-zA-Z0-9_]/g, '_');
-      
+
       // Add metric help and type
       output += `# HELP ${sanitizedName} ${metricName} metric\n`;
       output += `# TYPE ${sanitizedName} gauge\n`;
-      
+
       // Add metric value
-      const labels = latestMetric.tags ? 
-        Object.entries(latestMetric.tags)
+      const labels = latestMetric.tags
+        ? Object.entries(latestMetric.tags)
           .map(([key, value]) => `${key}="${value}"`)
-          .join(',') : '';
-      
+          .join(',')
+        : '';
+
       const labelString = labels ? `{${labels}}` : '';
       output += `${sanitizedName}${labelString} ${latestMetric.value}\n\n`;
     });
-    
+
     return output;
   }
 
@@ -441,7 +443,7 @@ export class MonitoringService {
       const memUsage = process.memoryUsage();
       this.recordMetric('memory_heap_used', memUsage.heapUsed, 'bytes');
       this.recordMetric('memory_heap_total', memUsage.heapTotal, 'bytes');
-      
+
       const totalMemory = os.totalmem();
       const freeMemory = os.freemem();
       const usedMemory = totalMemory - freeMemory;
@@ -450,7 +452,7 @@ export class MonitoringService {
       // CPU metrics
       const cpuUsage = process.cpuUsage();
       this.recordMetric('cpu_usage', (cpuUsage.user + cpuUsage.system) / 1000000, 'ms');
-      
+
       // Load average
       const loadAvg = os.loadavg();
       this.recordMetric('load_average_1m', loadAvg[0], 'float');
@@ -466,7 +468,7 @@ export class MonitoringService {
 
   private cleanupOldMetrics(): void {
     const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
-    
+
     this.metrics.forEach((metricData, metricName) => {
       const filteredData = metricData.filter(metric => metric.timestamp > cutoffTime);
       this.metrics.set(metricName, filteredData);
@@ -478,7 +480,7 @@ export class MonitoringService {
       if (!rule.enabled || rule.metric !== metric.name) return;
 
       let shouldAlert = false;
-      
+
       switch (rule.condition) {
         case 'greater_than':
           shouldAlert = metric.value > rule.threshold;
@@ -515,7 +517,7 @@ export class MonitoringService {
 
   private resolveAlert(rule: AlertRule): void {
     this.logger.log(`ALERT RESOLVED: ${rule.name}`);
-    
+
     // In production: send resolution notifications
   }
 
@@ -550,9 +552,9 @@ export class MonitoringService {
   private getAverageMetricValue(metricName: string, since: number): number {
     const metrics = this.metrics.get(metricName) || [];
     const recentMetrics = metrics.filter(m => m.timestamp.getTime() > since);
-    
+
     if (recentMetrics.length === 0) return 0;
-    
+
     const sum = recentMetrics.reduce((acc, metric) => acc + metric.value, 0);
     return sum / recentMetrics.length;
   }
@@ -560,7 +562,7 @@ export class MonitoringService {
   private calculateCacheHitRate(since: number): number {
     const hits = this.getMetricCount('cache_operations_total', since); // Would filter by hit operations
     const misses = this.getMetricCount('cache_operations_total', since); // Would filter by miss operations
-    
+
     return hits + misses > 0 ? (hits / (hits + misses)) * 100 : 0;
   }
 
@@ -568,7 +570,7 @@ export class MonitoringService {
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     const totalRequests = this.getMetricCount('http_requests_total', oneHourAgo);
     const errorRequests = this.getMetricCount('errors_total', oneHourAgo);
-    
+
     return totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
   }
 

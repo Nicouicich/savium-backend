@@ -1,5 +1,5 @@
-import { Types } from 'mongoose';
 import { PaymentMethodType } from '@common/constants/card-types';
+import { Types } from 'mongoose';
 import { IPaymentMethod } from '../../cards/interfaces/card.interface';
 
 export class PaymentMethodEntity implements IPaymentMethod {

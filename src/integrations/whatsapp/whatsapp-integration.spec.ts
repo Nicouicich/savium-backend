@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { WhatsappService } from './whatsapp.service';
-import { WhatsappController } from './whatsapp.controller';
-import { ConfigService } from '@nestjs/config';
 import { RequestContextService } from '@common/interceptors/request-context';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { WhatsappController } from './whatsapp.controller';
+import { WhatsappService } from './whatsapp.service';
 
 describe('WhatsApp Integration - Isolated Tests', () => {
   let whatsappService: WhatsappService;

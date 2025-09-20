@@ -1,17 +1,17 @@
+import {
+  AlreadyReferredException,
+  DuplicateReferralCodeException,
+  InvalidReferralCodeException,
+  RewardNotAvailableException,
+  SelfReferralException
+} from '@common/exceptions/business.exceptions';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ReferralsRepository } from '../referrals.repository';
 import { ApplyReferralDto } from '../dto/apply-referral.dto';
 import { RedeemRewardsDto, RedeemRewardsResponseDto } from '../dto/redeem-rewards.dto';
-import { UpdateReferralSettingsDto, ReferralSettingsResponseDto } from '../dto/referral-settings.dto';
+import { ReferralSettingsResponseDto, UpdateReferralSettingsDto } from '../dto/referral-settings.dto';
+import { ReferralsRepository } from '../referrals.repository';
 import { RewardStatus, RewardType } from '../schemas/referral-reward.schema';
-import {
-  InvalidReferralCodeException,
-  SelfReferralException,
-  AlreadyReferredException,
-  RewardNotAvailableException,
-  DuplicateReferralCodeException
-} from '@common/exceptions/business.exceptions';
 
 @Injectable()
 export class ReferralCommandService {

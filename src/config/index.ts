@@ -1,13 +1,13 @@
 export { default as appConfig } from './app.config';
-export { default as databaseConfig } from './database.config';
-export { default as redisConfig } from './redis.config';
-export { default as jwtConfig } from './jwt.config';
-export { default as swaggerConfig } from './swagger.config';
-export { default as integrationsConfig } from './integrations.config';
-export { default as stripeConfig } from './stripe.config';
-export { default as googleConfig } from './google.config';
-export { default as facebookConfig } from './facebook.config';
 export { default as awsConfig } from './aws.config';
+export { default as databaseConfig } from './database.config';
+export { default as facebookConfig } from './facebook.config';
+export { default as googleConfig } from './google.config';
+export { default as integrationsConfig } from './integrations.config';
+export { default as jwtConfig } from './jwt.config';
+export { default as redisConfig } from './redis.config';
+export { default as stripeConfig } from './stripe.config';
+export { default as swaggerConfig } from './swagger.config';
 
 // Configuration validation schema
 import * as Joi from 'joi';
@@ -127,8 +127,7 @@ export const configValidationSchema = Joi.object({
   AWS_S3_ENCRYPTION_ENABLED: Joi.boolean().default(true),
   AWS_S3_ENCRYPTION_ALGORITHM: Joi.string().valid('AES256', 'aws:kms').default('AES256'),
   AWS_S3_KMS_KEY_ID: Joi.string().optional(),
-  AWS_S3_STORAGE_CLASS: Joi.string()
-    .valid('STANDARD', 'REDUCED_REDUNDANCY', 'STANDARD_IA', 'ONEZONE_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE')
+  AWS_S3_STORAGE_CLASS: Joi.string().valid('STANDARD', 'REDUCED_REDUNDANCY', 'STANDARD_IA', 'ONEZONE_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE')
     .default('STANDARD'),
   AWS_S3_TRANSITION_TO_IA: Joi.number().default(30),
   AWS_S3_TRANSITION_TO_GLACIER: Joi.number().default(90),

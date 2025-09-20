@@ -5,24 +5,24 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  UnauthorizedException,
-  ServiceUnavailableException
+  ServiceUnavailableException,
+  UnauthorizedException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
+import { ErrorCode } from '@common/constants/error-codes';
+import { BusinessException } from '@common/exceptions/business.exception';
+import { SmsVerificationService } from '@common/services/sms-verification.service';
+import { TokenBlacklistService } from '@common/services/token-blacklist.service';
+import { UserDocument, UserMapper } from '../users';
+import type { UserDocument as UserDocumentType } from '../users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 import { AuthResponseDto, ChangePasswordDto, LoginDto, RegisterDto, SendSmsResponseDto } from './dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
 import { JwtPayload, JwtRefreshPayload } from './strategies/jwt.strategy';
-import { TokenBlacklistService } from '@common/services/token-blacklist.service';
-import { SmsVerificationService } from '@common/services/sms-verification.service';
-import { BusinessException } from '@common/exceptions/business.exception';
-import { ErrorCode } from '@common/constants/error-codes';
-import { UserDocument, UserMapper } from '../users';
-import type { UserDocument as UserDocumentType } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -237,14 +237,9 @@ export class AuthService {
     this.logger.log(`Password changed for user: ${userId}`);
   }
 
-  async validateOAuthUser(oauthData: {
-    oauthProvider: string;
-    oauthProviderId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    profilePicture?: string;
-  }): Promise<any> {
+  async validateOAuthUser(
+    oauthData: { oauthProvider: string; oauthProviderId: string; email: string; firstName: string; lastName: string; profilePicture?: string }
+  ): Promise<any> {
     try {
       // Check if user exists with this OAuth provider
       let user = await this.usersService.findByOAuthProvider(oauthData.oauthProvider, oauthData.oauthProviderId);

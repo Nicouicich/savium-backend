@@ -1,6 +1,6 @@
-import { IsOptional, IsEnum, IsDateString, IsMongoId } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { StatsPeriod } from '@common/constants/card-types';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDateString, IsEnum, IsMongoId, IsOptional } from 'class-validator';
 
 export class CardStatisticsQueryDto {
   @ApiPropertyOptional({

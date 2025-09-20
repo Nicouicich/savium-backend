@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
-import { ReferralsService } from './referrals.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { ReferralRewardRepository } from './referral-reward.repository';
+import { ReferralsService } from './referrals.service';
 import { RewardStatus } from './schemas/referral-reward.schema';
 
 @Injectable()

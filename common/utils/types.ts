@@ -1,7 +1,13 @@
-import { PersonalProfileDocument, CoupleProfileDocument, FamilyProfileDocument, CompanyProfileDocument, BaseProfile, ProfileType } from "src/financial-profiles/schemas";
+import {
+  BaseProfile,
+  CompanyProfileDocument,
+  CoupleProfileDocument,
+  FamilyProfileDocument,
+  PersonalProfileDocument,
+  ProfileType
+} from 'src/financial-profiles/schemas';
 
 export function getTypedProfile(userActiveProfileType: string, activeProfile: any) {
-
   switch (userActiveProfileType) {
     case 'PersonalProfile':
       return activeProfile as PersonalProfileDocument;
@@ -13,7 +19,6 @@ export function getTypedProfile(userActiveProfileType: string, activeProfile: an
       return activeProfile as CompanyProfileDocument;
     default:
       return activeProfile as BaseProfile;
-
   }
 }
 
@@ -28,13 +33,13 @@ export function getProfileType(message: string | undefined): ProfileType | undef
   const key = afterAt.toUpperCase();
 
   switch (key) {
-    case "PERSONAL":
+    case 'PERSONAL':
       return ProfileType.PERSONAL;
-    case "PAREJA":
+    case 'PAREJA':
       return ProfileType.COUPLE;
-    case "FAMILY":
+    case 'FAMILY':
       return ProfileType.FAMILY;
-    case "BUSINESS":
+    case 'BUSINESS':
       return ProfileType.BUSINESS;
     default:
       return undefined; // opcional, en caso que no coincida

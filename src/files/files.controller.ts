@@ -1,33 +1,33 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
-  Param,
-  Query,
   Body,
-  UseGuards,
-  UseInterceptors,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Logger,
+  Param,
+  ParseFilePipeBuilder,
+  Post,
+  Put,
+  Query,
+  Req,
   UploadedFile,
   UploadedFiles,
-  ParseFilePipeBuilder,
-  HttpStatus,
-  Req,
-  Logger
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
-import { FileManagementService } from './services/file-management.service';
-import { S3Service } from './services/s3.service';
-import { UploadFileDto, FileUploadResponseDto, BulkUploadDto, BulkUploadResponseDto } from './dto/upload-file.dto';
-import { FileQueryDto, FileStatsDto } from './dto/file-query.dto';
-import { FileMetadataResponseDto, FileListResponseDto, FileStatsResponseDto, PresignedUrlResponseDto } from './dto/file-response.dto';
-import { FilePurpose, FileType } from './schemas/file-metadata.schema';
 import { JwtAuthGuard } from '../auth/guards';
 import type { RequestWithUser } from '../auth/interfaces/request-with-user.interface';
+import { FileQueryDto, FileStatsDto } from './dto/file-query.dto';
+import { FileListResponseDto, FileMetadataResponseDto, FileStatsResponseDto, PresignedUrlResponseDto } from './dto/file-response.dto';
+import { BulkUploadDto, BulkUploadResponseDto, FileUploadResponseDto, UploadFileDto } from './dto/upload-file.dto';
+import { FilePurpose, FileType } from './schemas/file-metadata.schema';
+import { FileManagementService } from './services/file-management.service';
+import { S3Service } from './services/s3.service';
 
 @ApiTags('Files')
 @ApiBearerAuth()
@@ -67,8 +67,7 @@ export class FilesController {
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
         })
-    )
-    file: Express.Multer.File,
+    ) file: Express.Multer.File,
     @Body() uploadDto: UploadFileDto,
     @Req() req: RequestWithUser
   ): Promise<FileUploadResponseDto> {
@@ -117,8 +116,7 @@ export class FilesController {
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
         })
-    )
-    files: Express.Multer.File[],
+    ) files: Express.Multer.File[],
     @Body() bulkUploadDto: BulkUploadDto,
     @Req() req: RequestWithUser
   ): Promise<BulkUploadResponseDto> {

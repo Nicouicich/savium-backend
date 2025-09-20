@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { ReferralQueryService, ReferralCommandService } from './services';
 import { ApplyReferralDto } from './dto/apply-referral.dto';
+import { RedeemRewardsDto, RedeemRewardsResponseDto } from './dto/redeem-rewards.dto';
 import { ReferralCodeResponseDto } from './dto/referral-code-response.dto';
-import { ValidateReferralResponseDto } from './dto/validate-referral-response.dto';
-import { ReferralStatsQueryDto } from './dto/referral-stats-query.dto';
-import { ReferralStatsResponseDto } from './dto/referral-stats-response.dto';
 import { ReferralHistoryQueryDto } from './dto/referral-history-query.dto';
 import { ReferralHistoryResponseDto } from './dto/referral-history-response.dto';
+import { ReferralSettingsResponseDto, UpdateReferralSettingsDto } from './dto/referral-settings.dto';
+import { ReferralStatsQueryDto } from './dto/referral-stats-query.dto';
+import { ReferralStatsResponseDto } from './dto/referral-stats-response.dto';
 import { RewardsQueryDto } from './dto/rewards-query.dto';
 import { RewardsResponseDto } from './dto/rewards-response.dto';
-import { RedeemRewardsDto, RedeemRewardsResponseDto } from './dto/redeem-rewards.dto';
-import { UpdateReferralSettingsDto, ReferralSettingsResponseDto } from './dto/referral-settings.dto';
+import { ValidateReferralResponseDto } from './dto/validate-referral-response.dto';
+import { ReferralCommandService, ReferralQueryService } from './services';
 
 @Injectable()
 export class ReferralsService {

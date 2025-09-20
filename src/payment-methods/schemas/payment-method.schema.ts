@@ -1,9 +1,11 @@
+import { PaymentMethodType } from '@common/constants/card-types';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { PaymentMethodType } from '@common/constants/card-types';
 
-export type PaymentMethodDocument = PaymentMethod &
-  Document & {
+export type PaymentMethodDocument =
+  & PaymentMethod
+  & Document
+  & {
     createdAt: Date;
     updatedAt: Date;
   };

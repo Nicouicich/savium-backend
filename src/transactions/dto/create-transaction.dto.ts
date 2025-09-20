@@ -1,28 +1,28 @@
+import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsDate,
   IsDateString,
+  IsDecimal,
   IsEnum,
+  IsMongoId,
   IsNumber,
   IsObject,
   IsOptional,
+  IsPositive,
   IsString,
   Matches,
   Max,
   MaxLength,
   Min,
   MinLength,
-  ValidateNested,
-  IsPositive,
-  IsDecimal,
-  IsMongoId,
-  ValidateIf
+  ValidateIf,
+  ValidateNested
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
 
 export class CreateInstallmentDto {
   @IsNumber()

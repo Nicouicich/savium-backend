@@ -4,21 +4,21 @@ export class ResponseUtil {
       success: true,
       data,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
   static successWithPagination<T>(
     data: T[],
     pagination: any,
-    message?: string,
+    message?: string
   ) {
     return {
       success: true,
       data,
       pagination,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -29,8 +29,8 @@ export class ResponseUtil {
         statusCode,
         message,
         details,
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()
+      }
     };
   }
 
@@ -39,7 +39,7 @@ export class ResponseUtil {
       success: true,
       data,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -48,7 +48,7 @@ export class ResponseUtil {
       success: true,
       data,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -56,7 +56,7 @@ export class ResponseUtil {
     return {
       success: true,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 }

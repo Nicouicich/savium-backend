@@ -1,21 +1,21 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
   DeleteObjectCommand,
-  HeadObjectCommand,
+  GetObjectCommand,
   GetObjectCommandOutput,
+  HeadObjectCommand,
   ObjectCannedACL,
+  PutObjectCommand,
+  S3Client,
   ServerSideEncryption
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
-import { Readable } from 'stream';
-import { v4 as uuidv4 } from 'uuid';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import * as path from 'path';
+import { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 import { FileType } from '../schemas/file-metadata.schema';
 
 export interface S3UploadOptions {
@@ -169,9 +169,9 @@ export class S3Service {
         ...(this.publicRead ? { ACL: ObjectCannedACL.public_read } : {}),
         ...(this.encryptionEnabled
           ? {
-              ServerSideEncryption: this.encryptionAlgorithm,
-              ...(this.kmsKeyId && this.encryptionAlgorithm === ServerSideEncryption.aws_kms ? { SSEKMSKeyId: this.kmsKeyId } : {})
-            }
+            ServerSideEncryption: this.encryptionAlgorithm,
+            ...(this.kmsKeyId && this.encryptionAlgorithm === ServerSideEncryption.aws_kms ? { SSEKMSKeyId: this.kmsKeyId } : {})
+          }
           : {})
       };
 
@@ -247,9 +247,9 @@ export class S3Service {
         ...(this.publicRead ? { ACL: ObjectCannedACL.public_read } : {}),
         ...(this.encryptionEnabled
           ? {
-              ServerSideEncryption: this.encryptionAlgorithm,
-              ...(this.kmsKeyId && this.encryptionAlgorithm === ServerSideEncryption.aws_kms ? { SSEKMSKeyId: this.kmsKeyId } : {})
-            }
+            ServerSideEncryption: this.encryptionAlgorithm,
+            ...(this.kmsKeyId && this.encryptionAlgorithm === ServerSideEncryption.aws_kms ? { SSEKMSKeyId: this.kmsKeyId } : {})
+          }
           : {})
       };
 
@@ -468,15 +468,15 @@ export class S3Service {
       },
       features: isConfigured
         ? [
-            'File upload to S3',
-            'Stream upload for large files',
-            'Presigned URL generation',
-            'File validation and organization',
-            'Metadata and tagging support',
-            'Checksum verification',
-            ...(this.encryptionEnabled ? ['Server-side encryption'] : []),
-            ...(this.cdnDomain ? ['CDN integration'] : [])
-          ]
+          'File upload to S3',
+          'Stream upload for large files',
+          'Presigned URL generation',
+          'File validation and organization',
+          'Metadata and tagging support',
+          'Checksum verification',
+          ...(this.encryptionEnabled ? ['Server-side encryption'] : []),
+          ...(this.cdnDomain ? ['CDN integration'] : [])
+        ]
         : [],
       limitations: isConfigured
         ? [`Max file size: ${(this.maxFileSize / 1024 / 1024).toFixed(0)}MB`, `Allowed types: ${this.allowedMimeTypes.length} MIME types`]

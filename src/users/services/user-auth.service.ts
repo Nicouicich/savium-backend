@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
-import { UserAuth, UserAuthDocument } from '../schemas/user-auth.schema';
 import { ConfigService } from '@nestjs/config';
+import { UserAuth, UserAuthDocument } from '../schemas/user-auth.schema';
 
 @Injectable()
 export class UserAuthService {
@@ -89,13 +89,12 @@ export class UserAuthService {
       const authRecord = await this.findByUserId(userId);
       this.logger.log(`Auth record found for user ${userId}, refreshTokens count: ${authRecord.refreshTokens?.length || 0}`);
 
-      const tokenExists =
-        authRecord.refreshTokens?.some(tokenData => {
-          const isMatch = tokenData.token === refreshToken;
-          const isValid = tokenData.expiresAt > new Date();
-          this.logger.log(`Token match: ${isMatch}, valid: ${isValid}, expires: ${tokenData.expiresAt.toISOString()}`);
-          return isMatch && isValid;
-        }) || false;
+      const tokenExists = authRecord.refreshTokens?.some(tokenData => {
+        const isMatch = tokenData.token === refreshToken;
+        const isValid = tokenData.expiresAt > new Date();
+        this.logger.log(`Token match: ${isMatch}, valid: ${isValid}, expires: ${tokenData.expiresAt.toISOString()}`);
+        return isMatch && isValid;
+      }) || false;
 
       if (!tokenExists) {
         this.logger.warn(`Invalid or expired refresh token for user: ${userId}`);

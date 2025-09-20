@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Readable } from 'stream';
 import axios from 'axios';
+import { Readable } from 'stream';
 
-import { FileManagementService, UploadFileRequest } from './file-management.service';
-import { FilePurpose } from '../schemas/file-metadata.schema';
 import { FileUploadResponseDto } from '../dto/upload-file.dto';
+import { FilePurpose } from '../schemas/file-metadata.schema';
+import { FileManagementService, UploadFileRequest } from './file-management.service';
 
 export interface MessagingFileDownload {
   buffer: Buffer;

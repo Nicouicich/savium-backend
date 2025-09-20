@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as request from 'supertest';
 
 import { AppModule } from '../../src/app.module';
-import { TestSetup, TestDataFactory, TestUtils } from '../helpers/test-helpers';
+import { TestDataFactory, TestSetup, TestUtils } from '../helpers/test-helpers';
 
 describe('Financial Flow Integration Tests (e2e)', () => {
   let app: INestApplication;
@@ -132,10 +132,9 @@ describe('Financial Flow Integration Tests (e2e)', () => {
         description: 'Updated monthly grocery haul'
       };
 
-      const updateResponse = await TestUtils.authenticatedRequest(app, authToken)
-        .patch(`/api/v1/transactions/${transactionIds[2]}`)
-        .send(updatedTransactionData)
-        .expect(200);
+      const updateResponse = await TestUtils.authenticatedRequest(app, authToken).patch(`/api/v1/transactions/${transactionIds[2]}`).send(
+        updatedTransactionData
+      ).expect(200);
 
       expect(updateResponse.body.amount).toBe(95.75);
       expect(updateResponse.body.description).toBe(updatedTransactionData.description);
@@ -192,9 +191,9 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       expect(inviteResponse.body).toHaveProperty('invitationId');
 
       // Member accepts invitation (simulated via direct API call)
-      const acceptResponse = await TestUtils.authenticatedRequest(app, memberToken)
-        .post(`/api/v1/accounts/invitations/${inviteResponse.body.invitationId}/accept`)
-        .expect(200);
+      const acceptResponse = await TestUtils.authenticatedRequest(app, memberToken).post(
+        `/api/v1/accounts/invitations/${inviteResponse.body.invitationId}/accept`
+      ).expect(200);
 
       expect(acceptResponse.body).toHaveProperty('message');
       expect(acceptResponse.body).toHaveProperty('account');
@@ -241,18 +240,15 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/transactions').send(overLimitTransaction).expect(400); // Should be rejected due to transaction limit
 
       // Owner can view all transactions
-      const allTransactionsResponse = await TestUtils.authenticatedRequest(app, ownerToken)
-        .get('/api/v1/transactions')
-        .query({ accountId: familyAccountId })
+      const allTransactionsResponse = await TestUtils.authenticatedRequest(app, ownerToken).get('/api/v1/transactions').query({ accountId: familyAccountId })
         .expect(200);
 
       expect(allTransactionsResponse.body.data).toHaveLength(2);
 
       // Member can view all transactions too (in a family account)
-      const memberTransactionsResponse = await TestUtils.authenticatedRequest(app, memberToken)
-        .get('/api/v1/transactions')
-        .query({ accountId: familyAccountId })
-        .expect(200);
+      const memberTransactionsResponse = await TestUtils.authenticatedRequest(app, memberToken).get('/api/v1/transactions').query({
+        accountId: familyAccountId
+      }).expect(200);
 
       expect(memberTransactionsResponse.body.data).toHaveLength(2);
     });

@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException, ConflictException, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException, ConflictException, UnauthorizedException, Logger } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 
-import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { RegisterDto, LoginDto, ChangePasswordDto } from './dto';
-import { UserDocument } from '../users/schemas/user.schema';
 import { UserRole } from '../../common/constants/user-roles';
 import { TokenBlacklistService } from '../../common/services/token-blacklist.service';
+import { UserDocument } from '../users/schemas/user.schema';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
+import { ChangePasswordDto, LoginDto, RegisterDto } from './dto';
 
 // Mock bcrypt
 jest.mock('bcrypt');

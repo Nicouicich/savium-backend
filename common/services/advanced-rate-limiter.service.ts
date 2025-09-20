@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Injectable, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Cache } from 'cache-manager';
 
 export interface RateLimitConfig {
@@ -23,7 +23,7 @@ export interface RateLimitResult {
 export class AdvancedRateLimiterService {
   private readonly logger = new Logger(AdvancedRateLimiterService.name);
 
-  constructor (
+  constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService
   ) {}
@@ -114,23 +114,23 @@ export class AdvancedRateLimiterService {
     const endpointConfigs: Record<string, Partial<RateLimitConfig>> = {
       'auth/login': {
         windowMs: 15 * 60 * 1000, // 15 minutes
-        maxRequests: 5, // Only 5 login attempts per 15 minutes
+        maxRequests: 5 // Only 5 login attempts per 15 minutes
       },
       'auth/register': {
         windowMs: 60 * 60 * 1000, // 1 hour
-        maxRequests: 3, // Only 3 registration attempts per hour
+        maxRequests: 3 // Only 3 registration attempts per hour
       },
       'auth/forgot-password': {
         windowMs: 60 * 60 * 1000, // 1 hour
-        maxRequests: 3, // Only 3 password reset requests per hour
+        maxRequests: 3 // Only 3 password reset requests per hour
       },
       'transactions/create': {
         windowMs: 60 * 1000, // 1 minute
-        maxRequests: 10, // 10 transaction creations per minute
+        maxRequests: 10 // 10 transaction creations per minute
       },
       'reports/generate': {
         windowMs: 5 * 60 * 1000, // 5 minutes
-        maxRequests: 5, // 5 report generations per 5 minutes
+        maxRequests: 5 // 5 report generations per 5 minutes
       }
     };
 
@@ -172,10 +172,10 @@ export class AdvancedRateLimiterService {
   /**
    * Suspicious activity detection and temporary bans
    */
-  async checkSuspiciousActivity(identifier: string): Promise<{ isBanned: boolean; banExpiresAt?: number; }> {
+  async checkSuspiciousActivity(identifier: string): Promise<{ isBanned: boolean; banExpiresAt?: number }> {
     try {
       const banKey = `ban:${identifier}`;
-      const banData = await this.cacheManager.get<{ bannedAt: number; duration: number; }>(banKey);
+      const banData = await this.cacheManager.get<{ bannedAt: number; duration: number }>(banKey);
 
       if (banData) {
         const banExpiresAt = banData.bannedAt + banData.duration;
@@ -250,7 +250,7 @@ export class AdvancedRateLimiterService {
    */
   async getRateLimitStats(identifier: string): Promise<{
     current: Record<string, number>;
-    banStatus: { isBanned: boolean; expiresAt?: number; };
+    banStatus: { isBanned: boolean; expiresAt?: number };
   }> {
     try {
       const patterns = [

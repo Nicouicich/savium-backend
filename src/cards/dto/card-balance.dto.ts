@@ -1,8 +1,8 @@
-import { IsNumber, IsOptional, IsDateString, IsEnum, IsBoolean, Min } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { BalanceUpdateSource } from '@common/constants/card-types';
 import { Currency } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 
 export class CreateCardBalanceDto {
   @ApiProperty({

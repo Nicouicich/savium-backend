@@ -1,5 +1,5 @@
+import { CardBrand, CardStatus, CardType } from '@common/constants/card-types';
 import { Types } from 'mongoose';
-import { CardBrand, CardType, CardStatus } from '@common/constants/card-types';
 import { ICard, IMaskedCard } from '../interfaces/card.interface';
 
 export class CardEntity implements ICard {

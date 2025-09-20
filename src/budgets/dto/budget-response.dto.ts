@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Currency } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AlertType, BudgetPeriod, BudgetStatus } from '../schemas/budget.schema';
 
 export class BudgetAlertResponseDto {

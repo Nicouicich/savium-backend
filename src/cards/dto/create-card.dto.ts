@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString, IsOptional, IsEnum, IsNumber, IsInt, MaxLength, Min, Max, Matches, ValidateIf, IsMongoId } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CardBrand, CardType } from '@common/constants/card-types';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsEnum, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 
 export class CreateCardDto {
   @ApiProperty({

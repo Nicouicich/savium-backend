@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { SettingsController } from './settings.controller';
-import { SettingsService } from './settings.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Types } from 'mongoose';
 import { CreateTagDto, UpdateTagDto } from './dto/tag.dto';
 import { Tag } from './schemas/tag.schema';
-import { Types } from 'mongoose';
+import { SettingsController } from './settings.controller';
+import { SettingsService } from './settings.service';
 
 describe('SettingsController', () => {
   let controller: SettingsController;

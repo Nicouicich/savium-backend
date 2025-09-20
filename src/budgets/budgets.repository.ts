@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Budget, BudgetDocument, BudgetPeriod, BudgetStatus } from './schemas/budget.schema';
 import { CreateBudgetDto } from './dto';
+import { Budget, BudgetDocument, BudgetPeriod, BudgetStatus } from './schemas/budget.schema';
 
 @Injectable()
 export class BudgetsRepository {

@@ -8,6 +8,4 @@ export class BudgetQueryService {
     private readonly budgetsRepository: BudgetsRepository,
     private readonly categoriesService: CategoriesService
   ) {}
-
-  
 }

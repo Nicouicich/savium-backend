@@ -1,15 +1,15 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 
-import { FileMetadata, FileMetadataDocument, FileType, FilePurpose, FileStatus } from '../schemas/file-metadata.schema';
-import { S3Service, S3UploadOptions } from './s3.service';
-import { UploadFileDto, FileUploadResponseDto, BulkUploadResponseDto } from '../dto/upload-file.dto';
 import { FileQueryDto, FileStatsDto } from '../dto/file-query.dto';
-import { FileMetadataResponseDto, FileListResponseDto, FileStatsResponseDto, PresignedUrlResponseDto } from '../dto/file-response.dto';
+import { FileListResponseDto, FileMetadataResponseDto, FileStatsResponseDto, PresignedUrlResponseDto } from '../dto/file-response.dto';
+import { BulkUploadResponseDto, FileUploadResponseDto, UploadFileDto } from '../dto/upload-file.dto';
+import { FileMetadata, FileMetadataDocument, FilePurpose, FileStatus, FileType } from '../schemas/file-metadata.schema';
+import { S3Service, S3UploadOptions } from './s3.service';
 
 export interface UploadFileRequest {
   buffer?: Buffer;
@@ -28,8 +28,7 @@ export class FileManagementService {
   private readonly logger = new Logger(FileManagementService.name);
 
   constructor(
-    @InjectModel(FileMetadata.name)
-    private readonly fileMetadataModel: Model<FileMetadataDocument>,
+    @InjectModel(FileMetadata.name) private readonly fileMetadataModel: Model<FileMetadataDocument>,
     private readonly s3Service: S3Service
   ) {}
 

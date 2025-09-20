@@ -1,6 +1,6 @@
+import { UserRole } from '@common/constants/user-roles';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { UserRole } from '@common/constants/user-roles';
 import { AnyProfileDocument, BaseProfile, CompanyProfile, CoupleProfile, FamilyProfile, PersonalProfile, ProfileType } from 'src/financial-profiles/schemas';
 
 export type UserDocument = User & Document;
@@ -427,7 +427,7 @@ UserSchema.index(
 );
 
 // Virtual for full name
-UserSchema.virtual('fullName').get(function (this: User) {
+UserSchema.virtual('fullName').get(function(this: User) {
   return `${this.firstName} ${this.lastName}`;
 });
 

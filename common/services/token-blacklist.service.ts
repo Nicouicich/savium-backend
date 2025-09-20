@@ -1,8 +1,8 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import type { Cache } from 'cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import type { Cache } from 'cache-manager';
 
 export interface BlacklistedToken {
   jti?: string; // JWT ID
@@ -35,7 +35,7 @@ export class TokenBlacklistService {
     try {
       // Decode the token to get expiration and JTI
       const decoded = this.jwtService.decode(token) as any;
-      
+
       if (!decoded || !decoded.exp) {
         this.logger.warn('Cannot blacklist token: invalid token structure');
         return;
@@ -61,7 +61,7 @@ export class TokenBlacklistService {
 
       // Calculate TTL in seconds (time until token expires)
       const ttlSeconds = Math.ceil((expiresAt.getTime() - now.getTime()) / 1000);
-      
+
       // Store in Redis with TTL
       const key = this.getBlacklistKey(token);
       await this.cacheManager.set(key, blacklistedToken, ttlSeconds);
@@ -93,7 +93,7 @@ export class TokenBlacklistService {
     try {
       const key = this.getBlacklistKey(token);
       const blacklistedData = await this.cacheManager.get<BlacklistedToken>(key);
-      
+
       if (blacklistedData) {
         this.logger.debug('Token found in blacklist', {
           userId: blacklistedData.userId,

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 import { Logger } from '@nestjs/common';
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Model, Types } from 'mongoose';
 
-import { UserQueryService } from './user-query.service';
-import { User, UserDocument } from '../schemas/user.schema';
-import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 import { UserRole } from '@common/constants/user-roles';
+import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
+import { User, UserDocument } from '../schemas/user.schema';
+import { UserQueryService } from './user-query.service';
 
 describe('UserQueryService - Unit Tests', () => {
   let service: UserQueryService;

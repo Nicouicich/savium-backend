@@ -1,11 +1,11 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { CategoriesModule } from '../../categories/categories.module';
+import { FilesModule } from '../../files/files.module';
+import { FinancialProfilesModule } from '../../financial-profiles/financial-profiles.module';
+import { TransactionsModule } from '../../transactions/transactions.module';
 import { AiService } from './ai.service';
 import { MessageProcessorService } from './message-processor.service';
 import { ReceiptProcessorService } from './receipt-processor.service';
-import { FilesModule } from '../../files/files.module';
-import { TransactionsModule } from '../../transactions/transactions.module';
-import { CategoriesModule } from '../../categories/categories.module';
-import { FinancialProfilesModule } from '../../financial-profiles/financial-profiles.module';
 
 @Module({
   imports: [FilesModule, forwardRef(() => TransactionsModule), CategoriesModule, FinancialProfilesModule],

@@ -1,3 +1,6 @@
+import { Currency } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -14,9 +17,6 @@ import {
   MinLength,
   ValidateNested
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/transaction-categories';
 import { GoalPriority, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class CreateGoalMilestoneDto {

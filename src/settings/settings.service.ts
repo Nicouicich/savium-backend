@@ -1,10 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { User } from '../users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 import { UpdatePersonalInfoDto } from './dto/personal-info.dto';
 import { CreateTagDto, UpdateTagDto } from './dto/tag.dto';
-import { User } from '../users/schemas/user.schema';
 import { Tag, TagDocument } from './schemas/tag.schema';
 
 @Injectable()

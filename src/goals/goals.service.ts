@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGoalDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto } from './dto';
-import { GoalQueryService, GoalCommandService } from './services';
 import { PaginatedResult } from '../transactions/transactions.repository';
+import { CreateGoalDto, GoalQueryDto, GoalResponseDto, GoalSummaryDto, UpdateGoalDto } from './dto';
+import { GoalCommandService, GoalQueryService } from './services';
 
 @Injectable()
 export class GoalsService {
-  constructor (
+  constructor(
     private readonly goalQueryService: GoalQueryService,
     private readonly goalCommandService: GoalCommandService
   ) {}
-
 }

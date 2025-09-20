@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TransactionCategory } from '@common/constants/transaction-categories';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SubcategoryResponseDto } from './category-response.dto';
 
 export class CategoryHierarchyResponseDto {

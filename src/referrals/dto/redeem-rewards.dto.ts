@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsObject, IsOptional, IsString, ArrayMinSize } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 
 export enum RedemptionMethodEnum {
   BANK_TRANSFER = 'bank_transfer',

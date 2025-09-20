@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Observable, of } from 'rxjs';
 
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -662,8 +662,8 @@ describe('Auth Guards - Unit Tests', () => {
       const mockContext = createMockExecutionContext({
         request: {
           body: {
-            email: "'; DROP TABLE users; --",
-            password: "' OR '1'='1"
+            email: '\'; DROP TABLE users; --',
+            password: '\' OR \'1\'=\'1'
           }
         }
       });

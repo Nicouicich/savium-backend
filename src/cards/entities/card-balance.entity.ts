@@ -1,6 +1,6 @@
+import { BalanceUpdateSource } from '@common/constants/card-types';
 import { Types } from 'mongoose';
 import { ICardBalance } from '../interfaces/card.interface';
-import { BalanceUpdateSource } from '@common/constants/card-types';
 
 export class CardBalanceEntity implements ICardBalance {
   _id?: Types.ObjectId;

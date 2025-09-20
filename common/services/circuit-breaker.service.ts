@@ -10,8 +10,8 @@ export interface CircuitBreakerConfig {
 }
 
 export enum CircuitState {
-  CLOSED = 'CLOSED',     // Normal operation
-  OPEN = 'OPEN',         // Circuit is open, failing fast
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Circuit is open, failing fast
   HALF_OPEN = 'HALF_OPEN' // Testing if service has recovered
 }
 
@@ -61,14 +61,14 @@ class CircuitBreaker {
     try {
       // Execute operation with timeout
       const result = await this.executeWithTimeout(operation);
-      
+
       // Success
       this.onSuccess();
       return result;
     } catch (error) {
       // Failure
       this.onFailure();
-      
+
       if (fallback) {
         try {
           return await fallback();
@@ -77,7 +77,7 @@ class CircuitBreaker {
           throw error; // Throw original error, not fallback error
         }
       }
-      
+
       throw error;
     }
   }
@@ -118,8 +118,10 @@ class CircuitBreaker {
     this.failures++;
     this.lastFailureTime = new Date();
 
-    if (this.state === CircuitState.HALF_OPEN || 
-        this.failures >= this.config.failureThreshold) {
+    if (
+      this.state === CircuitState.HALF_OPEN
+      || this.failures >= this.config.failureThreshold
+    ) {
       this.state = CircuitState.OPEN;
       this.nextRetryTime = new Date(Date.now() + this.config.recoveryTimeout);
       this.logger.warn(`Circuit breaker ${this.name} is now OPEN`);
@@ -127,8 +129,8 @@ class CircuitBreaker {
   }
 
   private shouldAttemptReset(): boolean {
-    return this.nextRetryTime !== undefined && 
-           new Date() > this.nextRetryTime;
+    return this.nextRetryTime !== undefined
+      && new Date() > this.nextRetryTime;
   }
 
   getStats(): CircuitStats {
@@ -293,7 +295,7 @@ export class CircuitBreakerService {
    */
   getAllStats(): Record<string, CircuitStats> {
     const stats: Record<string, CircuitStats> = {};
-    
+
     this.circuitBreakers.forEach((circuitBreaker, name) => {
       stats[name] = circuitBreaker.getStats();
     });
@@ -365,16 +367,14 @@ export class CircuitBreakerService {
     });
 
     let status: 'healthy' | 'degraded' | 'unhealthy';
-    
+
     if (openCircuits.length === 0) {
       status = halfOpenCircuits.length === 0 ? 'healthy' : 'degraded';
     } else {
       // Check if critical services are down
       const criticalServices = ['database', 'ai_service'];
-      const criticalDown = openCircuits.some(circuit => 
-        criticalServices.some(service => circuit.includes(service))
-      );
-      
+      const criticalDown = openCircuits.some(circuit => criticalServices.some(service => circuit.includes(service)));
+
       status = criticalDown ? 'unhealthy' : 'degraded';
     }
 
@@ -393,7 +393,7 @@ export class CircuitBreakerService {
     // Pre-initialize common circuit breakers with sensible defaults
     const commonServices = [
       'database',
-      'ai_service', 
+      'ai_service',
       'email_service',
       'whatsapp_api',
       'telegram_api'
@@ -411,7 +411,7 @@ export class CircuitBreakerService {
     // Monitor circuit breaker health every minute
     setInterval(() => {
       const healthStatus = this.getHealthStatus();
-      
+
       if (healthStatus.status !== 'healthy') {
         this.logger.warn('Circuit breaker health check', {
           status: healthStatus.status,
@@ -426,7 +426,7 @@ export class CircuitBreakerService {
         Object.entries(stats).forEach(([name, stat]) => {
           if (stat.totalRequests > 0) {
             const errorRate = ((stat.failures + stat.timeouts) / stat.totalRequests) * 100;
-            
+
             this.logger.debug(`Circuit breaker stats: ${name}`, {
               state: stat.state,
               totalRequests: stat.totalRequests,
@@ -456,7 +456,7 @@ export class CircuitBreakerService {
         return await this.execute(serviceName, operation);
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt);
           this.logger.warn(`Attempt ${attempt + 1} failed for ${serviceName}, retrying in ${delay}ms:`, error);
@@ -477,11 +477,11 @@ export class CircuitBreakerService {
     concurrency = 5
   ): Promise<Array<T | Error>> {
     const results: Array<T | Error> = [];
-    
+
     // Process in batches to control concurrency
     for (let i = 0; i < operations.length; i += concurrency) {
       const batch = operations.slice(i, i + concurrency);
-      
+
       const batchResults = await Promise.allSettled(
         batch.map(operation => this.execute(serviceName, operation))
       );

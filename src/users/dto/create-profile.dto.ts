@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsEnum, IsDateString, ValidateNested } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { IsDateString, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class ProfilePrivacyDto {
   @ApiProperty({ enum: ['public', 'private', 'connections'], default: 'private' })

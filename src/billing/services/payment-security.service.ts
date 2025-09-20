@@ -4,8 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EnhancedPayment, EnhancedPaymentDocument } from '../schemas/enhanced-payment.schema';
 import { BillingCustomer, BillingCustomerDocument } from '../schemas/billing-customer.schema';
+import { EnhancedPayment, EnhancedPaymentDocument } from '../schemas/enhanced-payment.schema';
 
 export interface SecurityCheckResult {
   allowed: boolean;

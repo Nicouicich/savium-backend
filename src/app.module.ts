@@ -1,7 +1,7 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,34 +12,34 @@ import {
   awsConfig,
   configValidationSchema,
   databaseConfig,
-  googleConfig,
   facebookConfig,
+  googleConfig,
   integrationsConfig,
   jwtConfig,
   redisConfig,
-  swaggerConfig,
-  stripeConfig
+  stripeConfig,
+  swaggerConfig
 } from './config';
 
 // Module imports
 import { CommonModule } from '@common/common.module';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { CategoriesModule } from './categories/categories.module';
-import { TransactionsModule } from './transactions/transactions.module';
-import { ReportsModule } from './reports/reports.module';
+import { BillingModule } from './billing/billing.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { CategoriesModule } from './categories/categories.module';
+import { FilesModule } from './files/files.module';
 import { GoalsModule } from './goals/goals.module';
 import { AiModule } from './integrations/ai/ai.module';
-import { WhatsappModule } from './integrations/whatsapp/whatsapp.module';
-import { TelegramModule } from './integrations/telegram/telegram.module';
 import { MessagingIntegrationModule } from './integrations/messaging/messaging-integration.module';
-import { NotificationsModule } from './notifications/notifications.module';
+import { TelegramModule } from './integrations/telegram/telegram.module';
+import { WhatsappModule } from './integrations/whatsapp/whatsapp.module';
 import { MailModule } from './mail/mail.module';
-import { BillingModule } from './billing/billing.module';
-import { SettingsModule } from './settings/settings.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { ReferralsModule } from './referrals/referrals.module';
-import { FilesModule } from './files/files.module';
+import { ReportsModule } from './reports/reports.module';
+import { SettingsModule } from './settings/settings.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [

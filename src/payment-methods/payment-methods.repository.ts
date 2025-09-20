@@ -1,16 +1,15 @@
+import { PaymentMethodType } from '@common/constants/card-types';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PaymentMethod, PaymentMethodDocument } from './schemas/payment-method.schema';
-import { PaymentMethodEntity } from './entities/payment-method.entity';
 import { IPaymentMethod } from '../cards/interfaces/card.interface';
-import { PaymentMethodType } from '@common/constants/card-types';
+import { PaymentMethodEntity } from './entities/payment-method.entity';
+import { PaymentMethod, PaymentMethodDocument } from './schemas/payment-method.schema';
 
 @Injectable()
 export class PaymentMethodsRepository {
   constructor(
-    @InjectModel(PaymentMethod.name)
-    private readonly paymentMethodModel: Model<PaymentMethodDocument>
+    @InjectModel(PaymentMethod.name) private readonly paymentMethodModel: Model<PaymentMethodDocument>
   ) {}
 
   /**

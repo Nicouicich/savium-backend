@@ -1,15 +1,15 @@
 import { getProfileType, getTypedProfile } from '@common/utils/types';
 import { Injectable, Logger } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/categories/schemas/category.schema';
 import { FinancialProfilesService } from 'src/financial-profiles/financial-profiles.service';
+import { AnyProfileDocument, BaseProfile } from 'src/financial-profiles/schemas';
+import { CreateTransactionDto } from 'src/transactions/dto/create-transaction.dto';
+import { TransactionDocument } from 'src/transactions/schemas/transaction.schema';
 import { TransactionsService } from '../../transactions/transactions.service';
 import { UserDocument } from '../../users/schemas/user.schema';
 import { UsersService } from '../../users/users.service';
 import { AiService, IAMsgAnswer } from './ai.service';
-import { AnyProfileDocument, BaseProfile } from 'src/financial-profiles/schemas';
-import { Types } from 'mongoose';
-import { CreateTransactionDto } from 'src/transactions/dto/create-transaction.dto';
-import { TransactionDocument } from 'src/transactions/schemas/transaction.schema';
 
 export interface UnifiedMessage {
   from: string;
@@ -64,11 +64,12 @@ export class MessageProcessorService {
       const profileType = getProfileType(message.body);
       if (profileType) {
         const newProfile = await this.financialService.getProfile(message.user[profileType], message.user._id as string, profileType);
-        if (!newProfile)
+        if (!newProfile) {
           return {
             success: false,
             responseText: `You don't have a profile: ${profileType}`
           };
+        }
 
         message.user.activeProfileRef = newProfile as AnyProfileDocument;
         message.user.activeProfileType = profileType;
@@ -113,7 +114,7 @@ export class MessageProcessorService {
     };
     // Use AI to analyze the message for transactions
     const aiResult: IAMsgAnswer | undefined = await this.aiService.processTextMessage(msg);
-    console.log('IA MESSGE: ', aiResult)
+    console.log('IA MESSGE: ', aiResult);
     // Handle transaction creation if complete data is available
     if (aiResult?.trx) {
       return await this.processTransactionFromAI(message, aiResult, activeProfile._id as string);
@@ -187,7 +188,8 @@ export class MessageProcessorService {
 
       return {
         success: false,
-        responseText: `❌ Lo siento, hubo un error guardando tu ${transactionType}. Los datos fueron detectados correctamente, pero no pude guardarlos en tu cuenta. Por favor intenta de nuevo.`,
+        responseText:
+          `❌ Lo siento, hubo un error guardando tu ${transactionType}. Los datos fueron detectados correctamente, pero no pude guardarlos en tu cuenta. Por favor intenta de nuevo.`,
         error: error.message,
         actionTaken: {
           type: 'general_response'
@@ -199,7 +201,7 @@ export class MessageProcessorService {
   // Procesar comandos detectados por IA
   /*  private async processAICommand(message: UnifiedMessage, commandResult: any, userCategories: [{ name: string, id: string; }]): Promise<ProcessedMessageResponse> {
      this.logger.log('AI detected command:', commandResult);
- 
+
      switch (commandResult.commandType) {
        case 'transaction':
        case 'income':

@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 /**
@@ -14,12 +14,9 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
 
     if (err || !user) {
       // Log refresh token failures for security monitoring
-      const isExpectedTokenIssue =
-        info?.message &&
-        (info.message.includes('jwt expired') ||
-          info.message.includes('invalid token') ||
-          info.message.includes('jwt malformed') ||
-          info.message.includes('No auth token'));
+      const isExpectedTokenIssue = info?.message
+        && (info.message.includes('jwt expired') || info.message.includes('invalid token') || info.message.includes('jwt malformed')
+          || info.message.includes('No auth token'));
 
       if (!isExpectedTokenIssue && process.env.NODE_ENV === 'development') {
         this.logger.debug(`Refresh token validation failed for ${request.url}`, {

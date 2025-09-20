@@ -12,5 +12,4 @@ export class CategoriesService {
     private readonly configService: ConfigService,
     private readonly cacheService: EnhancedCacheService
   ) {}
-
 }

@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
-import { WhatsappService } from './whatsapp.service';
-import { MessageProcessorService } from '../ai/message-processor.service';
-import { MessagingFileService } from '../../files/services/messaging-file.service';
-import { ReceiptProcessorService } from '../ai/receipt-processor.service';
-import { TransactionsService } from '../../transactions/transactions.service';
-import { AccountsService } from '../../accounts/accounts.service';
-import { User } from '../../users/schemas/user.schema';
-import { UserProfile } from '../../users/schemas/user-profile.schema';
 import { RequestContextService } from '@common/interceptors/request-context';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AccountsService } from '../../accounts/accounts.service';
+import { MessagingFileService } from '../../files/services/messaging-file.service';
+import { TransactionsService } from '../../transactions/transactions.service';
+import { UserProfile } from '../../users/schemas/user-profile.schema';
+import { User } from '../../users/schemas/user.schema';
+import { MessageProcessorService } from '../ai/message-processor.service';
+import { ReceiptProcessorService } from '../ai/receipt-processor.service';
+import { WhatsappService } from './whatsapp.service';
 
 describe('WhatsappService', () => {
   let service: WhatsappService;

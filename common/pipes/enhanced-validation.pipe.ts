@@ -1,12 +1,12 @@
 import {
-  PipeTransform,
-  Injectable,
   ArgumentMetadata,
   BadRequestException,
-  Logger
+  Injectable,
+  Logger,
+  PipeTransform
 } from '@nestjs/common';
-import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
+import { validate, ValidationError } from 'class-validator';
 import { SanitizationService } from '../services/sanitization.service';
 
 interface ValidationPipeOptions {
@@ -69,7 +69,7 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
 
   async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
     const { metatype } = metadata;
-    
+
     // Skip validation for primitive types and built-in objects
     if (!metatype || !this.toValidate(metatype)) {
       return value;
@@ -138,7 +138,7 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
 
     if (value && typeof value === 'object') {
       const keys = Object.keys(value);
-      
+
       // Check object key count
       if (keys.length > (security?.maxObjectKeys || 100)) {
         throw new BadRequestException('Object has too many properties');
@@ -150,7 +150,7 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
         if (this.isDangerousPropertyName(key)) {
           throw new BadRequestException(`Dangerous property name detected: ${key}`);
         }
-        
+
         this.performSecurityValidation(value[key], depth + 1);
       });
       return;
@@ -195,15 +195,15 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
       let sanitized = await this.sanitizationService.sanitizeHtml(value);
       sanitized = this.sanitizationService.removeXSSAttempts(sanitized);
       sanitized = this.sanitizationService.sanitizeSQL(sanitized);
-      
+
       // Trim and normalize whitespace
       sanitized = sanitized.trim().replace(/\s+/g, ' ');
-      
+
       // Handle empty strings
       if (!this.options.sanitization?.allowEmptyStrings && sanitized === '') {
         return undefined;
       }
-      
+
       return sanitized;
     }
 
@@ -216,7 +216,7 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
       /^(eval|function|script)$/i,
       /^(on\w+)$/i, // Event handlers like onclick, onload
       /^\$\$/, // Angular internal properties
-      /_\w+_/  // Potential framework internal properties
+      /_\w+_/ // Potential framework internal properties
     ];
 
     return dangerousPatterns.some(pattern => pattern.test(key));
@@ -273,7 +273,7 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
     // Allow basic safe HTML entities
     const safeEntities = ['&amp;', '&lt;', '&gt;', '&quot;', '&#39;'];
     let testValue = value;
-    
+
     safeEntities.forEach(entity => {
       testValue = testValue.replace(new RegExp(entity, 'g'), '');
     });
@@ -288,18 +288,18 @@ export class EnhancedValidationPipe implements PipeTransform<any> {
 
     const formatError = (error: ValidationError): any => {
       const result: any = {};
-      
+
       if (error.constraints) {
         result.constraints = Object.values(error.constraints);
       }
-      
+
       if (error.children && error.children.length > 0) {
         result.children = {};
         error.children.forEach(child => {
           result.children[child.property] = formatError(child);
         });
       }
-      
+
       return result;
     };
 

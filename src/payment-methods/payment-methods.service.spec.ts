@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PaymentMethodsService } from './payment-methods.service';
-import { PaymentMethodsRepository } from './payment-methods.repository';
-import { PaymentMethodEntity } from './entities/payment-method.entity';
-import { PaymentMethodType, DEFAULT_PAYMENT_METHODS } from '@common/constants/card-types';
+import { DEFAULT_PAYMENT_METHODS, PaymentMethodType } from '@common/constants/card-types';
 import { BusinessLogicException, NotFoundResourceException } from '@common/exceptions/business.exceptions';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PaymentMethodEntity } from './entities/payment-method.entity';
+import { PaymentMethodsRepository } from './payment-methods.repository';
+import { PaymentMethodsService } from './payment-methods.service';
 
 describe('PaymentMethodsService', () => {
   let service: PaymentMethodsService;

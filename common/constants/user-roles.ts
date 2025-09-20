@@ -2,7 +2,7 @@
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
-  USER = 'user',
+  USER = 'user'
 }
 
 // Account-specific roles
@@ -10,7 +10,7 @@ export enum AccountRole {
   // Personal account roles
   OWNER = 'owner',
 
-  // Couple account roles  
+  // Couple account roles
   PARTNER = 'partner',
 
   // Family account roles
@@ -23,7 +23,7 @@ export enum AccountRole {
   MANAGER = 'manager',
   EMPLOYEE = 'employee',
   ACCOUNTANT = 'accountant',
-  VIEWER = 'viewer',
+  VIEWER = 'viewer'
 }
 
 // Permission levels
@@ -55,7 +55,7 @@ export enum Permission {
 
   // System operations
   PROCESS_RECURRING_EXPENSES = 'process_recurring_transactions',
-  SYSTEM_OPERATION = 'system_operation',
+  SYSTEM_OPERATION = 'system_operation'
 }
 
 // Role-permission mappings
@@ -67,7 +67,7 @@ export const ROLE_PERMISSIONS = {
     Permission.VIEW_REPORTS,
     Permission.EXPORT_REPORTS,
     Permission.PROCESS_RECURRING_EXPENSES,
-    Permission.SYSTEM_OPERATION,
+    Permission.SYSTEM_OPERATION
   ],
 
   [UserRole.USER]: [
@@ -75,7 +75,7 @@ export const ROLE_PERMISSIONS = {
     Permission.READ_EXPENSE,
     Permission.UPDATE_EXPENSE,
     Permission.DELETE_EXPENSE,
-    Permission.VIEW_REPORTS,
+    Permission.VIEW_REPORTS
   ],
 
   // Account-specific role permissions
@@ -92,7 +92,7 @@ export const ROLE_PERMISSIONS = {
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
     Permission.UPDATE_BUDGET,
-    Permission.DELETE_BUDGET,
+    Permission.DELETE_BUDGET
   ],
 
   [AccountRole.PARTNER]: [
@@ -103,7 +103,7 @@ export const ROLE_PERMISSIONS = {
     Permission.VIEW_REPORTS,
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
-    Permission.UPDATE_BUDGET,
+    Permission.UPDATE_BUDGET
   ],
 
   [AccountRole.PARENT]: [
@@ -118,19 +118,19 @@ export const ROLE_PERMISSIONS = {
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
     Permission.UPDATE_BUDGET,
-    Permission.DELETE_BUDGET,
+    Permission.DELETE_BUDGET
   ],
 
   [AccountRole.CHILD]: [
     Permission.CREATE_EXPENSE,
-    Permission.READ_EXPENSE,
+    Permission.READ_EXPENSE
   ],
 
   [AccountRole.GUARDIAN]: [
     Permission.CREATE_EXPENSE,
     Permission.READ_EXPENSE,
     Permission.UPDATE_EXPENSE,
-    Permission.VIEW_REPORTS,
+    Permission.VIEW_REPORTS
   ],
 
   [AccountRole.BUSINESS_OWNER]: [
@@ -146,7 +146,7 @@ export const ROLE_PERMISSIONS = {
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
     Permission.UPDATE_BUDGET,
-    Permission.DELETE_BUDGET,
+    Permission.DELETE_BUDGET
   ],
 
   [AccountRole.MANAGER]: [
@@ -158,13 +158,13 @@ export const ROLE_PERMISSIONS = {
     Permission.VIEW_REPORTS,
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
-    Permission.UPDATE_BUDGET,
+    Permission.UPDATE_BUDGET
   ],
 
   [AccountRole.EMPLOYEE]: [
     Permission.CREATE_EXPENSE,
     Permission.READ_EXPENSE,
-    Permission.UPDATE_EXPENSE,
+    Permission.UPDATE_EXPENSE
   ],
 
   [AccountRole.ACCOUNTANT]: [
@@ -172,11 +172,11 @@ export const ROLE_PERMISSIONS = {
     Permission.VIEW_REPORTS,
     Permission.EXPORT_REPORTS,
     Permission.CREATE_BUDGET,
-    Permission.UPDATE_BUDGET,
+    Permission.UPDATE_BUDGET
   ],
 
   [AccountRole.VIEWER]: [
     Permission.READ_EXPENSE,
-    Permission.VIEW_REPORTS,
-  ],
+    Permission.VIEW_REPORTS
+  ]
 };

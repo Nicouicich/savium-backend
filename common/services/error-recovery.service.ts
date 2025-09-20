@@ -62,10 +62,10 @@ export class ErrorRecoveryService {
    */
   analyzeError(error: Error, context?: Record<string, any>): ErrorAnalysis {
     // Find matching pattern
-    const matchedPattern = this.errorPatterns.find(pattern => 
-      pattern.pattern.test(error.message) || 
-      pattern.pattern.test(error.name) ||
-      (error.stack && pattern.pattern.test(error.stack))
+    const matchedPattern = this.errorPatterns.find(pattern =>
+      pattern.pattern.test(error.message)
+      || pattern.pattern.test(error.name)
+      || (error.stack && pattern.pattern.test(error.stack))
     );
 
     if (matchedPattern) {
@@ -94,11 +94,11 @@ export class ErrorRecoveryService {
    * Attempt to recover from an error using appropriate strategies
    */
   async attemptRecovery(
-    error: Error, 
+    error: Error,
     context?: Record<string, any>
   ): Promise<{ recovered: boolean; result?: any; fallbackUsed?: boolean }> {
     const analysis = this.analyzeError(error, context);
-    
+
     this.logger.warn(`Attempting recovery for error`, {
       errorName: error.name,
       errorMessage: error.message,
@@ -112,21 +112,19 @@ export class ErrorRecoveryService {
     }
 
     // Find applicable recovery strategies
-    const applicableStrategies = this.recoveryStrategies.filter(strategy => 
-      strategy.applicable(error, analysis)
-    );
+    const applicableStrategies = this.recoveryStrategies.filter(strategy => strategy.applicable(error, analysis));
 
     // Try each strategy in order
     for (const strategy of applicableStrategies) {
       try {
         this.logger.debug(`Trying recovery strategy: ${strategy.name}`);
         const result = await strategy.execute(error, context);
-        
+
         this.logger.log(`Recovery successful using strategy: ${strategy.name}`);
         return { recovered: true, result };
       } catch (recoveryError) {
         this.logger.warn(`Recovery strategy ${strategy.name} failed:`, recoveryError);
-        
+
         // Try fallback if available
         if (strategy.fallback) {
           try {
@@ -158,7 +156,7 @@ export class ErrorRecoveryService {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < maxRetries) {
           const recovery = await this.attemptRecovery(lastError, {
             ...context,
@@ -171,7 +169,7 @@ export class ErrorRecoveryService {
             if (recovery.result !== undefined) {
               return recovery.result;
             }
-            
+
             // Otherwise, try the operation again
             continue;
           }
@@ -203,15 +201,15 @@ export class ErrorRecoveryService {
     context?: Record<string, any>
   ): Promise<any> {
     const analysis = this.analyzeError(error, context);
-    
+
     if (analysis.category === ErrorCategory.DATABASE) {
       // Database-specific recovery strategies
       if (error.message.includes('connection') || error.message.includes('timeout')) {
         this.logger.warn('Database connection issue detected, attempting recovery');
-        
+
         // Wait and retry with exponential backoff
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         try {
           return await operation();
         } catch (retryError) {
@@ -260,7 +258,7 @@ export class ErrorRecoveryService {
     this.logger.warn(`External service ${serviceName} error:`, error);
 
     const analysis = this.analyzeError(error);
-    
+
     if (analysis.category === ErrorCategory.EXTERNAL_SERVICE) {
       // Try to use cached data if available
       if (fallbackData) {
@@ -412,9 +410,9 @@ export class ErrorRecoveryService {
     const strategies: RecoveryStrategy[] = [
       {
         name: 'Database Connection Recovery',
-        applicable: (error, analysis) => 
-          analysis.category === ErrorCategory.DATABASE && 
-          error.message.includes('connection'),
+        applicable: (error, analysis) =>
+          analysis.category === ErrorCategory.DATABASE
+          && error.message.includes('connection'),
         execute: async (error, context) => {
           // Implement database connection recovery logic
           this.logger.log('Attempting database connection recovery');
@@ -425,8 +423,7 @@ export class ErrorRecoveryService {
 
       {
         name: 'Network Retry with Backoff',
-        applicable: (error, analysis) => 
-          analysis.category === ErrorCategory.NETWORK && analysis.retryable,
+        applicable: (error, analysis) => analysis.category === ErrorCategory.NETWORK && analysis.retryable,
         execute: async (error, context) => {
           const attempt = context?.attempt || 0;
           const delay = Math.pow(2, attempt) * 1000;
@@ -437,8 +434,7 @@ export class ErrorRecoveryService {
 
       {
         name: 'Cache Fallback',
-        applicable: (error, analysis) => 
-          analysis.category === ErrorCategory.EXTERNAL_SERVICE,
+        applicable: (error, analysis) => analysis.category === ErrorCategory.EXTERNAL_SERVICE,
         execute: async (error, context) => {
           // Try to get cached data
           if (context?.cacheKey) {
@@ -481,8 +477,6 @@ export class ErrorRecoveryService {
       /network/i
     ];
 
-    return networkErrorPatterns.some(pattern => 
-      pattern.test(error.message) || pattern.test(error.name)
-    );
+    return networkErrorPatterns.some(pattern => pattern.test(error.message) || pattern.test(error.name));
   }
 }

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import { Document, Types } from 'mongoose';
 
 export type FileMetadataDocument = FileMetadata & Document;
 
@@ -386,11 +386,11 @@ FileMetadataSchema.index({
 });
 
 // Pre-save middleware to update lastAccessedAt when accessed
-FileMetadataSchema.pre('findOne', function () {
+FileMetadataSchema.pre('findOne', function() {
   this.updateOne({}, { $inc: { accessCount: 1 }, $set: { lastAccessedAt: new Date() } });
 });
 
-FileMetadataSchema.pre('find', function () {
+FileMetadataSchema.pre('find', function() {
   // Only apply to non-deleted files by default
   if (!this.getQuery().status && !this.getQuery().deletedAt) {
     this.where({ status: { $ne: FileStatus.DELETED } });

@@ -1,24 +1,24 @@
+import { UserRole } from '@common/constants/user-roles';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
   IsEmail,
   IsEnum,
+  IsIn,
+  IsNumber,
   IsObject,
   IsOptional,
   IsPhoneNumber,
   IsString,
-  MaxLength,
-  MinLength,
-  ValidateNested,
   Matches,
-  IsIn,
-  IsNumber,
+  Max,
+  MaxLength,
   Min,
-  Max
+  MinLength,
+  ValidateNested
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { UserRole } from '@common/constants/user-roles';
 import { CreateProfileDto } from './create-profile.dto';
 
 class NotificationPreferencesDto {

@@ -1,13 +1,13 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { HttpException, HttpStatus, Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Logger, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import helmet from 'helmet';
 
-import { AppModule } from './app.module';
-import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
 import { ErrorHandlingInterceptor } from '@common/interceptors/error-handling.interceptor';
+import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   // Configure log levels based on environment
@@ -26,10 +26,10 @@ async function bootstrap() {
     helmet({
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'https:']
+          defaultSrc: ['\'self\''],
+          styleSrc: ['\'self\'', '\'unsafe-inline\''],
+          scriptSrc: ['\'self\''],
+          imgSrc: ['\'self\'', 'data:', 'https:']
         }
       }
     })

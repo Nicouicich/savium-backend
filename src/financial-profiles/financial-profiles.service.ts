@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException, ConflictException, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { ProfileType, AnyProfileDocument, PersonalProfileDocument, BaseProfile } from './schemas';
-import { PersonalProfileRepository, CoupleProfileRepository, FamilyProfileRepository, CompanyProfileRepository } from './repositories';
 import { UsersService } from '../users/users.service';
+import { CompanyProfileRepository, CoupleProfileRepository, FamilyProfileRepository, PersonalProfileRepository } from './repositories';
+import { AnyProfileDocument, BaseProfile, PersonalProfileDocument, ProfileType } from './schemas';
 
 export interface CreateProfileData {
   type: ProfileType;

@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Readable } from 'stream';
 
-import { AiService, TicketProcessingResult } from './ai.service';
-import { MessagingFileService } from '../../files/services/messaging-file.service';
-import { S3Service } from '../../files/services/s3.service';
-import { FileManagementService } from '../../files/services/file-management.service';
-import { TransactionsService } from '../../transactions/transactions.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { FilePurpose } from '../../files/schemas/file-metadata.schema';
+import { FileManagementService } from '../../files/services/file-management.service';
+import { MessagingFileService } from '../../files/services/messaging-file.service';
+import { S3Service } from '../../files/services/s3.service';
+import { TransactionsService } from '../../transactions/transactions.service';
+import { AiService, TicketProcessingResult } from './ai.service';
 
 export interface ReceiptProcessingResult {
   isReceipt: boolean;
@@ -54,14 +54,14 @@ export class ReceiptProcessorService {
      } = {}
    ): Promise<ReceiptProcessingResult> {
      const { caption, traceId } = options;
- 
+
      this.logger.log('Processing potential receipt image from WhatsApp', {
        traceId,
        fileId,
        userId,
        profileId
      });
- 
+
      try {
        // Step 1: Download and upload file to S3
        const uploadResult = await this.messagingFileService.uploadMessagingFile(
@@ -79,29 +79,29 @@ export class ReceiptProcessorService {
            traceId
          }
        );
- 
+
        this.logger.log('File uploaded to S3', {
          traceId,
          fileId: uploadResult.fileId,
          s3Key: uploadResult.s3Key
        });
- 
+
        // Step 2: Download file buffer for AI processing
        const fileBuffer = await this.downloadFileBuffer(uploadResult.s3Key);
        if (!fileBuffer) {
          throw new Error('Failed to download uploaded file for AI processing');
        }
- 
+
        // Step 3: Detect if image is a receipt using AI
        const detectedMimeType = 'image/jpeg'; // Default fallback since S3UploadResult doesn't include mimeType
        const isReceiptResult = await this.detectReceipt(fileBuffer, detectedMimeType);
- 
+
        if (!isReceiptResult.isReceipt) {
          this.logger.log('Image determined not to be a receipt', {
            traceId,
            confidence: isReceiptResult.confidence
          });
- 
+
          // Update file tags to indicate it's not a receipt
          await this.updateFileMetadata(
            uploadResult.fileId,
@@ -112,7 +112,7 @@ export class ReceiptProcessorService {
            userId,
            profileId
          );
- 
+
          return {
            isReceipt: false,
            confidence: isReceiptResult.confidence,
@@ -123,23 +123,23 @@ export class ReceiptProcessorService {
            }
          };
        }
- 
+
        // Step 4: Process receipt with AI to extract transaction data
        const extractedData = await this.aiService.processTicketImage(fileBuffer, detectedMimeType);
- 
+
        this.logger.log('Receipt data extracted', {
          traceId,
          amount: extractedData.amount,
          vendor: extractedData.vendor,
          confidence: extractedData.confidence
        });
- 
+
        // Step 5: Create transaction if we have sufficient data
        let transactionCreated;
        if (extractedData.amount && extractedData.amount > 0) {
          try {
            transactionCreated = await this.createTransactionFromReceipt(extractedData, uploadResult.fileId, userId, profileId, traceId);
- 
+
            // Update file metadata to link to transaction
            await this.updateFileMetadata(
              uploadResult.fileId,
@@ -156,7 +156,7 @@ export class ReceiptProcessorService {
              traceId,
              error: transactionError.message
            });
- 
+
            // Update file to indicate processing error
            await this.updateFileMetadata(
              uploadResult.fileId,
@@ -169,7 +169,7 @@ export class ReceiptProcessorService {
            );
          }
        }
- 
+
        return {
          isReceipt: true,
          confidence: isReceiptResult.confidence,
@@ -187,7 +187,7 @@ export class ReceiptProcessorService {
          error: error.message,
          stack: error.stack
        });
- 
+
        return {
          isReceipt: false,
          confidence: 0,
@@ -204,16 +204,16 @@ export class ReceiptProcessorService {
        // Fallback: assume all images are potential receipts
        return { isReceipt: true, confidence: 0.5 };
      }
- 
+
      try {
        // Use a simple prompt to detect receipts
        const base64Image = imageBuffer.toString('base64');
        const imageUrl = `data:${mimeType};base64,${base64Image}`;
- 
+
        // This would be implemented with a separate AI call optimized for classification
        // For now, we'll use the existing ticket processing and check confidence
        const result = await this.aiService.processTicketImage(imageBuffer, mimeType);
- 
+
        // Consider it a receipt if:
        // 1. AI found an amount or vendor with reasonable confidence
        // 2. Extracted text contains receipt-like keywords
@@ -224,10 +224,10 @@ export class ReceiptProcessorService {
          result.extractedText?.toLowerCase().includes('subtotal') ||
          result.extractedText?.toLowerCase().includes('receipt') ||
          result.extractedText?.toLowerCase().includes('tax');
- 
+
        const isReceipt = hasAmount || (hasVendor && hasReceiptKeywords);
        const confidence = result.confidence || (isReceipt ? 0.7 : 0.2);
- 
+
        return { isReceipt: Boolean(isReceipt), confidence };
      } catch (error) {
        this.logger.warn('Error detecting receipt, defaulting to true', error.message);
@@ -252,10 +252,10 @@ export class ReceiptProcessorService {
           vendor: extractedData.vendor,
           fileId
         });
-  
+
         // Get appropriate category based on AI suggestion
         const categoryId = await this.getCategoryByName(extractedData.suggestedCategory || 'Otros', profileId);
-  
+
         const transactionData = {
           amount: extractedData.amount!,
           description: extractedData.description || `Purchase at ${extractedData.vendor || 'Unknown vendor'}`,
@@ -276,10 +276,10 @@ export class ReceiptProcessorService {
             platform: 'whatsapp'
           }
         };
-  
+
         // Create the transaction using TransactionsService
         const transaction = await this.transactionsService.create(transactionData, userId);
-  
+
         this.logger.log('Transaction created successfully from receipt', {
           traceId,
           transactionId: transaction.id, // Use UUID
@@ -287,7 +287,7 @@ export class ReceiptProcessorService {
           fileId,
           categoryId
         });
-  
+
         return {
           transactionId: transaction.id, // Use UUID instead of MongoDB _id
           amount: transaction.amount,
@@ -300,7 +300,7 @@ export class ReceiptProcessorService {
           stack: error.stack,
           extractedData
         });
-  
+
         // Re-throw to be handled by caller
         throw new Error(`Failed to create transaction: ${error.message}`);
       }
@@ -365,14 +365,14 @@ export class ReceiptProcessorService {
   /*   private async downloadFileBuffer(s3Key: string): Promise<Buffer | null> {
       try {
         this.logger.debug('Downloading file from S3 for AI processing', { s3Key });
-  
+
         const result = await this.s3Service.downloadFile(s3Key);
-  
+
         if (!result.Body) {
           this.logger.error('S3 download returned no body', { s3Key });
           return null;
         }
-  
+
         // Convert Stream to Buffer if necessary
         if (result.Body instanceof Readable) {
           const chunks: Buffer[] = [];
@@ -380,28 +380,28 @@ export class ReceiptProcessorService {
             chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
           }
           const buffer = Buffer.concat(chunks);
-  
+
           this.logger.debug('File downloaded and converted to buffer', {
             s3Key,
             bufferSize: buffer.length
           });
-  
+
           return buffer;
         }
-  
+
         // If it's already a Buffer or Uint8Array
         if (Buffer.isBuffer(result.Body)) {
           return result.Body;
         }
-  
+
         // Convert other types to Buffer
         const buffer = Buffer.from(result.Body as any);
-  
+
         this.logger.debug('File downloaded as buffer', {
           s3Key,
           bufferSize: buffer.length
         });
-  
+
         return buffer;
       } catch (error) {
         this.logger.error('Failed to download file from S3', {
@@ -428,7 +428,7 @@ export class ReceiptProcessorService {
    ): Promise<void> {
      try {
        this.logger.debug('Updating file metadata', { fileId, updates, userId, profileId });
- 
+
        // Update file metadata using FileManagementService
        await this.fileManagementService.updateFileMetadata(
          fileId,
@@ -440,7 +440,7 @@ export class ReceiptProcessorService {
          userId,
          profileId
        );
- 
+
        this.logger.debug('File metadata updated successfully', { fileId, updates });
      } catch (error) {
        this.logger.warn('Failed to update file metadata', {
@@ -450,7 +450,7 @@ export class ReceiptProcessorService {
          profileId,
          error: error.message
        });
- 
+
        // Don't throw error to avoid breaking the main flow
        // File metadata update is not critical for transaction creation
      }

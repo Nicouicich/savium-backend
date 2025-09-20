@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import * as request from 'supertest';
 import { Types } from 'mongoose';
+import * as request from 'supertest';
 
 import { AppModule } from '../app.module';
 import { DatabaseModule } from '../database/database.module';

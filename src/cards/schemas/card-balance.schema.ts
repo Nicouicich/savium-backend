@@ -1,10 +1,12 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
 import { BalanceUpdateSource } from '@common/constants/card-types';
 import { Currency } from '@common/constants/transaction-categories';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
-export type CardBalanceDocument = CardBalance &
-  Document & {
+export type CardBalanceDocument =
+  & CardBalance
+  & Document
+  & {
     createdAt: Date;
     updatedAt: Date;
   };

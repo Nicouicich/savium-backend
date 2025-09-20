@@ -1,11 +1,11 @@
-import { Injectable, Logger, BadRequestException, ServiceUnavailableException, Inject, forwardRef } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { SNSClient, PublishCommand, PublishCommandOutput } from '@aws-sdk/client-sns';
-import { createHash, randomBytes } from 'crypto';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { BusinessException } from '@common/exceptions/business.exception';
+import { PublishCommand, PublishCommandOutput, SNSClient } from '@aws-sdk/client-sns';
 import { ErrorCode } from '@common/constants/error-codes';
+import { BusinessException } from '@common/exceptions/business.exception';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectConnection } from '@nestjs/mongoose';
+import { createHash, randomBytes } from 'crypto';
+import { Connection } from 'mongoose';
 import { UsersService } from '../../src/users/users.service';
 
 interface VerificationCode {
@@ -524,10 +524,24 @@ export class SmsVerificationService {
    */
   private getCountryCodeForRegion(region: string): string {
     const regionMap: Record<string, string> = {
-      'US': '1', 'CA': '1', 'GB': '44', 'DE': '49', 'FR': '33',
-      'ES': '34', 'IT': '39', 'BR': '55', 'AR': '54', 'CO': '57',
-      'PE': '51', 'CL': '56', 'UY': '598', 'EC': '593', 'BO': '591',
-      'PY': '595', 'VE': '58', 'MX': '52'
+      'US': '1',
+      'CA': '1',
+      'GB': '44',
+      'DE': '49',
+      'FR': '33',
+      'ES': '34',
+      'IT': '39',
+      'BR': '55',
+      'AR': '54',
+      'CO': '57',
+      'PE': '51',
+      'CL': '56',
+      'UY': '598',
+      'EC': '593',
+      'BO': '591',
+      'PY': '595',
+      'VE': '58',
+      'MX': '52'
     };
     return regionMap[region] || '';
   }
@@ -541,10 +555,9 @@ export class SmsVerificationService {
     }
     const start = phoneNumber.substring(0, 3);
     const end = phoneNumber.substring(phoneNumber.length - 2);
-    return phoneNumber
+    return phoneNumber;
     return `${start}***${end}`;
   }
-
 
   /**
    * Clean up expired verification codes (can be called by a cron job)

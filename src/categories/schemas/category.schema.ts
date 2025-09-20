@@ -1,6 +1,6 @@
+import { TransactionCategory } from '@common/constants/transaction-categories';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { TransactionCategory } from '@common/constants/transaction-categories';
 import { AnyProfileDocument } from 'src/financial-profiles/schemas';
 
 export type CategoryDocument = Category & Document;
@@ -22,7 +22,7 @@ export class Subcategory {
 
 @Schema({ timestamps: true })
 export class Category {
-  @Prop({ required: true})
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: false })
@@ -33,7 +33,7 @@ export class Category {
 
   @Prop()
   description?: string;
-/* 
+  /*
   @Prop({ type: [Subcategory], default: [] })
   subcategories: Subcategory[]; */
 

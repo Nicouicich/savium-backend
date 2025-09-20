@@ -1,29 +1,29 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Req, Logger, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 
+import { ApiErrorResponse, ApiSuccessResponse } from '@common/decorators/api-response.decorator';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { Public } from '@common/decorators/public.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import type { UserForJWT, UserPublicInfo } from '../users/types';
+import { UserMapper } from '../users/utils';
 import { AuthService } from './auth.service';
 import {
   AuthResponseDto,
   ChangePasswordDto,
   LoginDto,
+  PhoneRemovalResponseDto,
+  PhoneVerificationResponseDto,
   RefreshTokenDto,
   RegisterDto,
-  PhoneVerificationResponseDto,
-  PhoneRemovalResponseDto,
   SendSmsDto,
   SendSmsResponseDto
 } from './dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { FacebookOAuthGuard } from './guards/facebook-oauth.guard';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
-import { Public } from '@common/decorators/public.decorator';
-import { ApiErrorResponse, ApiSuccessResponse } from '@common/decorators/api-response.decorator';
-import type { UserForJWT, UserPublicInfo } from '../users/types';
-import { UserMapper } from '../users/utils';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')

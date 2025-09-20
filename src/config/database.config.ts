@@ -20,7 +20,6 @@ export default registerAs('database', () => {
       // Replica set options
       retryWrites: true,
       w: 'majority'
-
       // Connection options (deprecated options removed for MongoDB Driver v6+)
     }
   };

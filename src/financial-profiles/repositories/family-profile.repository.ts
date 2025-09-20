@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { ProfileType } from '../schemas';
 import { FamilyProfile, FamilyProfileDocument } from '../schemas/family-profile.schema';
 import { BaseProfileRepository } from './base-profile.repository';
-import { ProfileType } from '../schemas';
 
 @Injectable()
 export class FamilyProfileRepository extends BaseProfileRepository<FamilyProfile, FamilyProfileDocument> {
   constructor(
-    @InjectModel(ProfileType.FAMILY)
-    familyProfileModel: Model<FamilyProfileDocument>
+    @InjectModel(ProfileType.FAMILY) familyProfileModel: Model<FamilyProfileDocument>
   ) {
     super(familyProfileModel);
   }

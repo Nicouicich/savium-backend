@@ -4,7 +4,7 @@ import { ApiResponse as SwaggerApiResponse, getSchemaPath } from '@nestjs/swagge
 export const ApiSuccessResponse = <TModel extends Type<any>>(
   model: TModel,
   description?: string,
-  isArray = false,
+  isArray = false
 ) => {
   return applyDecorators(
     SwaggerApiResponse({
@@ -14,32 +14,32 @@ export const ApiSuccessResponse = <TModel extends Type<any>>(
         properties: {
           success: {
             type: 'boolean',
-            example: true,
+            example: true
           },
           data: isArray
             ? {
-                type: 'array',
-                items: { $ref: getSchemaPath(model) },
-              }
+              type: 'array',
+              items: { $ref: getSchemaPath(model) }
+            }
             : { $ref: getSchemaPath(model) },
           timestamp: {
             type: 'string',
             format: 'date-time',
-            example: '2024-01-01T00:00:00.000Z',
+            example: '2024-01-01T00:00:00.000Z'
           },
           path: {
             type: 'string',
-            example: '/api/v1/users',
-          },
-        },
-      },
-    }),
+            example: '/api/v1/users'
+          }
+        }
+      }
+    })
   );
 };
 
 export const ApiPaginatedResponse = <TModel extends Type<any>>(
   model: TModel,
-  description?: string,
+  description?: string
 ) => {
   return applyDecorators(
     SwaggerApiResponse({
@@ -49,11 +49,11 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(
         properties: {
           success: {
             type: 'boolean',
-            example: true,
+            example: true
           },
           data: {
             type: 'array',
-            items: { $ref: getSchemaPath(model) },
+            items: { $ref: getSchemaPath(model) }
           },
           pagination: {
             type: 'object',
@@ -63,28 +63,28 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(
               total: { type: 'number', example: 100 },
               totalPages: { type: 'number', example: 10 },
               hasNext: { type: 'boolean', example: true },
-              hasPrevious: { type: 'boolean', example: false },
-            },
+              hasPrevious: { type: 'boolean', example: false }
+            }
           },
           timestamp: {
             type: 'string',
             format: 'date-time',
-            example: '2024-01-01T00:00:00.000Z',
+            example: '2024-01-01T00:00:00.000Z'
           },
           path: {
             type: 'string',
-            example: '/api/v1/users',
-          },
-        },
-      },
-    }),
+            example: '/api/v1/users'
+          }
+        }
+      }
+    })
   );
 };
 
 export const ApiErrorResponse = (
   status: number,
   description: string,
-  example?: any,
+  example?: any
 ) => {
   return applyDecorators(
     SwaggerApiResponse({
@@ -94,7 +94,7 @@ export const ApiErrorResponse = (
         properties: {
           success: {
             type: 'boolean',
-            example: false,
+            example: false
           },
           error: {
             type: 'object',
@@ -105,12 +105,12 @@ export const ApiErrorResponse = (
               timestamp: {
                 type: 'string',
                 format: 'date-time',
-                example: '2024-01-01T00:00:00.000Z',
+                example: '2024-01-01T00:00:00.000Z'
               },
               path: { type: 'string', example: '/api/v1/users' },
-              method: { type: 'string', example: 'GET' },
-            },
-          },
+              method: { type: 'string', example: 'GET' }
+            }
+          }
         },
         example: example || {
           success: false,
@@ -119,11 +119,11 @@ export const ApiErrorResponse = (
             message: description,
             timestamp: '2024-01-01T00:00:00.000Z',
             path: '/api/v1/users',
-            method: 'GET',
-          },
-        },
-      },
-    }),
+            method: 'GET'
+          }
+        }
+      }
+    })
   );
 };
 
@@ -131,20 +131,22 @@ export const ApiErrorResponse = (
 export const ApiResponseDecorator = <TModel extends Type<any>>(
   model: TModel | TModel[],
   status: number = 200,
-  description?: string,
+  description?: string
 ) => {
   const isArray = Array.isArray(model);
   const actualModel = isArray ? model[0] : model;
-  
+
   return applyDecorators(
     SwaggerApiResponse({
       status,
       description: description || 'Success',
-      schema: isArray ? {
-        type: 'array',
-        items: { $ref: getSchemaPath(actualModel) },
-      } : { $ref: getSchemaPath(actualModel) },
-    }),
+      schema: isArray
+        ? {
+          type: 'array',
+          items: { $ref: getSchemaPath(actualModel) }
+        }
+        : { $ref: getSchemaPath(actualModel) }
+    })
   );
 };
 

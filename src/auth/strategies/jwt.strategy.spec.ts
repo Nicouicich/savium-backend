@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 
-import { JwtStrategy, JwtPayload } from './jwt.strategy';
-import { UsersService } from '../../users/users.service';
-import { UserDocument } from '../../users/schemas/user.schema';
 import { UserRole } from '@common/constants/user-roles';
+import { UserDocument } from '../../users/schemas/user.schema';
+import { UsersService } from '../../users/users.service';
+import { JwtPayload, JwtStrategy } from './jwt.strategy';
 
 describe('JwtStrategy - Unit Tests', () => {
   let strategy: JwtStrategy;

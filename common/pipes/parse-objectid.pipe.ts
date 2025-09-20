@@ -1,19 +1,19 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 /**
  * ParseObjectIdPipe - Validates and transforms string values to MongoDB ObjectIds
- * 
+ *
  * This pipe validates that a string parameter is a valid MongoDB ObjectId format
  * before it reaches the service layer, preventing MongoDB casting errors.
- * 
+ *
  * @example
  * ```typescript
  * @Get(':id')
  * async findOne(@Param('id', ParseObjectIdPipe) id: string) {
  *   // id is guaranteed to be a valid ObjectId format
  * }
- * 
+ *
  * @Get('summary')
  * async getSummary(@Query('accountId', ParseObjectIdPipe) accountId: string) {
  *   // accountId is guaranteed to be a valid ObjectId format
@@ -24,7 +24,7 @@ import { Types } from 'mongoose';
 export class ParseObjectIdPipe implements PipeTransform<string, string> {
   /**
    * Transforms and validates the input value as a MongoDB ObjectId
-   * 
+   *
    * @param value - The input value to validate (typically from @Param or @Query)
    * @param metadata - NestJS argument metadata (contains parameter info)
    * @returns The validated ObjectId string
@@ -48,8 +48,8 @@ export class ParseObjectIdPipe implements PipeTransform<string, string> {
     // Validate ObjectId format using MongoDB's native validation
     if (!Types.ObjectId.isValid(value)) {
       throw new BadRequestException(
-        `${metadata.data || 'Parameter'} must be a valid MongoDB ObjectId (24-character hexadecimal string). ` +
-        `Received: "${value}". Expected format: "507f1f77bcf86cd799439011"`
+        `${metadata.data || 'Parameter'} must be a valid MongoDB ObjectId (24-character hexadecimal string). `
+          + `Received: "${value}". Expected format: "507f1f77bcf86cd799439011"`
       );
     }
 
@@ -57,8 +57,8 @@ export class ParseObjectIdPipe implements PipeTransform<string, string> {
     // This catches edge cases where isValid might pass but it's not the right format
     if (typeof value !== 'string' || !/^[0-9a-fA-F]{24}$/.test(value)) {
       throw new BadRequestException(
-        `${metadata.data || 'Parameter'} must be a 24-character hexadecimal string. ` +
-        `Received: "${value}". Expected format: "507f1f77bcf86cd799439011"`
+        `${metadata.data || 'Parameter'} must be a 24-character hexadecimal string. `
+          + `Received: "${value}". Expected format: "507f1f77bcf86cd799439011"`
       );
     }
 
@@ -68,9 +68,9 @@ export class ParseObjectIdPipe implements PipeTransform<string, string> {
 
 /**
  * ParseOptionalObjectIdPipe - Similar to ParseObjectIdPipe but allows undefined values
- * 
+ *
  * This pipe is useful for optional query parameters that should be valid ObjectIds when provided
- * 
+ *
  * @example
  * ```typescript
  * @Get()

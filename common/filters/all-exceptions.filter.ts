@@ -1,11 +1,11 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  BadRequestException,
+  Catch,
+  ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
-  BadRequestException,
+  Logger
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
@@ -26,10 +26,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const errorResponse = exception.getResponse();
-      message = typeof errorResponse === 'string' 
-        ? errorResponse 
+      message = typeof errorResponse === 'string'
+        ? errorResponse
         : (errorResponse as any).message || exception.message;
-      
+
       // Extract validation details if available
       if (typeof errorResponse === 'object' && (errorResponse as any).errors) {
         details = (errorResponse as any).errors;
@@ -39,13 +39,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = HttpStatus.BAD_REQUEST;
       const path = (exception as any).path;
       const value = (exception as any).value;
-      
+
       if (path === '_id' || path.endsWith('Id')) {
-        message = `Invalid ${path === '_id' ? 'ID' : path} format. Expected a valid MongoDB ObjectId (24-character hexadecimal string), but received: "${value}". Example format: "507f1f77bcf86cd799439011"`;
+        message = `Invalid ${
+          path === '_id' ? 'ID' : path
+        } format. Expected a valid MongoDB ObjectId (24-character hexadecimal string), but received: "${value}". Example format: "507f1f77bcf86cd799439011"`;
       } else {
         message = `Invalid ${path} format: "${value}". Expected a valid MongoDB ObjectId.`;
       }
-      
+
       details = {
         field: path,
         value: value,
@@ -69,8 +71,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message,
         timestamp: new Date().toISOString(),
         path: request.url,
-        method: request.method,
-      },
+        method: request.method
+      }
     };
 
     // Add details if available (validation errors, etc.)
@@ -80,7 +82,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Simplified logging based on error type and environment
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     if (status === HttpStatus.UNAUTHORIZED) {
       // Don't log unauthorized errors - these are expected when tokens are invalid/expired
       // Only log in development for debugging purposes
@@ -92,7 +94,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`${status} ${request.method} ${request.url}`, {
         message,
         user: (request as any).user?.id || 'anonymous',
-        ...(isDevelopment && exception instanceof Error && { stack: exception.stack }),
+        ...(isDevelopment && exception instanceof Error && { stack: exception.stack })
       });
     } else if (isDevelopment) {
       // Log client errors (4xx) only in development
