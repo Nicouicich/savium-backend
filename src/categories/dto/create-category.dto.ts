@@ -36,7 +36,7 @@ export class CreateSubcategoryDto {
 export class CreateCategoryDto {
   @ApiProperty({
     description: 'Category internal name (unique within account)',
-    example: 'food_dining',
+    example: 'Food & Dining',
     minLength: 1,
     maxLength: 50
   })
@@ -44,22 +44,6 @@ export class CreateCategoryDto {
   @MinLength(1)
   @MaxLength(50)
   name: string;
-
-  @ApiProperty({
-    description: 'Category display name',
-    example: 'Food & Dining',
-    minLength: 1,
-    maxLength: 100
-  })
-  @IsString()
-  @MinLength(1)
-  @MaxLength(100)
-  displayName: string;
-
-  @ApiPropertyOptional({ description: 'Predefined category type', enum: TransactionCategory, example: TransactionCategory.FOOD_DINING })
-  @IsOptional()
-  @IsEnum(TransactionCategory)
-  type?: TransactionCategory;
 
   @ApiProperty({
     description: 'Category icon (emoji or icon identifier)',
@@ -85,29 +69,10 @@ export class CreateCategoryDto {
   @MaxLength(500)
   description?: string;
 
-  @ApiPropertyOptional({ description: 'List of subcategories', type: [CreateSubcategoryDto], maxItems: 20 })
-  @IsOptional()
-  @IsArray()
-  @ArrayMaxSize(20)
-  subcategories?: CreateSubcategoryDto[];
-
   @ApiPropertyOptional({ description: 'Keywords for AI categorization', type: [String], example: ['restaurant', 'food', 'dining', 'grocery'], maxItems: 50 })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(50)
   keywords?: string[];
-
-  @ApiPropertyOptional({ description: 'Sort order for display', example: 1, minimum: 0, maximum: 999 })
-  @IsOptional()
-  @IsNumber()
-  sortOrder?: number;
-
-  @ApiPropertyOptional({ description: 'AI configuration for categorization', type: 'object' })
-  @IsOptional()
-  aiConfig?: Record<string, any>;
-
-  @ApiPropertyOptional({ description: 'Additional metadata', type: 'object' })
-  @IsOptional()
-  metadata?: Record<string, any>;
 }

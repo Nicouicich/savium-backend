@@ -5,7 +5,6 @@ import { Connection, ClientSession } from 'mongoose';
 import { TransactionStats, TransactionsRepository, PaginatedResult } from './transactions.repository';
 import { CreateTransactionDto, TransactionQueryDto, UpdateTransactionDto, TransactionExportDto, ExportPeriod } from './dto';
 import { TransactionDocument } from './schemas/transaction.schema';
-import { AccountsService } from '../accounts/accounts.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
@@ -24,7 +23,6 @@ export class TransactionsService {
 
   constructor(
     private readonly transactionsRepository: TransactionsRepository,
-    private readonly accountsService: AccountsService,
     private readonly profilesService: ProfilesService,
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService,

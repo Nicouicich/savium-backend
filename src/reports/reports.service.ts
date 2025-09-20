@@ -14,7 +14,6 @@ import {
   UserBreakdownDto
 } from './dto';
 import { TransactionsService } from '../transactions/transactions.service';
-import { AccountsService } from '../accounts/accounts.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
@@ -26,7 +25,6 @@ export class ReportsService {
   constructor(
     private readonly cacheService: EnhancedCacheService,
     private readonly transactionsService: TransactionsService,
-    private readonly accountsService: AccountsService,
     private readonly profilesService: ProfilesService,
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService

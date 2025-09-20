@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import axios from 'axios';
 import { Model } from 'mongoose';
-import { AccountsService } from '../../accounts/accounts.service';
 import { MessagingFileService } from '../../files/services/messaging-file.service';
 import { UserProfile } from '../../users/schemas/user-profile.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
@@ -40,7 +39,6 @@ export class WhatsappService {
     private messagingFileService: MessagingFileService,
     private receiptProcessorService: ReceiptProcessorService,
     private transactionsService: TransactionsService,
-    private accountsService: AccountsService,
     private aiService: AiService
   ) {
     this.accessToken = this.configService.get('WHATSAPP_ACCESS_TOKEN');

@@ -7,7 +7,6 @@ import { UserProfile, UserProfileSchema } from '../../users/schemas/user-profile
 import { AiModule } from '../ai/ai.module';
 import { FilesModule } from '../../files/files.module';
 import { TransactionsModule } from '../../transactions/transactions.module';
-import { AccountsModule } from '../../accounts/accounts.module';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
@@ -19,7 +18,6 @@ import { UsersModule } from 'src/users/users.module';
     AiModule,
     FilesModule,
     TransactionsModule,
-    AccountsModule,
     UsersModule
   ],
   controllers: [WhatsappController],

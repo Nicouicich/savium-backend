@@ -7,7 +7,6 @@ import { TransactionsRepository } from './transactions.repository';
 import { FileUploadService } from './file-upload.service';
 import { PdfExportService } from './pdf-export.service';
 import { Transaction, TransactionSchema } from './schemas/transaction.schema';
-import { AccountsModule } from '../accounts/accounts.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { UsersModule } from '../users/users.module';
@@ -29,7 +28,6 @@ import { CommonModule } from '@common/common.module';
         callback(null, true);
       }
     }),
-    AccountsModule,
     ProfilesModule,
     CategoriesModule,
     UsersModule,
