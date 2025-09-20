@@ -13,24 +13,26 @@ import {
   SummaryStatsDto,
   UserBreakdownDto
 } from './dto';
-import { ExpensesService } from '../expenses/expenses.service';
+import { TransactionsService } from '../transactions/transactions.service';
 import { AccountsService } from '../accounts/accounts.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
 @Injectable()
 export class ReportsService {
   constructor(
     private readonly cacheService: EnhancedCacheService,
-    private readonly expensesService: ExpensesService,
+    private readonly transactionsService: TransactionsService,
     private readonly accountsService: AccountsService,
+    private readonly profilesService: ProfilesService,
     private readonly categoriesService: CategoriesService,
     private readonly usersService: UsersService
   ) {}
 
-  async generateMonthlyReport(query: ReportQueryDto, userId: string): Promise<MonthlyReportDto> {
+  /* async generateMonthlyReport(query: ReportQueryDto, userId: string): Promise<MonthlyReportDto> {
     // Generate cache key for this specific report
     const cacheKey = this.generateCacheKey('monthly', query, userId);
 
@@ -42,7 +44,7 @@ export class ReportsService {
       {
         ttl: 3600, // 1 hour
         namespace: 'reports',
-        tags: [`account:${query.accountId}`, 'reports'],
+        tags: [`profile:${query.profileId}`, 'reports'],
         compress: true
       }
     );
@@ -50,25 +52,25 @@ export class ReportsService {
 
   private async generateMonthlyReportData(query: ReportQueryDto, userId: string): Promise<MonthlyReportDto> {
     // Validate access to account
-    await this.validateAccountAccess(query.accountId!, userId);
+    await this.validateProfileAccess(query.profileId!, userId);
 
     // Calculate date range
     const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
     // Generate report metadata
-    const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.MONTHLY, startDate, endDate, query.currency, query);
+    const metadata = await this.generateReportMetadata(query.profileId!, userId, ReportType.MONTHLY, startDate, endDate, query.currency, query);
 
     // Get summary statistics
-    const summary = await this.generateSummaryStats(query.accountId!, startDate, endDate, query.currency as Currency, query.includeComparison);
+    const summary = await this.generateSummaryStats(query.profileId!, startDate, endDate, query.currency as Currency, query.includeComparison);
 
     // Get daily breakdown
-    const dailyBreakdown = await this.generateDailyBreakdown(query.accountId!, startDate, endDate);
+    const dailyBreakdown = await this.generateDailyBreakdown(query.profileId!, startDate, endDate);
 
     // Get category breakdown
-    const categoryBreakdown = await this.expensesService.getCategoryBreakdown(query.accountId!, userId, startDate, endDate);
+    const categoryBreakdown = await this.transactionsService.getCategoryBreakdown(query.profileId!, userId, startDate, endDate);
 
-    // Get top expenses
-    const topExpenses = await this.getTopExpenses(query.accountId!, startDate, endDate, 10);
+    // Get top transactions
+    const topTransactions = await this.getTopTransactions(query.profileId!, startDate, endDate, 10);
 
     return {
       metadata,
@@ -77,10 +79,10 @@ export class ReportsService {
       categoryBreakdown: await Promise.all(
         categoryBreakdown.map(async cat => ({
           ...cat,
-          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.accountId!, startDate, endDate) : undefined
+          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.profileId!, startDate, endDate) : undefined
         }))
       ),
-      topExpenses
+      topTransactions
     };
   }
 
@@ -95,26 +97,26 @@ export class ReportsService {
       {
         ttl: 3600, // 1 hour
         namespace: 'reports',
-        tags: [`account:${query.accountId}`, 'reports'],
+        tags: [`profile:${query.profileId}`, 'reports'],
         compress: true
       }
     );
   }
 
   private async generateCategoryReportData(query: ReportQueryDto, userId: string): Promise<CategoryReportDto> {
-    await this.validateAccountAccess(query.accountId!, userId);
+    await this.validateProfileAccess(query.profileId!, userId);
 
     const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
-    const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.CATEGORY, startDate, endDate, query.currency, query);
+    const metadata = await this.generateReportMetadata(query.profileId!, userId, ReportType.CATEGORY, startDate, endDate, query.currency, query);
 
-    const summary = await this.generateSummaryStats(query.accountId!, startDate, endDate, query.currency as Currency, query.includeComparison);
+    const summary = await this.generateSummaryStats(query.profileId!, startDate, endDate, query.currency as Currency, query.includeComparison);
 
     // Get detailed category breakdown
-    const categories = await this.expensesService.getCategoryBreakdown(query.accountId!, userId, startDate, endDate);
+    const categories = await this.transactionsService.getCategoryBreakdown(query.profileId!, userId, startDate, endDate);
 
     // Get monthly trends by category
-    const monthlyTrends = await this.generateCategoryTrends(query.accountId!, startDate, endDate, query.months || 6);
+    const monthlyTrends = await this.generateCategoryTrends(query.profileId!, startDate, endDate, query.months || 6);
 
     return {
       metadata,
@@ -122,7 +124,7 @@ export class ReportsService {
       categories: await Promise.all(
         categories.map(async cat => ({
           ...cat,
-          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.accountId!, startDate, endDate) : undefined
+          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.profileId!, startDate, endDate) : undefined
         }))
       ),
       monthlyTrends
@@ -140,29 +142,29 @@ export class ReportsService {
       {
         ttl: 3600, // 1 hour
         namespace: 'reports',
-        tags: [`account:${query.accountId}`, 'reports'],
+        tags: [`profile:${query.profileId}`, 'reports'],
         compress: true
       }
     );
   }
 
   private async generateSummaryReportData(query: ReportQueryDto, userId: string): Promise<SummaryReportDto> {
-    await this.validateAccountAccess(query.accountId!, userId);
+    await this.validateProfileAccess(query.profileId!, userId);
 
     const { startDate, endDate } = this.calculateDateRange(query.period!, query.startDate, query.endDate);
 
-    const metadata = await this.generateReportMetadata(query.accountId!, userId, ReportType.SUMMARY, startDate, endDate, query.currency, query);
+    const metadata = await this.generateReportMetadata(query.profileId!, userId, ReportType.SUMMARY, startDate, endDate, query.currency, query);
 
-    const summary = await this.generateSummaryStats(query.accountId!, startDate, endDate, query.currency as Currency, query.includeComparison);
+    const summary = await this.generateSummaryStats(query.profileId!, startDate, endDate, query.currency as Currency, query.includeComparison);
 
-    const categoryBreakdown = await this.expensesService.getCategoryBreakdown(query.accountId!, userId, startDate, endDate);
+    const categoryBreakdown = await this.transactionsService.getCategoryBreakdown(query.profileId!, userId, startDate, endDate);
 
-    const monthlyBreakdown = await this.expensesService.getMonthlyTrends(query.accountId!, userId, query.months || 12);
+    const monthlyBreakdown = await this.transactionsService.getMonthlyTrends(query.profileId!, userId, query.months || 12);
 
     // Get user breakdown if this is a shared account
     let userBreakdown: UserBreakdownDto[] | undefined;
     if (query.groupByUser) {
-      userBreakdown = await this.generateUserBreakdown(query.accountId!, startDate, endDate);
+      userBreakdown = await this.generateUserBreakdown(query.profileId!, startDate, endDate);
     }
 
     // Generate insights and recommendations
@@ -174,7 +176,7 @@ export class ReportsService {
         month: trend.month,
         monthName: this.getMonthName(trend.month),
         totalAmount: trend.totalAmount,
-        expenseCount: trend.expenseCount,
+        transactionCount: trend.transactionCount,
         averageAmount: trend.averageAmount
       }))
     );
@@ -185,7 +187,7 @@ export class ReportsService {
       categoryBreakdown: await Promise.all(
         categoryBreakdown.map(async cat => ({
           ...cat,
-          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.accountId!, startDate, endDate) : undefined
+          comparison: query.includeComparison ? await this.calculateCategoryComparison(cat.categoryId, query.profileId!, startDate, endDate) : undefined
         }))
       ),
       monthlyBreakdown: monthlyBreakdown.map(trend => ({
@@ -193,7 +195,7 @@ export class ReportsService {
         month: trend.month,
         monthName: this.getMonthName(trend.month),
         totalAmount: trend.totalAmount,
-        expenseCount: trend.expenseCount,
+        transactionCount: trend.transactionCount,
         averageAmount: trend.averageAmount
       })),
       userBreakdown,
@@ -203,7 +205,7 @@ export class ReportsService {
 
   async exportReport(query: ReportQueryDto, userId: string): Promise<ExportReportDto> {
     // Validate access
-    await this.validateAccountAccess(query.accountId!, userId);
+    await this.validateProfileAccess(query.profileId!, userId);
 
     // Generate the appropriate report based on type
     let report: any;
@@ -243,32 +245,32 @@ export class ReportsService {
       {
         ttl: 86400, // 24 hours
         namespace: 'exports',
-        tags: [`account:${query.accountId}`, 'exports']
+        tags: [`profile:${query.profileId}`, 'exports']
       }
     );
 
     return exportResult;
   }
 
-  async clearReportsCache(accountId?: string): Promise<void> {
-    if (accountId) {
+  async clearReportsCache(profileId?: string): Promise<void> {
+    if (profileId) {
       // Clear cache for specific account
-      await this.cacheService.invalidateAccountCache(accountId);
-      await this.cacheService.invalidateByTags([`account:${accountId}`, 'reports']);
+      await this.cacheService.invalidateAccountCache(profileId);
+      await this.cacheService.invalidateByTags([`profile:${profileId}`, 'reports']);
     } else {
       // Clear all report cache
       await this.cacheService.invalidateByTags(['reports']);
     }
   }
 
-  private async validateAccountAccess(accountId: string, userId: string): Promise<void> {
-    const hasAccess = await this.accountsService.hasUserAccess(accountId, userId);
-    if (!hasAccess) {
-      throw new ForbiddenException('Access denied to this account');
+  private async validateProfileAccess(profileId: string, userId: string): Promise<void> {
+    const profile = await this.profilesService.findOne(profileId, userId);
+    if (!profile) {
+      throw new ForbiddenException('Access denied to this profile');
     }
   }
 
-  private calculateDateRange(period: ReportPeriod, customStartDate?: string, customEndDate?: string): { startDate: Date; endDate: Date } {
+  private calculateDateRange(period: ReportPeriod, customStartDate?: string, customEndDate?: string): { startDate: Date; endDate: Date; } {
     const now = new Date();
     let startDate: Date;
     let endDate: Date = new Date(now);
@@ -302,7 +304,7 @@ export class ReportsService {
   }
 
   private async generateReportMetadata(
-    accountId: string,
+    profileId: string,
     userId: string,
     reportType: ReportType,
     startDate: Date,
@@ -310,9 +312,9 @@ export class ReportsService {
     currency?: string,
     filters?: ReportQueryDto
   ): Promise<ReportMetadataDto> {
-    const account = await this.accountsService.findById(accountId);
-    if (!account) {
-      throw new NotFoundException('Account not found');
+    const profile = await this.profilesService.findById(profileId);
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
     }
 
     const user = await this.usersService.findById(userId);
@@ -324,30 +326,30 @@ export class ReportsService {
       generatedAt: new Date(),
       periodStart: startDate,
       periodEnd: endDate,
-      accountId,
-      accountName: account.name,
+      profileId,
+      profileName: profile.name,
       requestedBy: `${user.firstName} ${user.lastName}`,
       reportType,
       currency: (currency as Currency) || Currency.USD,
       filters: filters
         ? {
-            categoryIds: filters.categoryIds,
-            includeComparison: filters.includeComparison,
-            groupByUser: filters.groupByUser
-          }
+          categoryIds: filters.categoryIds,
+          includeComparison: filters.includeComparison,
+          groupByUser: filters.groupByUser
+        }
         : undefined
     };
   }
-
-  private async generateSummaryStats(
-    accountId: string,
+ */
+  /*  private async generateSummaryStats(
+    profileId: string,
     startDate: Date,
     endDate: Date,
     currency?: Currency,
     includeComparison = false
   ): Promise<SummaryStatsDto> {
-    const stats = await this.expensesService.getExpenseStats(
-      accountId,
+    const stats = await this.transactionsService.getTransactionStats(
+      profileId,
       undefined, // Don't filter by user for account-level stats
       startDate,
       endDate,
@@ -355,23 +357,23 @@ export class ReportsService {
     );
 
     // Get additional stats
-    const categoryBreakdown = await this.expensesService.getCategoryBreakdown(
-      accountId,
+    const categoryBreakdown = await this.transactionsService.getCategoryBreakdown(
+      profileId,
       '', // Empty string to bypass user check since we already validated access
       startDate,
       endDate
     );
 
-    const activeDays = await this.calculateActiveDays(accountId, startDate, endDate);
+    const activeDays = await this.calculateActiveDays(profileId, startDate, endDate);
 
     let comparison;
     if (includeComparison) {
-      comparison = await this.calculatePeriodComparison(accountId, startDate, endDate, currency);
+      comparison = await this.calculatePeriodComparison(profileId, startDate, endDate, currency);
     }
 
     return {
       totalAmount: stats.totalAmount,
-      totalExpenses: stats.totalExpenses,
+      totalTransactions: stats.totalTransactions,
       averageAmount: stats.averageAmount,
       maxAmount: stats.maxAmount,
       minAmount: stats.minAmount,
@@ -380,31 +382,31 @@ export class ReportsService {
       activeDays,
       comparison
     };
-  }
+  } */
 
-  private async generateDailyBreakdown(
-    accountId: string,
+  /*  private async generateDailyBreakdown(
+    profileId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<Array<{ date: string; totalAmount: number; expenseCount: number }>> {
+  ): Promise<Array<{ date: string; totalAmount: number; transactionCount: number; }>> {
     // This would require a more complex aggregation query
     // For now, we'll return a simplified version
-    const expenses = await this.expensesService.findByAccount(accountId, {
+    const transactions = await this.transactionsService.findByProfile(profileId, {
       startDate,
       endDate,
       limit: 1000
     });
 
-    const dailyMap = new Map<string, { totalAmount: number; expenseCount: number }>();
+    const dailyMap = new Map<string, { totalAmount: number; transactionCount: number; }>();
 
-    expenses.data.forEach(expense => {
-      const dateStr = expense.date.toISOString().split('T')[0];
+    transactions.data.forEach(transaction => {
+      const dateStr = transaction.date.toISOString().split('T')[0];
       const existing = dailyMap.get(dateStr) || {
         totalAmount: 0,
-        expenseCount: 0
+        transactionCount: 0
       };
-      existing.totalAmount += expense.amount;
-      existing.expenseCount += 1;
+      existing.totalAmount += transaction.amount;
+      existing.transactionCount += 1;
       dailyMap.set(dateStr, existing);
     });
 
@@ -412,10 +414,10 @@ export class ReportsService {
       date,
       ...stats
     }));
-  }
+  } */
 
-  private async getTopExpenses(
-    accountId: string,
+  /* private async getTopTransactions(
+    profileId: string,
     startDate: Date,
     endDate: Date,
     limit: number
@@ -429,7 +431,7 @@ export class ReportsService {
       vendor?: string;
     }>
   > {
-    const expenses = await this.expensesService.findByAccount(accountId, {
+    const transactions = await this.transactionsService.findByProfile(profileId, {
       startDate,
       endDate,
       limit,
@@ -437,18 +439,18 @@ export class ReportsService {
       sortOrder: 'desc'
     });
 
-    return expenses.data.slice(0, limit).map(expense => ({
-      id: (expense as any)._id.toString(),
-      description: expense.description,
-      amount: expense.amount,
-      date: expense.date,
-      categoryName: (expense.categoryId as any)?.displayName || 'Unknown',
-      vendor: expense.vendor
+    return transactions.data.slice(0, limit).map(transaction => ({
+      id: (transaction as any)._id.toString(),
+      description: transaction.description,
+      amount: transaction.amount,
+      date: transaction.date,
+      categoryName: (transaction.categoryId as any)?.displayName || 'Unknown',
+      vendor: transaction.vendor
     }));
-  }
+  } */
 
   private async generateCategoryTrends(
-    accountId: string,
+    profileId: string,
     startDate: Date,
     endDate: Date,
     months: number
@@ -466,7 +468,7 @@ export class ReportsService {
 
   private async calculateCategoryComparison(
     categoryId: string,
-    accountId: string,
+    profileId: string,
     startDate: Date,
     endDate: Date
   ): Promise<
@@ -483,10 +485,10 @@ export class ReportsService {
     const prevStartDate = new Date(startDate.getTime() - periodLength);
 
     // Get current and previous period stats for this category
-    const currentExpenses = await this.expensesService.findByCategory(categoryId, accountId);
-    const currentAmount = currentExpenses.filter(exp => exp.date >= startDate && exp.date <= endDate).reduce((sum, exp) => sum + exp.amount, 0);
+    const currentTransactions = await this.transactionsService.findByCategory(categoryId, profileId);
+    const currentAmount = currentTransactions.filter(exp => exp.date >= startDate && exp.date <= endDate).reduce((sum, exp) => sum + exp.amount, 0);
 
-    const previousAmount = currentExpenses.filter(exp => exp.date >= prevStartDate && exp.date <= prevEndDate).reduce((sum, exp) => sum + exp.amount, 0);
+    const previousAmount = currentTransactions.filter(exp => exp.date >= prevStartDate && exp.date <= prevEndDate).reduce((sum, exp) => sum + exp.amount, 0);
 
     const changeAmount = currentAmount - previousAmount;
     const changePercentage = previousAmount > 0 ? (changeAmount / previousAmount) * 100 : 0;
@@ -499,7 +501,7 @@ export class ReportsService {
   }
 
   private async calculatePeriodComparison(
-    accountId: string,
+    profileId: string,
     startDate: Date,
     endDate: Date,
     currency?: Currency
@@ -513,9 +515,9 @@ export class ReportsService {
     const prevEndDate = new Date(startDate.getTime() - 1);
     const prevStartDate = new Date(startDate.getTime() - periodLength);
 
-    const prevStats = await this.expensesService.getExpenseStats(accountId, undefined, prevStartDate, prevEndDate, currency);
+    const prevStats = await this.transactionsService.getTransactionStats(profileId, undefined, prevStartDate, prevEndDate, currency);
 
-    const currentStats = await this.expensesService.getExpenseStats(accountId, undefined, startDate, endDate, currency);
+    const currentStats = await this.transactionsService.getTransactionStats(profileId, undefined, startDate, endDate, currency);
 
     const changeAmount = currentStats.totalAmount - prevStats.totalAmount;
     const changePercentage = prevStats.totalAmount > 0 ? (changeAmount / prevStats.totalAmount) * 100 : 0;
@@ -533,23 +535,23 @@ export class ReportsService {
     };
   }
 
-  private async generateUserBreakdown(accountId: string, startDate: Date, endDate: Date): Promise<UserBreakdownDto[]> {
-    // This would require aggregating expenses by user within the account
+  private async generateUserBreakdown(profileId: string, startDate: Date, endDate: Date): Promise<UserBreakdownDto[]> {
+    // This would require aggregating transactions by user within the account
     // For now, return empty array as placeholder
     return [];
   }
 
-  private async calculateActiveDays(accountId: string, startDate: Date, endDate: Date): Promise<number> {
-    const expenses = await this.expensesService.findByAccount(accountId, {
+  /*  private async calculateActiveDays(profileId: string, startDate: Date, endDate: Date): Promise<number> {
+    const transactions = await this.transactionsService.findByProfile(profileId, {
       startDate,
       endDate,
       limit: 10000
     });
 
-    const uniqueDays = new Set(expenses.data.map(expense => expense.date.toISOString().split('T')[0]));
+    const uniqueDays = new Set(transactions.data.map(transaction => transaction.date.toISOString().split('T')[0]));
 
     return uniqueDays.size;
-  }
+  } */
 
   private async generateInsights(
     summary: SummaryStatsDto,
@@ -581,7 +583,7 @@ export class ReportsService {
           title: 'High Category Concentration',
           description: `${topCategory.percentage.toFixed(1)}% of spending is in ${topCategory.categoryName}`,
           value: topCategory.percentage,
-          recommendation: 'Consider reviewing expenses in this category for potential savings'
+          recommendation: 'Consider reviewing transactions in this category for potential savings'
         });
       }
     }
@@ -594,7 +596,7 @@ export class ReportsService {
           title: 'Spending Increase',
           description: `Spending increased by ${summary.comparison.changePercentage.toFixed(1)}% compared to previous period`,
           value: summary.comparison.changePercentage,
-          recommendation: 'Review recent expenses to identify areas for cost reduction'
+          recommendation: 'Review recent transactions to identify areas for cost reduction'
         });
       } else if (summary.comparison.trend === 'decreasing') {
         insights.push({
@@ -606,12 +608,12 @@ export class ReportsService {
       }
     }
 
-    // Average expense insight
+    // Average transaction insight
     if (summary.averageAmount > 0) {
       insights.push({
         type: 'info' as const,
-        title: 'Average Expense',
-        description: `Your average expense is $${summary.averageAmount.toFixed(2)}`,
+        title: 'Average Transaction',
+        description: `Your average transaction is $${summary.averageAmount.toFixed(2)}`,
         value: summary.averageAmount
       });
     }
@@ -628,7 +630,7 @@ export class ReportsService {
     const keyParts = [
       'report',
       type,
-      query.accountId || 'no-account',
+      query.profileId || 'no-account',
       query.period || 'no-period',
       query.startDate || 'no-start',
       query.endDate || 'no-end',

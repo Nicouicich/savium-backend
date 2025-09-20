@@ -9,7 +9,7 @@ export type AccountDocument = Account & Document;
 @Schema()
 export class PrivacySettings {
   @Prop({ default: 'all_members' })
-  expenseVisibility: string;
+  transactionVisibility: string;
 
   @Prop({ default: 'all_members' })
   reportVisibility: string;
@@ -18,10 +18,10 @@ export class PrivacySettings {
   budgetVisibility: string;
 
   @Prop({ default: false })
-  allowPrivateExpenses?: boolean;
+  allowPrivateTransactions?: boolean;
 
   @Prop({ type: Number, default: 0 })
-  childExpenseLimit?: number;
+  childTransactionLimit?: number;
 
   @Prop({ default: false })
   requireApproval?: boolean;
@@ -45,7 +45,7 @@ export class AccountMember {
   isActive: boolean;
 
   @Prop({ type: Number, default: 0 })
-  expenseLimit?: number;
+  transactionLimit?: number;
 
   @Prop({ type: [String], default: [] })
   permissions: string[];
@@ -75,7 +75,7 @@ export class AccountInvitation {
   token: string;
 
   @Prop({ type: Number, default: 0 })
-  expenseLimit?: number;
+  transactionLimit?: number;
 }
 
 @Schema({ timestamps: true })

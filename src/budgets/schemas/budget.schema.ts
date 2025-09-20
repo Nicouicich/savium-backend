@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 
 export type BudgetDocument = Budget & Document;
 
@@ -63,7 +63,7 @@ export class CategoryBudget {
   alerts: BudgetAlert[];
 
   @Prop({ default: true })
-  trackExpenses: boolean;
+  trackTransactions: boolean;
 }
 
 @Schema({ timestamps: true })

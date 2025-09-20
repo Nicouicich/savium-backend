@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 
@@ -13,10 +13,12 @@ import { UserCommandService } from './services/user-command.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { UserAuth, UserAuthSchema } from './schemas/user-auth.schema';
 import { UserProfile, UserProfileSchema } from './schemas/user-profile.schema';
+import { FinancialProfilesModule } from '../financial-profiles/financial-profiles.module';
 
 @Module({
   imports: [
     ConfigModule,
+    forwardRef(() => FinancialProfilesModule),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: UserAuth.name, schema: UserAuthSchema },

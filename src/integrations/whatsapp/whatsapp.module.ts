@@ -6,8 +6,9 @@ import { User, UserSchema } from '../../users/schemas/user.schema';
 import { UserProfile, UserProfileSchema } from '../../users/schemas/user-profile.schema';
 import { AiModule } from '../ai/ai.module';
 import { FilesModule } from '../../files/files.module';
-import { ExpensesModule } from '../../expenses/expenses.module';
+import { TransactionsModule } from '../../transactions/transactions.module';
 import { AccountsModule } from '../../accounts/accounts.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -17,8 +18,9 @@ import { AccountsModule } from '../../accounts/accounts.module';
     ]),
     AiModule,
     FilesModule,
-    ExpensesModule,
-    AccountsModule
+    TransactionsModule,
+    AccountsModule,
+    UsersModule
   ],
   controllers: [WhatsappController],
   providers: [WhatsappService],

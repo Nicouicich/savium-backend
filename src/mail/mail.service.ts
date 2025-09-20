@@ -166,7 +166,7 @@ export class MailService {
         <h1 style="color: #333; text-align: center;">You're Invited!</h1>
         <p>Hi there,</p>
         <p>${context.inviterName} has invited you to join "${context.accountName}" as a ${context.role} in their ${context.accountType} account on Savium.</p>
-        <p>Savium helps you track expenses, manage budgets, and achieve your financial goals together.</p>
+        <p>Savium helps you track transactions, manage budgets, and achieve your financial goals together.</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${context.joinUrl}" 
              style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
@@ -185,16 +185,16 @@ export class MailService {
     });
   }
 
-  async sendExpenseDigest(to: string, accountName: string, expenses: any[], period: string): Promise<boolean> {
-    const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const expenseList = expenses
-      .slice(0, 10) // Show only first 10 expenses
+  async sendTransactionDigest(to: string, accountName: string, transactions: any[], period: string): Promise<boolean> {
+    const totalAmount = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    const transactionList = transactions
+      .slice(0, 10) // Show only first 10 transactions
       .map(
-        expense => `
+        transaction => `
         <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${expense.description}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${expense.amount.toFixed(2)}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${new Date(expense.date).toLocaleDateString()}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${transaction.description}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$${transaction.amount.toFixed(2)}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${new Date(transaction.date).toLocaleDateString()}</td>
         </tr>
       `
       )
@@ -202,17 +202,17 @@ export class MailService {
 
     const htmlTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #333; text-align: center;">${period} Expense Summary</h1>
+        <h1 style="color: #333; text-align: center;">${period} Transaction Summary</h1>
         <p>Hi there,</p>
-        <p>Here's your expense summary for ${accountName} for the ${period.toLowerCase()}:</p>
+        <p>Here's your transaction summary for ${accountName} for the ${period.toLowerCase()}:</p>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-          <h3 style="margin: 0; color: #333;">Total Expenses: $${totalAmount.toFixed(2)}</h3>
-          <p style="margin: 10px 0 0 0;">Number of transactions: ${expenses.length}</p>
+          <h3 style="margin: 0; color: #333;">Total Transactions: $${totalAmount.toFixed(2)}</h3>
+          <p style="margin: 10px 0 0 0;">Number of transactions: ${transactions.length}</p>
         </div>
 
         ${
-          expenses.length > 0
+          transactions.length > 0
             ? `
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <thead>
@@ -223,12 +223,12 @@ export class MailService {
               </tr>
             </thead>
             <tbody>
-              ${expenseList}
+              ${transactionList}
             </tbody>
           </table>
-          ${expenses.length > 10 ? `<p><em>... and ${expenses.length - 10} more transactions</em></p>` : ''}
+          ${transactions.length > 10 ? `<p><em>... and ${transactions.length - 10} more transactions</em></p>` : ''}
         `
-            : '<p>No expenses recorded for this period.</p>'
+            : '<p>No transactions recorded for this period.</p>'
         }
 
         <p>Log in to Savium to see your complete financial overview and manage your budgets.</p>
@@ -238,7 +238,7 @@ export class MailService {
 
     return this.sendMail({
       to,
-      subject: `${period} Expense Summary for ${accountName}`,
+      subject: `${period} Transaction Summary for ${accountName}`,
       html: htmlTemplate
     });
   }

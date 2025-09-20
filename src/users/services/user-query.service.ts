@@ -320,4 +320,31 @@ export class UserQueryService {
       .limit(limit)
       .exec();
   }
+
+  async getFullUserDataByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
+    const user = await this.userModel
+      .findOne({ phoneNumber })
+      .populate({
+        path: 'activeProfileRef',
+        populate: [
+          {
+            path: 'categories',
+            model: 'Category'
+          },
+          {
+            path: 'associatedAccounts',
+            model: 'Account'
+          },
+          {
+            path: 'userId',
+            model: 'User',
+            select: 'firstName lastName email phoneNumber'
+          }
+        ]
+      })
+      .populate('activeProfileRef')
+      .exec();
+
+    return user;
+  }
 }

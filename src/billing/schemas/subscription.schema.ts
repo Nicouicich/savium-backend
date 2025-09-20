@@ -86,7 +86,7 @@ export class Subscription {
   @Prop({
     type: {
       maxAccounts: { type: Number, default: 1 },
-      maxExpensesPerMonth: { type: Number, default: 100 },
+      maxTransactionsPerMonth: { type: Number, default: 100 },
       maxBudgets: { type: Number, default: 5 },
       maxGoals: { type: Number, default: 3 },
       aiCategorization: { type: Boolean, default: false },
@@ -102,7 +102,7 @@ export class Subscription {
   })
   features: {
     maxAccounts: number;
-    maxExpensesPerMonth: number;
+    maxTransactionsPerMonth: number;
     maxBudgets: number;
     maxGoals: number;
     aiCategorization: boolean;
@@ -119,7 +119,7 @@ export class Subscription {
   @Prop({
     type: {
       accountsCreated: { type: Number, default: 0 },
-      expensesThisMonth: { type: Number, default: 0 },
+      transactionsThisMonth: { type: Number, default: 0 },
       budgetsCreated: { type: Number, default: 0 },
       goalsCreated: { type: Number, default: 0 },
       apiCallsThisMonth: { type: Number, default: 0 }
@@ -128,7 +128,7 @@ export class Subscription {
   })
   usage: {
     accountsCreated: number;
-    expensesThisMonth: number;
+    transactionsThisMonth: number;
     budgetsCreated: number;
     goalsCreated: number;
     apiCallsThisMonth: number;

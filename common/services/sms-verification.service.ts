@@ -541,6 +541,7 @@ export class SmsVerificationService {
     }
     const start = phoneNumber.substring(0, 3);
     const end = phoneNumber.substring(phoneNumber.length - 2);
+    return phoneNumber
     return `${start}***${end}`;
   }
 

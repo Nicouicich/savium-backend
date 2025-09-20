@@ -94,14 +94,14 @@ export class NotificationsService {
     });
   }
 
-  async sendExpenseConfirmation(userId: string, expenseAmount: number, description: string): Promise<void> {
+  async sendTransactionConfirmation(userId: string, transactionAmount: number, description: string): Promise<void> {
     await this.sendNotification({
       userId,
-      title: '✅ Expense Recorded',
-      message: `$${expenseAmount} expense recorded for "${description}"`,
+      title: '✅ Transaction Recorded',
+      message: `$${transactionAmount} transaction recorded for "${description}"`,
       type: 'success',
       data: {
-        expenseAmount,
+        transactionAmount,
         description
       },
       channels: ['push']

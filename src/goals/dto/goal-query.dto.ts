@@ -5,12 +5,12 @@ import { GoalPriority, GoalStatus, GoalType, RecurrenceType } from '../schemas/g
 
 export class GoalQueryDto {
   @ApiPropertyOptional({
-    description: 'Account ID to filter goals',
+    description: 'Profile ID to filter goals',
     example: '507f1f77bcf86cd799439011'
   })
   @IsOptional()
   @IsString()
-  accountId?: string;
+  profileId?: string;
 
   @ApiPropertyOptional({
     description: 'Goal type filter',

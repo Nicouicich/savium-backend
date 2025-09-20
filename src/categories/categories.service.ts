@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { CategoriesRepository } from './categories.repository';
 import { AccountsService } from '../accounts/accounts.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import {
   CategoryResponseDto,
   CreateCategoryDto,
@@ -13,7 +14,7 @@ import {
   BulkOperationType
 } from './dto';
 
-import { CATEGORY_CONFIG, CATEGORY_KEYWORDS, ExpenseCategory } from '@common/constants/expense-categories';
+import { CATEGORY_CONFIG, CATEGORY_KEYWORDS, TransactionCategory } from '@common/constants/transaction-categories';
 import { AccountRole, Permission, ROLE_PERMISSIONS } from '@common/constants/user-roles';
 import { EnhancedCacheService } from '@common/services/enhanced-cache.service';
 
@@ -22,27 +23,28 @@ export class CategoriesService {
   constructor(
     private readonly categoriesRepository: CategoriesRepository,
     private readonly accountsService: AccountsService,
+    private readonly profilesService: ProfilesService,
     private readonly configService: ConfigService,
     private readonly cacheService: EnhancedCacheService
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto, accountId?: string, userId?: string): Promise<CategoryResponseDto> {
-    // Check if user has permission to create categories for the account
-    if (accountId && userId) {
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
-      if (!userRole || !this.canCreateCategories(userRole)) {
-        throw new ForbiddenException('You do not have permission to create categories');
+  async create(createCategoryDto: CreateCategoryDto, profileId?: string, userId?: string): Promise<CategoryResponseDto> {
+    // Check if user has permission to create categories for the profile
+    if (profileId && userId) {
+      const profile = await this.profilesService.findOne(profileId, userId);
+      if (!profile) {
+        throw new ForbiddenException('Access denied to this profile');
       }
     }
 
     // Check if category name already exists for the account/global
-    const existingCategory = await this.categoriesRepository.findByName(createCategoryDto.name, accountId);
+    const existingCategory = await this.categoriesRepository.findByName(createCategoryDto.name, profileId);
     if (existingCategory) {
       throw new ConflictException('Category with this name already exists');
     }
 
     // Validate category type if provided
-    if (createCategoryDto.type && !Object.values(ExpenseCategory).includes(createCategoryDto.type)) {
+    if (createCategoryDto.type && !Object.values(TransactionCategory).includes(createCategoryDto.type)) {
       throw new BadRequestException('Invalid category type');
     }
 
@@ -54,11 +56,11 @@ export class CategoriesService {
       subcategories: createCategoryDto.subcategories || []
     };
 
-    const category = await this.categoriesRepository.create(categoryData, accountId, userId);
+    const category = await this.categoriesRepository.create(categoryData, profileId, userId);
 
     // Invalidate relevant caches
-    if (accountId) {
-      await this.cacheService.invalidateAccountCache(accountId);
+    if (profileId) {
+      await this.cacheService.invalidateAccountCache(profileId);
     }
     await this.cacheService.delete('categories:global', 'categories');
     await this.cacheService.delete('categories:all', 'categories');
@@ -66,37 +68,37 @@ export class CategoriesService {
     return this.mapToResponseDto(category, userId);
   }
 
-  async findAll(accountId?: string, userId?: string, includeGlobal = true): Promise<CategoryResponseDto[]> {
+  async findAll(profileId?: string, userId?: string, includeGlobal = true): Promise<CategoryResponseDto[]> {
     // Check if user has access to the account
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
     // Create cache key based on parameters
-    const cacheKey = accountId ? `categories:account:${accountId}:global:${includeGlobal}` : 'categories:global';
+    const cacheKey = profileId ? `categories:account:${profileId}:global:${includeGlobal}` : 'categories:global';
 
     // Try to get from cache first
     const cached = await this.cacheService.cacheQuery(
       cacheKey,
       async () => {
-        const categories = await this.categoriesRepository.findAll(accountId, includeGlobal);
+        const categories = await this.categoriesRepository.findAll(profileId, includeGlobal);
         return categories.map(category => this.mapToResponseDto(category, userId));
       },
       {
         ttl: 1800, // 30 minutes for category lists
         namespace: 'categories',
-        tags: accountId ? [`account:${accountId}`, 'categories'] : ['categories']
+        tags: profileId ? [`account:${profileId}`, 'categories'] : ['categories']
       }
     );
 
     return cached;
   }
 
-  async findOne(id: string, userId?: string, accountId?: string): Promise<CategoryResponseDto> {
+  async findOne(id: string, userId?: string, profileId?: string): Promise<CategoryResponseDto> {
     // Cache individual category lookups
     const cacheKey = `category:${id}`;
 
@@ -121,14 +123,14 @@ export class CategoriesService {
     }
 
     // Check access permissions
-    if (cached.accountId && accountId) {
-      if (cached.accountId.toString() !== accountId) {
+    if (cached.profileId && profileId) {
+      if (cached.profileId.toString() !== profileId) {
         throw new ForbiddenException('You do not have access to this category');
       }
 
       if (userId) {
         try {
-          await this.accountsService.findOne(accountId, userId);
+          await this.accountsService.findOne(profileId, userId);
         } catch (error) {
           throw new ForbiddenException('You do not have access to this account');
         }
@@ -149,23 +151,23 @@ export class CategoriesService {
     });
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto, userId?: string, accountId?: string): Promise<CategoryResponseDto> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, userId?: string, profileId?: string): Promise<CategoryResponseDto> {
     const category = await this.categoriesRepository.findById(id);
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
     // Check permissions
-    if (category.accountId && accountId && userId) {
-      if (category.accountId.toString() !== accountId) {
+    if (category.profileId && profileId && userId) {
+      if (category.profileId.toString() !== profileId) {
         throw new ForbiddenException('You do not have access to this category');
       }
 
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
+      const userRole = await this.accountsService.getUserRole(profileId, userId);
       if (!userRole || !this.canEditCategories(userRole)) {
         throw new ForbiddenException('You do not have permission to edit categories');
       }
-    } else if (!category.accountId) {
+    } else if (!category.profileId) {
       // Global categories can only be updated by system admins
       throw new ForbiddenException('Cannot modify global categories');
     }
@@ -177,44 +179,44 @@ export class CategoriesService {
 
     // Invalidate relevant caches
     await this.cacheService.delete(`category:${id}`, 'categories');
-    if (accountId) {
-      await this.cacheService.invalidateAccountCache(accountId);
+    if (profileId) {
+      await this.cacheService.invalidateAccountCache(profileId);
     }
     await this.cacheService.invalidateByTags(['categories']);
 
     return this.mapToResponseDto(updatedCategory, userId);
   }
 
-  async remove(id: string, userId?: string, accountId?: string): Promise<void> {
+  async remove(id: string, userId?: string, profileId?: string): Promise<void> {
     const category = await this.categoriesRepository.findById(id);
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
     // Check permissions
-    if (category.accountId && accountId && userId) {
-      if (category.accountId.toString() !== accountId) {
+    if (category.profileId && profileId && userId) {
+      if (category.profileId.toString() !== profileId) {
         throw new ForbiddenException('You do not have access to this category');
       }
 
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
+      const userRole = await this.accountsService.getUserRole(profileId, userId);
       if (!userRole || !this.canDeleteCategories(userRole)) {
         throw new ForbiddenException('You do not have permission to delete categories');
       }
-    } else if (!category.accountId) {
+    } else if (!category.profileId) {
       // Global categories cannot be deleted
       throw new ForbiddenException('Cannot delete global categories');
     }
 
-    // TODO: Check if category is being used by any expenses
+    // TODO: Check if category is being used by any transactions
     // If used, prevent deletion or offer to soft delete
 
     await this.categoriesRepository.softDelete(id);
 
     // Invalidate relevant caches
     await this.cacheService.delete(`category:${id}`, 'categories');
-    if (accountId) {
-      await this.cacheService.invalidateAccountCache(accountId);
+    if (profileId) {
+      await this.cacheService.invalidateAccountCache(profileId);
     }
     await this.cacheService.invalidateByTags(['categories']);
   }
@@ -228,7 +230,7 @@ export class CategoriesService {
       isActive?: boolean;
     },
     userId?: string,
-    accountId?: string
+    profileId?: string
   ): Promise<CategoryResponseDto> {
     const category = await this.categoriesRepository.findById(categoryId);
     if (!category) {
@@ -236,8 +238,8 @@ export class CategoriesService {
     }
 
     // Check permissions
-    if (category.accountId && accountId && userId) {
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
+    if (category.profileId && profileId && userId) {
+      const userRole = await this.accountsService.getUserRole(profileId, userId);
       if (!userRole || !this.canEditCategories(userRole)) {
         throw new ForbiddenException('You do not have permission to edit categories');
       }
@@ -267,7 +269,7 @@ export class CategoriesService {
       isActive?: boolean;
     },
     userId?: string,
-    accountId?: string
+    profileId?: string
   ): Promise<CategoryResponseDto> {
     const category = await this.categoriesRepository.findById(categoryId);
     if (!category) {
@@ -275,8 +277,8 @@ export class CategoriesService {
     }
 
     // Check permissions (similar to update category)
-    if (category.accountId && accountId && userId) {
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
+    if (category.profileId && profileId && userId) {
+      const userRole = await this.accountsService.getUserRole(profileId, userId);
       if (!userRole || !this.canEditCategories(userRole)) {
         throw new ForbiddenException('You do not have permission to edit categories');
       }
@@ -291,15 +293,15 @@ export class CategoriesService {
     return this.mapToResponseDto(updatedCategory, userId);
   }
 
-  async removeSubcategory(categoryId: string, subcategoryName: string, userId?: string, accountId?: string): Promise<CategoryResponseDto> {
+  async removeSubcategory(categoryId: string, subcategoryName: string, userId?: string, profileId?: string): Promise<CategoryResponseDto> {
     const category = await this.categoriesRepository.findById(categoryId);
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
     // Check permissions
-    if (category.accountId && accountId && userId) {
-      const userRole = await this.accountsService.getUserRole(accountId, userId);
+    if (category.profileId && profileId && userId) {
+      const userRole = await this.accountsService.getUserRole(profileId, userId);
       if (!userRole || !this.canEditCategories(userRole)) {
         throw new ForbiddenException('You do not have permission to edit categories');
       }
@@ -314,125 +316,125 @@ export class CategoriesService {
     return this.mapToResponseDto(updatedCategory, userId);
   }
 
-  async searchCategories(searchTerm: string, accountId?: string, userId?: string): Promise<CategoryResponseDto[]> {
+  async searchCategories(searchTerm: string, profileId?: string, userId?: string): Promise<CategoryResponseDto[]> {
     // Check account access if needed
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
     // Cache search results with shorter TTL
-    const cacheKey = accountId ? `search:${searchTerm}:account:${accountId}` : `search:${searchTerm}:global`;
+    const cacheKey = profileId ? `search:${searchTerm}:account:${profileId}` : `search:${searchTerm}:global`;
 
     return this.cacheService.cacheQuery(
       cacheKey,
       async () => {
-        const categories = await this.categoriesRepository.searchCategories(searchTerm, accountId);
+        const categories = await this.categoriesRepository.searchCategories(searchTerm, profileId);
         return categories.map(category => this.mapToResponseDto(category, userId));
       },
       {
         ttl: 600, // 10 minutes for search results
         namespace: 'categories',
-        tags: accountId ? [`account:${accountId}`, 'categories', 'search'] : ['categories', 'search']
+        tags: profileId ? [`account:${profileId}`, 'categories', 'search'] : ['categories', 'search']
       }
     );
   }
 
-  async getCategoriesByType(type: ExpenseCategory, accountId?: string, userId?: string): Promise<CategoryResponseDto[]> {
+  async getCategoriesByType(type: TransactionCategory, profileId?: string, userId?: string): Promise<CategoryResponseDto[]> {
     // Check account access if needed
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
-    const cacheKey = accountId ? `type:${type}:account:${accountId}` : `type:${type}:global`;
+    const cacheKey = profileId ? `type:${type}:account:${profileId}` : `type:${type}:global`;
 
     return this.cacheService.cacheQuery(
       cacheKey,
       async () => {
-        const categories = await this.categoriesRepository.findByType(type, accountId);
+        const categories = await this.categoriesRepository.findByType(type, profileId);
         return categories.map(category => this.mapToResponseDto(category, userId));
       },
       {
         ttl: 1800, // 30 minutes for type-based queries
         namespace: 'categories',
-        tags: accountId ? [`account:${accountId}`, 'categories'] : ['categories']
+        tags: profileId ? [`account:${profileId}`, 'categories'] : ['categories']
       }
     );
   }
 
-  async getStats(accountId?: string, userId?: string) {
+  async getStats(profileId?: string, userId?: string) {
     // Check account access if needed
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
-    const cacheKey = accountId ? `stats:account:${accountId}` : 'stats:global';
+    const cacheKey = profileId ? `stats:account:${profileId}` : 'stats:global';
 
-    return this.cacheService.cacheCalculation(cacheKey, async () => this.categoriesRepository.getCategoryStats(accountId));
+    return this.cacheService.cacheCalculation(cacheKey, async () => this.categoriesRepository.getCategoryStats(profileId));
   }
 
-  async getPopularCategories(accountId?: string, userId?: string, limit = 10) {
+  async getPopularCategories(profileId?: string, userId?: string, limit = 10) {
     // Check account access if needed
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
-    const cacheKey = accountId ? `popular:account:${accountId}:limit:${limit}` : `popular:global:limit:${limit}`;
+    const cacheKey = profileId ? `popular:account:${profileId}:limit:${limit}` : `popular:global:limit:${limit}`;
 
-    return this.cacheService.cacheCalculation(cacheKey, async () => this.categoriesRepository.getPopularCategories(accountId, limit));
+    return this.cacheService.cacheCalculation(cacheKey, async () => this.categoriesRepository.getPopularCategories(profileId, limit));
   }
 
-  async findAllHierarchy(accountId?: string, userId?: string, includeGlobal = true): Promise<CategoryHierarchyResponseDto[]> {
+  async findAllHierarchy(profileId?: string, userId?: string, includeGlobal = true): Promise<CategoryHierarchyResponseDto[]> {
     // Check if user has access to the account
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
       } catch (error) {
         throw new ForbiddenException('You do not have access to this account');
       }
     }
 
     // Create cache key based on parameters
-    const cacheKey = accountId ? `hierarchy:account:${accountId}:global:${includeGlobal}` : 'hierarchy:global';
+    const cacheKey = profileId ? `hierarchy:account:${profileId}:global:${includeGlobal}` : 'hierarchy:global';
 
     // Try to get from cache first
     const cached = await this.cacheService.cacheQuery(
       cacheKey,
       async () => {
-        const categories = await this.categoriesRepository.findAllHierarchy(accountId, includeGlobal);
+        const categories = await this.categoriesRepository.findAllHierarchy(profileId, includeGlobal);
         return categories.map(category => this.mapToHierarchyResponseDto(category, userId));
       },
       {
         ttl: 1800, // 30 minutes for hierarchy lists
         namespace: 'categories',
-        tags: accountId ? [`account:${accountId}`, 'categories', 'hierarchy'] : ['categories', 'hierarchy']
+        tags: profileId ? [`account:${profileId}`, 'categories', 'hierarchy'] : ['categories', 'hierarchy']
       }
     );
 
     return cached;
   }
 
-  async bulkOperation(bulkDto: BulkCategoryOperationDto, accountId?: string, userId?: string): Promise<BulkOperationResultDto> {
+  async bulkOperation(bulkDto: BulkCategoryOperationDto, profileId?: string, userId?: string): Promise<BulkOperationResultDto> {
     // Check if user has permission to perform bulk operations
-    if (accountId && userId) {
+    if (profileId && userId) {
       try {
-        await this.accountsService.findOne(accountId, userId);
-        const userRole = await this.accountsService.getUserRole(accountId, userId);
+        await this.accountsService.findOne(profileId, userId);
+        const userRole = await this.accountsService.getUserRole(profileId, userId);
 
         if (!userRole || !this.canBulkEditCategories(userRole, bulkDto.operation)) {
           throw new ForbiddenException('You do not have permission to perform bulk category operations');
@@ -463,11 +465,11 @@ export class CategoriesService {
     // Validate permissions for each category
     const accessibleCategories = categories.filter(category => {
       // Check if user has access to the category
-      if (category.accountId && accountId) {
-        return category.accountId.toString() === accountId;
+      if (category.profileId && profileId) {
+        return category.profileId.toString() === profileId;
       }
       // Global categories can only be modified by system admins for delete operations
-      if (!category.accountId && bulkDto.operation === BulkOperationType.DELETE) {
+      if (!category.profileId && bulkDto.operation === BulkOperationType.DELETE) {
         return false; // Don't allow deleting global categories
       }
       return true;
@@ -505,8 +507,8 @@ export class CategoriesService {
       result.success = operationResult.modifiedCount;
 
       // Invalidate relevant caches
-      if (accountId) {
-        await this.cacheService.invalidateAccountCache(accountId);
+      if (profileId) {
+        await this.cacheService.invalidateAccountCache(profileId);
       }
       await this.cacheService.invalidateByTags(['categories']);
 
@@ -539,7 +541,7 @@ export class CategoriesService {
         const createDto: CreateCategoryDto = {
           name: categoryType,
           displayName: categoryType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          type: categoryType as ExpenseCategory,
+          type: categoryType as TransactionCategory,
           icon: config.icon,
           color: config.color,
           subcategories: config.subcategories.map((sub, index) => ({
@@ -547,7 +549,7 @@ export class CategoriesService {
             displayName: sub.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
             isActive: true
           })),
-          keywords: CATEGORY_KEYWORDS[categoryType as ExpenseCategory] || [],
+          keywords: CATEGORY_KEYWORDS[categoryType as TransactionCategory] || [],
           sortOrder: Object.keys(CATEGORY_CONFIG).indexOf(categoryType)
         };
 
@@ -606,7 +608,7 @@ export class CategoriesService {
   }
 
   private mapToResponseDto(category: any, userId?: string): CategoryResponseDto {
-    const canEdit = category.accountId && (!category.accountId || category.createdBy?.toString() === userId || category.isCustom);
+    const canEdit = category.profileId && (!category.profileId || category.createdBy?.toString() === userId || category.isCustom);
 
     const canDelete = canEdit && category.isCustom;
 
@@ -624,7 +626,7 @@ export class CategoriesService {
         description: sub.description,
         isActive: sub.isActive
       })),
-      accountId: category.accountId?.toString(),
+      profileId: category.profileId?.toString(),
       createdBy: category.createdBy?._id?.toString() || category.createdBy?.toString(),
       isCustom: category.isCustom,
       isActive: category.isActive,
@@ -642,7 +644,7 @@ export class CategoriesService {
   }
 
   private mapToHierarchyResponseDto(category: any, userId?: string): CategoryHierarchyResponseDto {
-    const canEdit = category.accountId && (!category.accountId || category.createdBy?.toString() === userId || category.isCustom);
+    const canEdit = category.profileId && (!category.profileId || category.createdBy?.toString() === userId || category.isCustom);
 
     const canDelete = canEdit && category.isCustom;
 
@@ -660,7 +662,7 @@ export class CategoriesService {
         description: sub.description,
         isActive: sub.isActive
       })),
-      accountId: category.accountId?.toString(),
+      profileId: category.profileId?.toString(),
       createdBy: category.createdBy?._id?.toString() || category.createdBy?.toString(),
       isCustom: category.isCustom,
       isActive: category.isActive,

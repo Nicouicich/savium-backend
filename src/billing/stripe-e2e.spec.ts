@@ -91,7 +91,7 @@ describe('Stripe E2E - Complete Financial Transaction Workflows', () => {
           personal: {
             priceId: 'price_test_personal',
             productId: 'prod_test_personal',
-            features: ['basic_analytics', 'expense_tracking']
+            features: ['basic_analytics', 'transaction_tracking']
           },
           couple: {
             priceId: 'price_test_couple',

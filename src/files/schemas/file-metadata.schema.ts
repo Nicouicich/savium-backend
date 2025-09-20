@@ -246,7 +246,7 @@ export class FileMetadata {
 
   @ApiProperty({
     description: 'File tags for organization',
-    example: ['receipt', 'restaurant', 'business_expense']
+    example: ['receipt', 'restaurant', 'business_transaction']
   })
   @Prop({
     type: [String],

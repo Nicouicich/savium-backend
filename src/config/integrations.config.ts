@@ -27,8 +27,8 @@ export default registerAs('integrations', () => ({
     timeout: 30000,
     commands: [
       { command: 'start', description: 'Start using Savium AI bot' },
-      { command: 'expense', description: 'Record a new expense' },
-      { command: 'summary', description: 'Get expense summary' },
+      { command: 'transaction', description: 'Record a new transaction' },
+      { command: 'summary', description: 'Get transaction summary' },
       { command: 'help', description: 'Show available commands' }
     ]
   },

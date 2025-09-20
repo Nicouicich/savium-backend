@@ -26,7 +26,7 @@ export interface IndexStatus {
 export class DatabasePerformanceService implements OnModuleInit {
   private readonly logger = new Logger(DatabasePerformanceService.name);
 
-  constructor(
+  constructor (
     @InjectConnection() private connection: Connection
   ) {}
 
@@ -34,7 +34,7 @@ export class DatabasePerformanceService implements OnModuleInit {
     try {
       // Create critical indexes on startup
       await this.createCriticalIndexes();
-      
+
       // Schedule performance monitoring
       this.schedulePerformanceMonitoring();
     } catch (error) {
@@ -47,20 +47,20 @@ export class DatabasePerformanceService implements OnModuleInit {
    */
   async createAllIndexes(): Promise<void> {
     this.logger.log('Creating database indexes...');
-    
+
     let createdCount = 0;
     let skippedCount = 0;
-    
+
     for (const indexDef of DATABASE_INDEXES) {
       try {
         const collection = this.connection.collection(indexDef.collection);
-        
+
         // Check if index already exists
         const existingIndexes = await collection.listIndexes().toArray();
         const indexName = indexDef.options?.name || this.generateIndexName(indexDef.index);
-        
+
         const exists = existingIndexes.some(idx => idx.name === indexName);
-        
+
         if (!exists) {
           await collection.createIndex(indexDef.index, indexDef.options);
           createdCount++;
@@ -72,7 +72,7 @@ export class DatabasePerformanceService implements OnModuleInit {
         this.logger.error(`Failed to create index on ${indexDef.collection}:`, error);
       }
     }
-    
+
     this.logger.log(`Index creation complete: ${createdCount} created, ${skippedCount} skipped`);
   }
 
@@ -81,21 +81,21 @@ export class DatabasePerformanceService implements OnModuleInit {
    */
   async createCriticalIndexes(): Promise<void> {
     this.logger.log('Creating critical database indexes...');
-    
+
     for (const indexDef of CRITICAL_INDEXES) {
       try {
         const collection = this.connection.collection(indexDef.collection);
-        
+
         // Check if index already exists
         const existingIndexes = await collection.listIndexes().toArray();
         const indexName = indexDef.options?.name || this.generateIndexName(indexDef.index);
-        
+
         // Check by name or by key pattern to avoid conflicts
-        const exists = existingIndexes.some(idx => 
-          idx.name === indexName || 
+        const exists = existingIndexes.some(idx =>
+          idx.name === indexName ||
           JSON.stringify(idx.key) === JSON.stringify(indexDef.index)
         );
-        
+
         if (!exists) {
           await collection.createIndex(indexDef.index, indexDef.options);
           this.logger.log(`Created critical index ${indexName} on ${indexDef.collection}`);
@@ -113,13 +113,13 @@ export class DatabasePerformanceService implements OnModuleInit {
    */
   async getIndexUsageStats(): Promise<IndexStatus[]> {
     try {
-      const collections = ['users', 'accounts', 'expenses', 'categories', 'budgets', 'goals'];
+      const collections = ['users', 'accounts', 'transactions', 'categories', 'budgets', 'goals'];
       const allStats: IndexStatus[] = [];
 
       for (const collectionName of collections) {
         try {
           const collection = this.connection.collection(collectionName);
-          
+
           // Get index statistics
           const indexStats = await collection.aggregate([
             { $indexStats: {} }
@@ -258,11 +258,11 @@ export class DatabasePerformanceService implements OnModuleInit {
   }> {
     try {
       const serverStatus = await this.connection.db?.admin().serverStatus();
-      
+
       if (!serverStatus) {
         throw new Error('Could not retrieve server status');
       }
-      
+
       return {
         status: this.determineHealthStatus(serverStatus),
         connections: {
@@ -298,13 +298,13 @@ export class DatabasePerformanceService implements OnModuleInit {
    */
   async cleanupUnusedIndexes(): Promise<string[]> {
     const cleanedIndexes: string[] = [];
-    
+
     try {
       const indexStats = await this.getIndexUsageStats();
-      
+
       // Find indexes with zero usage (excluding _id_ index)
-      const unusedIndexes = indexStats.filter(stat => 
-        stat.usage.ops === 0 && 
+      const unusedIndexes = indexStats.filter(stat =>
+        stat.usage.ops === 0 &&
         stat.name !== '_id_' &&
         new Date().getTime() - stat.usage.since.getTime() > 7 * 24 * 60 * 60 * 1000 // Older than 7 days
       );
@@ -334,7 +334,7 @@ export class DatabasePerformanceService implements OnModuleInit {
     setInterval(async () => {
       try {
         const metrics = await this.analyzeQueryPerformance();
-        
+
         if (metrics.slowQueries > 10) {
           this.logger.warn('High number of slow queries detected', {
             slowQueries: metrics.slowQueries,
@@ -380,9 +380,9 @@ export class DatabasePerformanceService implements OnModuleInit {
    */
   private generatePerformanceRecommendations(slowQueries: any[]): string[] {
     const recommendations: string[] = [];
-    
+
     // Analyze query patterns
-    const collectionScans = slowQueries.filter(q => 
+    const collectionScans = slowQueries.filter(q =>
       q.executionStats?.executionStages?.stage === 'COLLSCAN'
     ).length;
 
@@ -424,7 +424,7 @@ export class DatabasePerformanceService implements OnModuleInit {
 
     if (connectionRatio > 0.9) return 'critical';
     if (connectionRatio > 0.7) return 'warning';
-    
+
     return 'healthy';
   }
 
@@ -432,7 +432,7 @@ export class DatabasePerformanceService implements OnModuleInit {
    * Get collection statistics
    */
   async getCollectionStats(): Promise<Record<string, any>> {
-    const collections = ['users', 'accounts', 'expenses', 'categories', 'budgets', 'goals'];
+    const collections = ['users', 'accounts', 'transactions', 'categories', 'budgets', 'goals'];
     const stats: Record<string, any> = {};
 
     for (const collectionName of collections) {
@@ -441,7 +441,7 @@ export class DatabasePerformanceService implements OnModuleInit {
         const collStats = await this.connection.db?.command({
           collStats: collectionName
         });
-        
+
         if (collStats) {
           stats[collectionName] = {
             count: collStats.count || 0,
@@ -451,7 +451,7 @@ export class DatabasePerformanceService implements OnModuleInit {
             avgObjSize: collStats.avgObjSize || 0
           };
         } else {
-          stats[collectionName] = { 
+          stats[collectionName] = {
             error: 'Could not retrieve collection stats'
           };
         }

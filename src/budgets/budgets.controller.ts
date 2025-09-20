@@ -14,7 +14,7 @@ import { ParseObjectIdPipe, ParseOptionalObjectIdPipe } from '@common/pipes/pars
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
-  @Post()
+  /*   @Post()
   @ApiOperation({
     summary: 'Create a new budget',
     description: 'Create a new budget with category allocations and alerts'
@@ -324,12 +324,12 @@ export class BudgetsController {
         {
           status: BudgetStatus.ACTIVE,
           name: 'Active',
-          description: 'Budget is currently active and tracking expenses'
+          description: 'Budget is currently active and tracking transactions'
         },
         {
           status: BudgetStatus.PAUSED,
           name: 'Paused',
-          description: 'Budget is paused and not tracking expenses'
+          description: 'Budget is paused and not tracking transactions'
         },
         {
           status: BudgetStatus.EXCEEDED,
@@ -343,5 +343,5 @@ export class BudgetsController {
         }
       ]
     };
-  }
+  } */
 }

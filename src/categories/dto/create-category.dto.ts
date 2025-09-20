@@ -1,6 +1,6 @@
 import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ExpenseCategory } from '@common/constants/expense-categories';
+import { TransactionCategory } from '@common/constants/transaction-categories';
 
 export class CreateSubcategoryDto {
   @ApiProperty({
@@ -21,7 +21,7 @@ export class CreateSubcategoryDto {
   @MaxLength(100)
   displayName: string;
 
-  @ApiPropertyOptional({ description: 'Subcategory description', example: 'Expenses at restaurants and dining establishments' })
+  @ApiPropertyOptional({ description: 'Subcategory description', example: 'Transactions at restaurants and dining establishments' })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -56,10 +56,10 @@ export class CreateCategoryDto {
   @MaxLength(100)
   displayName: string;
 
-  @ApiPropertyOptional({ description: 'Predefined category type', enum: ExpenseCategory, example: ExpenseCategory.FOOD_DINING })
+  @ApiPropertyOptional({ description: 'Predefined category type', enum: TransactionCategory, example: TransactionCategory.FOOD_DINING })
   @IsOptional()
-  @IsEnum(ExpenseCategory)
-  type?: ExpenseCategory;
+  @IsEnum(TransactionCategory)
+  type?: TransactionCategory;
 
   @ApiProperty({
     description: 'Category icon (emoji or icon identifier)',
@@ -79,7 +79,7 @@ export class CreateCategoryDto {
   @MaxLength(7)
   color: string;
 
-  @ApiPropertyOptional({ description: 'Category description', example: 'All expenses related to food, dining, and groceries', maxLength: 500 })
+  @ApiPropertyOptional({ description: 'Category description', example: 'All transactions related to food, dining, and groceries', maxLength: 500 })
   @IsOptional()
   @IsString()
   @MaxLength(500)

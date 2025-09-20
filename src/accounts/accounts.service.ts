@@ -157,7 +157,7 @@ export class AccountsService {
       invitedBy: userId,
       token,
       expiresAt,
-      expenseLimit: inviteMemberDto.expenseLimit || 0
+      transactionLimit: inviteMemberDto.transactionLimit || 0
     };
 
     await this.accountsRepository.addInvitation(accountId, invitation);
@@ -188,7 +188,7 @@ export class AccountsService {
     }
 
     // Add user as member
-    await this.accountsRepository.addMember((account as any)._id.toString(), userId, invitation.role, invitation.expenseLimit);
+    await this.accountsRepository.addMember((account as any)._id.toString(), userId, invitation.role, invitation.transactionLimit);
 
     // Update invitation status
     await this.accountsRepository.updateInvitation((account as any)._id.toString(), token, InvitationStatus.ACCEPTED);
@@ -369,7 +369,7 @@ export class AccountsService {
         role: member.role,
         joinedAt: member.joinedAt,
         isActive: member.isActive,
-        expenseLimit: member.expenseLimit,
+        transactionLimit: member.transactionLimit,
         permissions: ROLE_PERMISSIONS[member.role] || []
       })),
       pendingInvitations: account.pendingInvitations.map((invitation: any) => ({
@@ -380,7 +380,7 @@ export class AccountsService {
         invitedAt: invitation.invitedAt,
         expiresAt: invitation.expiresAt,
         status: invitation.status,
-        expenseLimit: invitation.expenseLimit
+        transactionLimit: invitation.transactionLimit
       })),
       currency: account.currency,
       timezone: account.timezone,

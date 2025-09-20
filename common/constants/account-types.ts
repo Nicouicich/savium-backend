@@ -1,6 +1,6 @@
 export enum AccountType {
   PERSONAL = 'personal',
-  COUPLE = 'couple', 
+  COUPLE = 'couple',
   FAMILY = 'family',
   BUSINESS = 'business',
 }
@@ -25,33 +25,33 @@ export const ACCOUNT_TYPE_CONFIG = {
     maxMembers: 1,
     allowedRoles: ['owner'],
     features: [
-      'expense_tracking',
+      'transaction_tracking',
       'budgets',
       'goals',
       'reports',
       'ai_categorization',
     ],
   },
-  
+
   [AccountType.COUPLE]: {
     maxMembers: 2,
     allowedRoles: ['partner'],
     features: [
-      'expense_tracking',
+      'transaction_tracking',
       'budgets',
-      'goals', 
+      'goals',
       'reports',
-      'shared_expenses',
+      'shared_transactions',
       'privacy_settings',
       'ai_categorization',
     ],
   },
-  
+
   [AccountType.FAMILY]: {
     maxMembers: 8,
     allowedRoles: ['parent', 'child', 'guardian'],
     features: [
-      'expense_tracking',
+      'transaction_tracking',
       'budgets',
       'goals',
       'reports',
@@ -61,15 +61,15 @@ export const ACCOUNT_TYPE_CONFIG = {
       'ai_categorization',
     ],
   },
-  
+
   [AccountType.BUSINESS]: {
     maxMembers: 50, // Can be increased based on plan
     allowedRoles: ['business_owner', 'manager', 'employee', 'accountant', 'viewer'],
     features: [
-      'expense_tracking',
+      'transaction_tracking',
       'budgets',
       'reports',
-      'member_management', 
+      'member_management',
       'role_permissions',
       'departments',
       'approval_workflows',
@@ -83,27 +83,27 @@ export const ACCOUNT_TYPE_CONFIG = {
 // Default privacy settings by account type
 export const DEFAULT_PRIVACY_SETTINGS = {
   [AccountType.PERSONAL]: {
-    expenseVisibility: 'private' as const,
+    transactionVisibility: 'private' as const,
     reportVisibility: 'private' as const,
     budgetVisibility: 'private' as const,
   },
-  
+
   [AccountType.COUPLE]: {
-    expenseVisibility: 'members_only' as const, // Can be set to 'private'
+    transactionVisibility: 'members_only' as const, // Can be set to 'private'
     reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
-    allowPrivateExpenses: true,
+    allowPrivateTransactions: true,
   },
-  
+
   [AccountType.FAMILY]: {
-    expenseVisibility: 'members_only' as const,
-    reportVisibility: 'members_only' as const, 
+    transactionVisibility: 'members_only' as const,
+    reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
-    childExpenseLimit: 50, // Default limit for children
+    childTransactionLimit: 50, // Default limit for children
   },
-  
+
   [AccountType.BUSINESS]: {
-    expenseVisibility: 'members_only' as const,
+    transactionVisibility: 'members_only' as const,
     reportVisibility: 'members_only' as const,
     budgetVisibility: 'members_only' as const,
     requireApproval: true,

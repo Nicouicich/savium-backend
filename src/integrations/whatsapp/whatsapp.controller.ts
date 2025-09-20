@@ -1,11 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
-import { WhatsappService } from './whatsapp.service';
-import { RequestContextService } from '@common/interceptors/request-context';
-import { BusinessException } from '@common/exceptions/business.exception';
 import { ErrorCode } from '@common/constants/error-codes';
+import { Public } from '@common/decorators/public.decorator';
+import { BusinessException } from '@common/exceptions/business.exception';
+import { RequestContextService } from '@common/interceptors/request-context';
+import { LogFormatter } from '@common/utils/log-formatter';
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Query } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SendMessageDto, SendMessageResponseDto, WhatsAppChangeDto, WhatsAppWebhookDto } from './dto';
+import { WhatsappService } from './whatsapp.service';
 
 @ApiTags('WhatsApp Integration')
 @Controller('integrations/whatsapp')
@@ -81,121 +82,25 @@ export class WhatsappController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Handle WhatsApp webhook',
-    description: 'Process incoming WhatsApp messages and media with full AI integration and expense tracking'
+    description: 'Process incoming WhatsApp messages and media with full AI integration and transaction tracking'
   })
   @ApiBody({
     description: 'WhatsApp webhook payload',
-    schema: {
-      type: 'object',
-      properties: {
-        object: { type: 'string' },
-        entry: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              changes: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    value: {
-                      type: 'object',
-                      properties: {
-                        messaging_product: { type: 'string' },
-                        metadata: { type: 'object' },
-                        contacts: { type: 'array' },
-                        messages: { type: 'array' },
-                        statuses: { type: 'array' }
-                      }
-                    },
-                    field: { type: 'string' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    type: WhatsAppWebhookDto
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Webhook processed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        processed: { type: 'boolean' },
-        message: { type: 'string' },
-        timestamp: { type: 'string' },
-        traceId: { type: 'string' }
-      }
-    }
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid webhook payload'
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error processing webhook'
-  })
-  async handleWebhook(@Body() payload: any) {
+  async handleWebhook(@Body() payload: WhatsAppWebhookDto) {
     const traceId = RequestContextService.getTraceId() || `webhook_${Date.now()}`;
 
-    try {
-      this.logger.log('WhatsApp webhook received', {
+    this.logger.log(
+      LogFormatter.webhook('WhatsApp webhook received', {
         hasPayload: !!payload,
         objectType: payload?.object,
         entryCount: payload?.entry?.length || 0,
         traceId
-      });
+      })
+    );
 
-      // Validate payload structure
-      if (!payload || !payload.entry || !Array.isArray(payload.entry)) {
-        this.logger.warn('Invalid webhook payload structure', {
-          payload: JSON.stringify(payload).substring(0, 500),
-          traceId
-        });
-
-        return {
-          processed: false,
-          message: 'Invalid webhook payload structure',
-          timestamp: new Date().toISOString(),
-          traceId
-        };
-      }
-
-      const result = await this.whatsappService.handleWebhook(payload);
-
-      this.logger.log('WhatsApp webhook processed successfully', {
-        processed: result.processed,
-        traceId
-      });
-
-      return {
-        ...result,
-        timestamp: new Date().toISOString(),
-        traceId
-      };
-    } catch (error) {
-      this.logger.error('WhatsApp webhook processing failed', {
-        error: error.message,
-        stack: error.stack,
-        payload: JSON.stringify(payload).substring(0, 500),
-        traceId
-      });
-
-      // Return success to WhatsApp to avoid retries for application errors
-      return {
-        processed: false,
-        message: 'Webhook processing failed',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-        traceId
-      };
-    }
+    await this.whatsappService.handleWebhook(payload);
   }
 
   @Post('send')
@@ -205,42 +110,18 @@ export class WhatsappController {
   })
   @ApiBody({
     description: 'Send message request',
-    schema: {
-      type: 'object',
-      required: ['to', 'message'],
-      properties: {
-        to: {
-          type: 'string',
-          description: 'Phone number in international format (e.g., +1234567890)',
-          example: '+1234567890'
-        },
-        message: {
-          type: 'string',
-          description: 'Message text to send',
-          example: 'Hello! This is a test message from Savium.'
-        }
-      }
-    }
+    type: SendMessageDto
   })
   @ApiResponse({
     status: 200,
     description: 'Message sent successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-        to: { type: 'string' },
-        timestamp: { type: 'string' },
-        traceId: { type: 'string' }
-      }
-    }
+    type: SendMessageResponseDto
   })
   @ApiResponse({
     status: 400,
     description: 'Invalid request parameters'
   })
-  async sendMessage(@Body() body: { to: string; message: string }) {
+  async sendMessage(@Body() body: SendMessageDto) {
     const traceId = RequestContextService.getTraceId() || `send_${Date.now()}`;
     const { to, message } = body;
 
@@ -249,17 +130,6 @@ export class WhatsappController {
       messageLength: message?.length || 0,
       traceId
     });
-
-    // Validate input
-    if (!to || !message) {
-      throw new BusinessException('Phone number and message are required', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
-    }
-
-    // Validate phone number format
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(to)) {
-      throw new BusinessException('Invalid phone number format. Use international format with + prefix.', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
-    }
 
     try {
       await this.whatsappService.sendMessage(to, message);

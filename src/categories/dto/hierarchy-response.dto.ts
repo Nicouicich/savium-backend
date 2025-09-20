@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ExpenseCategory } from '@common/constants/expense-categories';
+import { TransactionCategory } from '@common/constants/transaction-categories';
 import { SubcategoryResponseDto } from './category-response.dto';
 
 export class CategoryHierarchyResponseDto {
@@ -12,8 +12,8 @@ export class CategoryHierarchyResponseDto {
   @ApiProperty({ description: 'Category display name' })
   displayName: string;
 
-  @ApiPropertyOptional({ enum: ExpenseCategory, description: 'Predefined category type' })
-  type?: ExpenseCategory;
+  @ApiPropertyOptional({ enum: TransactionCategory, description: 'Predefined category type' })
+  type?: TransactionCategory;
 
   @ApiProperty({ description: 'Category icon' })
   icon: string;
@@ -30,8 +30,8 @@ export class CategoryHierarchyResponseDto {
   })
   subcategories: SubcategoryResponseDto[];
 
-  @ApiPropertyOptional({ description: 'Account ID (null for global categories)' })
-  accountId?: string;
+  @ApiPropertyOptional({ description: 'Profile ID (null for global categories)' })
+  profileId?: string;
 
   @ApiPropertyOptional({ description: 'Category creator ID' })
   createdBy?: string;

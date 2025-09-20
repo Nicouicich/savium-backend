@@ -21,7 +21,7 @@ describe('WhatsApp Integration - Isolated Tests', () => {
     processMessage: jest.fn()
   };
 
-  const mockExpensesService = {
+  const mockTransactionsService = {
     create: jest.fn()
   };
 
@@ -289,7 +289,7 @@ describe('WhatsApp Integration - Isolated Tests', () => {
         step3: 'Extract message data',
         step4: 'Find user by phone number',
         step5: 'Process message with AI service',
-        step6: 'Create expense if detected',
+        step6: 'Create transaction if detected',
         step7: 'Send response to user',
         step8: 'Log action and trace'
       };
@@ -314,21 +314,21 @@ describe('WhatsApp Integration - Isolated Tests', () => {
       const supportedLanguages = ['es', 'en'];
       const sampleResponses = {
         es: '¡Gasto registrado exitosamente!',
-        en: 'Expense recorded successfully!'
+        en: 'Transaction recorded successfully!'
       };
 
       expect(supportedLanguages).toContain('es');
       expect(supportedLanguages).toContain('en');
       expect(sampleResponses.es).toContain('Gasto');
-      expect(sampleResponses.en).toContain('Expense');
+      expect(sampleResponses.en).toContain('Transaction');
     });
   });
 
   describe('AI Integration Features', () => {
-    it('should define expense extraction capabilities', () => {
+    it('should define transaction extraction capabilities', () => {
       const aiCapabilities = {
-        textParsing: 'Extract expense data from natural language',
-        categoryDetection: 'Suggest appropriate expense categories',
+        textParsing: 'Extract transaction data from natural language',
+        categoryDetection: 'Suggest appropriate transaction categories',
         amountDetection: 'Parse monetary amounts in various formats',
         languageSupport: 'Process messages in Spanish and English',
         confidenceScoring: 'Provide confidence levels for AI analysis'
@@ -341,8 +341,8 @@ describe('WhatsApp Integration - Isolated Tests', () => {
       expect(aiCapabilities.confidenceScoring).toBeDefined();
     });
 
-    it('should handle expense message patterns', () => {
-      const expensePatterns = ['gasté 25 en almuerzo', 'spent 30 on groceries', '15 café', '$50 dinner', 'pagué 100 por gasolina'];
+    it('should handle transaction message patterns', () => {
+      const transactionPatterns = ['gasté 25 en almuerzo', 'spent 30 on groceries', '15 café', '$50 dinner', 'pagué 100 por gasolina'];
 
       const expectedResults = [
         { amount: 25, description: 'almuerzo' },
@@ -352,7 +352,7 @@ describe('WhatsApp Integration - Isolated Tests', () => {
         { amount: 100, description: 'gasolina' }
       ];
 
-      expect(expensePatterns).toHaveLength(5);
+      expect(transactionPatterns).toHaveLength(5);
       expect(expectedResults).toHaveLength(5);
       expect(expectedResults[0].amount).toBe(25);
       expect(expectedResults[0].description).toBe('almuerzo');

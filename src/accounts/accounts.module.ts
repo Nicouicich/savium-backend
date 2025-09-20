@@ -13,12 +13,13 @@ import { CoupleAnalyticsService } from './services/couple-analytics.service';
 import { CouplePremiumService } from './services/couple-premium.service';
 
 // Common services
-import { ExpenseContextParserService } from '../common/services/expense-context-parser.service';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 import { Account, AccountSchema } from './schemas/account.schema';
 import { CoupleSettings, CoupleSettingsSchema } from './schemas/couple-settings.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
-import { Expense, ExpenseSchema } from '../expenses/schemas/expense.schema';
+import { Transaction, TransactionSchema } from '../transactions/schemas/transaction.schema';
+import { Profile, ProfileSchema } from '../profiles/schemas/profile.schema';
 
 @Module({
   imports: [
@@ -26,11 +27,13 @@ import { Expense, ExpenseSchema } from '../expenses/schemas/expense.schema';
       { name: Account.name, schema: AccountSchema },
       { name: CoupleSettings.name, schema: CoupleSettingsSchema },
       { name: User.name, schema: UserSchema },
-      { name: Expense.name, schema: ExpenseSchema }
-    ])
+      { name: Transaction.name, schema: TransactionSchema },
+      { name: Profile.name, schema: ProfileSchema }
+    ]),
+    ProfilesModule
   ],
   controllers: [AccountsController, CoupleController],
-  providers: [AccountsService, AccountsRepository, CoupleService, GiftModeService, CoupleAnalyticsService, CouplePremiumService, ExpenseContextParserService],
-  exports: [AccountsService, AccountsRepository, CoupleService, GiftModeService, CoupleAnalyticsService, CouplePremiumService, ExpenseContextParserService]
+  providers: [AccountsService, AccountsRepository, CoupleService, GiftModeService, CoupleAnalyticsService, CouplePremiumService],
+  exports: [AccountsService, AccountsRepository, CoupleService, GiftModeService, CoupleAnalyticsService, CouplePremiumService]
 })
 export class AccountsModule {}

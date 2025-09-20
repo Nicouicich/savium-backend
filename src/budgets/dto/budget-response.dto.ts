@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 import { AlertType, BudgetPeriod, BudgetStatus } from '../schemas/budget.schema';
 
 export class BudgetAlertResponseDto {
@@ -56,8 +56,8 @@ export class CategoryBudgetResponseDto {
   })
   alerts: BudgetAlertResponseDto[];
 
-  @ApiProperty({ description: 'Whether expense tracking is enabled' })
-  trackExpenses: boolean;
+  @ApiProperty({ description: 'Whether transaction tracking is enabled' })
+  trackTransactions: boolean;
 }
 
 export class BudgetProgressDto {
@@ -108,8 +108,8 @@ export class BudgetStatisticsDto {
     percentage: number;
   };
 
-  @ApiProperty({ description: 'Largest single expense' })
-  largestExpense?: {
+  @ApiProperty({ description: 'Largest single transaction' })
+  largestTransaction?: {
     id: string;
     description: string;
     amount: number;

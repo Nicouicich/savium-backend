@@ -21,8 +21,8 @@ export class AccountMemberResponseDto {
   @ApiProperty({ description: 'Whether member is active' })
   isActive: boolean;
 
-  @ApiPropertyOptional({ description: 'Expense limit for member' })
-  expenseLimit?: number;
+  @ApiPropertyOptional({ description: 'Transaction limit for member' })
+  transactionLimit?: number;
 
   @ApiProperty({ description: 'Member permissions', type: [String] })
   permissions: string[];
@@ -50,8 +50,8 @@ export class AccountInvitationResponseDto {
   @ApiProperty({ description: 'Invitation status' })
   status: string;
 
-  @ApiPropertyOptional({ description: 'Expense limit for invited member' })
-  expenseLimit?: number;
+  @ApiPropertyOptional({ description: 'Transaction limit for invited member' })
+  transactionLimit?: number;
 }
 
 export class AccountResponseDto {
@@ -87,11 +87,11 @@ export class AccountResponseDto {
 
   @ApiProperty({ description: 'Privacy settings', type: 'object' })
   privacySettings: {
-    expenseVisibility: string;
+    transactionVisibility: string;
     reportVisibility: string;
     budgetVisibility: string;
-    allowPrivateExpenses?: boolean;
-    childExpenseLimit?: number;
+    allowPrivateTransactions?: boolean;
+    childTransactionLimit?: number;
     requireApproval?: boolean;
     approvalThreshold?: number;
   };

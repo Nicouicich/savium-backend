@@ -1,10 +1,11 @@
-import { Controller, Put, Body, UseGuards, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Put, Body, UseGuards, UseInterceptors, ClassSerializerInterceptor, Get, Post, Delete, Param } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator';
 import { SettingsService } from './settings.service';
 import { UpdatePersonalInfoDto, PersonalInfoResponseDto } from './dto/personal-info.dto';
+import { CreateTagDto, UpdateTagDto, TagsListResponseDto, TagCreatedResponseDto } from './dto/tag.dto';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -99,6 +100,126 @@ export class SettingsController {
       success: true,
       message: 'Security settings updated successfully',
       data: { user: await this.settingsService.getCurrentUser(user.id) },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Tags management endpoints
+  @Get('tags')
+  @ApiOperation({ summary: 'Get all user tags' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tags retrieved successfully',
+    type: TagsListResponseDto
+  })
+  @ApiErrorResponse(400, 'Failed to fetch tags')
+  async getTags(@CurrentUser() user: any): Promise<TagsListResponseDto> {
+    const tags = await this.settingsService.getTags(user.id);
+
+    const formattedTags = tags.map(tag => ({
+      id: (tag as any)._id?.toString() || (tag as any).id,
+      name: tag.name,
+      color: tag.color,
+      description: tag.description,
+      userId: tag.userId.toString(),
+      profileId: tag.profileId?.toString(),
+      isActive: tag.isActive,
+      usageCount: tag.usageCount,
+      lastUsedAt: tag.lastUsedAt,
+      createdAt: (tag as any).createdAt,
+      updatedAt: (tag as any).updatedAt
+    }));
+
+    return {
+      success: true,
+      message: 'Tags retrieved successfully',
+      data: formattedTags,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  @Post('tags')
+  @ApiOperation({ summary: 'Create a new tag' })
+  @ApiResponse({
+    status: 201,
+    description: 'Tag created successfully',
+    type: TagCreatedResponseDto
+  })
+  @ApiErrorResponse(400, 'Validation failed or tag name already exists')
+  async createTag(@CurrentUser() user: any, @Body() createTagDto: CreateTagDto): Promise<TagCreatedResponseDto> {
+    const tag = await this.settingsService.createTag(user.id, createTagDto);
+
+    const formattedTag = {
+      id: (tag as any)._id?.toString() || (tag as any).id,
+      name: tag.name,
+      color: tag.color,
+      description: tag.description,
+      userId: tag.userId.toString(),
+      profileId: tag.profileId?.toString(),
+      isActive: tag.isActive,
+      usageCount: tag.usageCount,
+      lastUsedAt: tag.lastUsedAt,
+      createdAt: (tag as any).createdAt,
+      updatedAt: (tag as any).updatedAt
+    };
+
+    return {
+      success: true,
+      message: 'Tag created successfully',
+      data: formattedTag,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  @Put('tags/:id')
+  @ApiOperation({ summary: 'Update an existing tag' })
+  @ApiParam({ name: 'id', description: 'Tag ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tag updated successfully',
+    type: TagCreatedResponseDto
+  })
+  @ApiErrorResponse(400, 'Validation failed or tag name already exists')
+  @ApiErrorResponse(404, 'Tag not found')
+  async updateTag(@CurrentUser() user: any, @Param('id') tagId: string, @Body() updateTagDto: UpdateTagDto): Promise<TagCreatedResponseDto> {
+    const tag = await this.settingsService.updateTag(user.id, tagId, updateTagDto);
+
+    const formattedTag = {
+      id: (tag as any)._id?.toString() || (tag as any).id,
+      name: tag.name,
+      color: tag.color,
+      description: tag.description,
+      userId: tag.userId.toString(),
+      profileId: tag.profileId?.toString(),
+      isActive: tag.isActive,
+      usageCount: tag.usageCount,
+      lastUsedAt: tag.lastUsedAt,
+      createdAt: (tag as any).createdAt,
+      updatedAt: (tag as any).updatedAt
+    };
+
+    return {
+      success: true,
+      message: 'Tag updated successfully',
+      data: formattedTag,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  @Delete('tags/:id')
+  @ApiOperation({ summary: 'Delete a tag' })
+  @ApiParam({ name: 'id', description: 'Tag ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tag deleted successfully'
+  })
+  @ApiErrorResponse(404, 'Tag not found')
+  async deleteTag(@CurrentUser() user: any, @Param('id') tagId: string) {
+    await this.settingsService.deleteTag(user.id, tagId);
+
+    return {
+      success: true,
+      message: 'Tag deleted successfully',
       timestamp: new Date().toISOString()
     };
   }

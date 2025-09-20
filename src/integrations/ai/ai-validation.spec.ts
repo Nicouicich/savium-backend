@@ -41,7 +41,7 @@ describe('AI Service Validation', () => {
       const status = service.getServiceStatus();
       expect(status.enabled).toBe(true);
       expect(status.features).toContain('GPT-4 Vision ticket processing (OCR + AI analysis)');
-      expect(status.features).toContain('GPT-3.5 expense categorization with confidence scoring');
+      expect(status.features).toContain('GPT-3.5 transaction categorization with confidence scoring');
     });
   });
 
@@ -83,7 +83,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should return mock category suggestions', async () => {
-      const result = await mockService.categorizeExpense('Coffee purchase', 5.99, ['Food'], 'Starbucks');
+      const result = await mockService.categorizeTransaction('Coffee purchase', 5.99, ['Food'], 'Starbucks');
 
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
@@ -95,7 +95,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should return mock spending analysis', async () => {
-      const mockExpenses = [
+      const mockTransactions = [
         {
           amount: 50,
           category: { name: 'Food' },
@@ -110,7 +110,7 @@ describe('AI Service Validation', () => {
         }
       ];
 
-      const result = await mockService.analyzeSpendingPatterns(mockExpenses);
+      const result = await mockService.analyzeSpendingPatterns(mockTransactions);
 
       expect(result).toBeDefined();
       expect(result).toHaveProperty('insights');
@@ -121,7 +121,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should return mock budget suggestions', async () => {
-      const mockExpenses = [
+      const mockTransactions = [
         {
           amount: 500,
           category: { name: 'Food' },
@@ -130,7 +130,7 @@ describe('AI Service Validation', () => {
         }
       ];
 
-      const result = await mockService.generateBudgetSuggestions(mockExpenses, 'personal');
+      const result = await mockService.generateBudgetSuggestions(mockTransactions, 'personal');
 
       expect(result).toBeDefined();
       expect(result).toHaveProperty('suggestedBudgets');
@@ -155,7 +155,7 @@ describe('AI Service Validation', () => {
     });
 
     it('should handle categorization structure correctly', async () => {
-      const result = await service.categorizeExpense('Test expense', 100, ['Food', 'Transport']);
+      const result = await service.categorizeTransaction('Test transaction', 100, ['Food', 'Transport']);
 
       expect(Array.isArray(result)).toBe(true);
       if (result.length > 0) {
@@ -171,10 +171,10 @@ describe('AI Service Validation', () => {
     it('should process text messages for transactions', async () => {
       const categories = ['Alimentación', 'Transporte', 'Ingresos', 'Otros'];
 
-      // Test expense detection
-      const expenseResult = await mockService.processTextMessage('gasté 50 en almuerzo', categories);
-      expect(expenseResult).toBeDefined();
-      expect(expenseResult).toHaveProperty('hasTransaction');
+      // Test transaction detection
+      const transactionResult = await mockService.processTextMessage('gasté 50 en almuerzo', categories);
+      expect(transactionResult).toBeDefined();
+      expect(transactionResult).toHaveProperty('hasTransaction');
 
       // Test income detection
       const incomeResult = await mockService.processTextMessage('recibí 1000 de sueldo', categories);
@@ -204,7 +204,7 @@ describe('AI Service Validation', () => {
   });
 
   describe('Enhanced Ticket Processing', () => {
-    it('should support income/expense categorization in images', async () => {
+    it('should support income/transaction categorization in images', async () => {
       const buffer = Buffer.from('test-receipt-data');
       const result = await mockService.processTicketImage(buffer, 'image/jpeg');
 
@@ -212,7 +212,7 @@ describe('AI Service Validation', () => {
       expect(result).toHaveProperty('confidence');
       expect(result).toHaveProperty('extractedText');
       // New properties for enhanced categorization
-      expect(result).toHaveProperty('type'); // 'expense' | 'income'
+      expect(result).toHaveProperty('type'); // 'transaction' | 'income'
       expect(result).toHaveProperty('isRecurring');
       expect(result).toHaveProperty('installments');
       expect(result).toHaveProperty('installmentInfo');
@@ -220,7 +220,7 @@ describe('AI Service Validation', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle empty expense array gracefully', async () => {
+    it('should handle empty transaction array gracefully', async () => {
       const result = await service.analyzeSpendingPatterns([]);
       expect(result).toBeDefined();
       expect(result.insights).toBeDefined();

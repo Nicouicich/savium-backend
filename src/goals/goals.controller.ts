@@ -35,13 +35,13 @@ export class GoalsController {
 
   @Get('summary')
   @ApiOperation({
-    summary: 'Get goal summary for account',
+    summary: 'Get goal summary for profile',
     description: 'Get aggregated goal statistics'
   })
   @ApiResponseDecorator(GoalSummaryDto, 200, 'Goal summary retrieved successfully')
-  async getGoalSummary(@Query('accountId') accountId: string, @CurrentUser() user: any): Promise<GoalSummaryDto> {
-    if (!accountId) throw new BadRequestException('Account ID is required');
-    return this.goalsService.getGoalSummary(accountId, user.id);
+  async getGoalSummary(@Query('profileId') profileId: string, @CurrentUser() user: any): Promise<GoalSummaryDto> {
+    if (!profileId) throw new BadRequestException('Profile ID is required');
+    return this.goalsService.getGoalSummary(profileId, user.id);
   }
 
   @Get(':id')

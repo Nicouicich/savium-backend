@@ -24,7 +24,6 @@ export class UserMapper {
       phoneNumber: user.phoneNumber,
       isPhoneVerified: user.isPhoneVerified,
       preferences: user.preferences,
-      accounts: user.accounts?.map(accountId => accountId.toString()) || [],
       status: user.status,
       createdAt: user.createdAt || new Date(),
       updatedAt: user.updatedAt || new Date()

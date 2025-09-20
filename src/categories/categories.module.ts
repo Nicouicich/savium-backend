@@ -7,12 +7,14 @@ import { CategoriesRepository } from './categories.repository';
 
 import { Category, CategorySchema } from './schemas/category.schema';
 import { AccountsModule } from '../accounts/accounts.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import { CommonModule } from '@common/common.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
     forwardRef(() => AccountsModule), // Use forwardRef to avoid circular dependency
+    ProfilesModule,
     CommonModule
   ],
   controllers: [CategoriesController],

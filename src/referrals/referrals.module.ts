@@ -7,6 +7,7 @@ import { ReferralsController } from './referrals.controller';
 import { ReferralsService } from './referrals.service';
 import { ReferralCronService } from './referral-cron.service';
 import { ReferralsRepository } from './referrals.repository';
+import { ReferralRewardRepository } from './referral-reward.repository';
 import { ReferralQueryService, ReferralCommandService } from './services';
 
 // Import schemas
@@ -37,8 +38,8 @@ import { CommonModule } from '@common/common.module';
 
   controllers: [ReferralsController],
 
-  providers: [ReferralsRepository, ReferralQueryService, ReferralCommandService, ReferralsService, ReferralCronService],
+  providers: [ReferralsRepository, ReferralRewardRepository, ReferralQueryService, ReferralCommandService, ReferralsService, ReferralCronService],
 
-  exports: [ReferralsService, ReferralCronService]
+  exports: [ReferralsRepository, ReferralRewardRepository, ReferralsService, ReferralCronService]
 })
 export class ReferralsModule {}

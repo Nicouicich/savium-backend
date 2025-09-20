@@ -12,7 +12,7 @@ import { ApiResponseDecorator } from '@common/decorators/api-response.decorator'
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  @Get('monthly')
+  /* @Get('monthly')
   @ApiOperation({
     summary: 'Generate monthly report',
     description: 'Generate a detailed monthly spending report for the specified account and period'
@@ -55,8 +55,8 @@ export class ReportsController {
   })
   @ApiResponseDecorator(MonthlyReportDto, 200, 'Monthly report generated successfully')
   async getMonthlyReport(@Query() query: ReportQueryDto, @CurrentUser() user: any): Promise<MonthlyReportDto> {
-    if (!query.accountId) {
-      throw new BadRequestException('Account ID is required');
+    if (!query.profileId) {
+      throw new BadRequestException('Profile ID is required');
     }
 
     // Set default values
@@ -124,8 +124,8 @@ export class ReportsController {
   })
   @ApiResponseDecorator(CategoryReportDto, 200, 'Category report generated successfully')
   async getCategoryReport(@Query() query: ReportQueryDto, @CurrentUser() user: any): Promise<CategoryReportDto> {
-    if (!query.accountId) {
-      throw new BadRequestException('Account ID is required');
+    if (!query.profileId) {
+      throw new BadRequestException('Profile ID is required');
     }
 
     const reportQuery = {
@@ -189,12 +189,12 @@ export class ReportsController {
     name: 'groupByUser',
     required: false,
     type: Boolean,
-    description: 'Group expenses by user (for shared accounts)'
+    description: 'Group transactions by user (for shared accounts)'
   })
   @ApiResponseDecorator(SummaryReportDto, 200, 'Summary report generated successfully')
   async getSummaryReport(@Query() query: ReportQueryDto, @CurrentUser() user: any): Promise<SummaryReportDto> {
-    if (!query.accountId) {
-      throw new BadRequestException('Account ID is required');
+    if (!query.profileId) {
+      throw new BadRequestException('Profile ID is required');
     }
 
     const reportQuery = {
@@ -215,8 +215,8 @@ export class ReportsController {
   })
   @ApiResponseDecorator(ExportReportDto, 201, 'Report export initiated successfully')
   async exportReport(@Query() query: ReportQueryDto, @CurrentUser() user: any): Promise<ExportReportDto> {
-    if (!query.accountId) {
-      throw new BadRequestException('Account ID is required');
+    if (!query.profileId) {
+      throw new BadRequestException('Profile ID is required');
     }
 
     if (!query.type) {
@@ -353,5 +353,5 @@ export class ReportsController {
         }
       ]
     };
-  }
+  } */
 }

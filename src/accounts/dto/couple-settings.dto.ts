@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsBoolean, IsNumber, IsString, ValidateNested, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CoupleFinancialModel, CoupleExpenseType } from '@common/constants/couple-types';
+import { CoupleFinancialModel, CoupleTransactionType } from '@common/constants/couple-types';
 
 export class UpdateCoupleContributionDto {
   @ApiProperty({
@@ -65,15 +65,15 @@ export class UpdateCoupleContributionDto {
 
 export class CoupleNotificationPreferencesDto {
   @ApiPropertyOptional({
-    description: 'Notify when partner adds an expense',
+    description: 'Notify when partner adds an transaction',
     default: true
   })
   @IsOptional()
   @IsBoolean()
-  expenseAdded?: boolean;
+  transactionAdded?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Notify about comments and reactions on expenses',
+    description: 'Notify about comments and reactions on transactions',
     default: true
   })
   @IsOptional()
@@ -81,7 +81,7 @@ export class CoupleNotificationPreferencesDto {
   commentsAndReactions?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Notify when gift expenses are revealed',
+    description: 'Notify when gift transactions are revealed',
     default: true
   })
   @IsOptional()
@@ -116,13 +116,13 @@ export class UpdateCoupleSettingsDto {
   financialModel?: CoupleFinancialModel;
 
   @ApiPropertyOptional({
-    description: 'Default expense type for new expenses',
-    enum: CoupleExpenseType,
-    example: CoupleExpenseType.SHARED
+    description: 'Default transaction type for new transactions',
+    enum: CoupleTransactionType,
+    example: CoupleTransactionType.SHARED
   })
   @IsOptional()
-  @IsEnum(CoupleExpenseType, { message: 'Invalid default expense type' })
-  defaultExpenseType?: CoupleExpenseType;
+  @IsEnum(CoupleTransactionType, { message: 'Invalid default transaction type' })
+  defaultTransactionType?: CoupleTransactionType;
 
   @ApiPropertyOptional({
     description: 'Contribution settings for proportional income model',
@@ -134,7 +134,7 @@ export class UpdateCoupleSettingsDto {
   contributionSettings?: UpdateCoupleContributionDto;
 
   @ApiPropertyOptional({
-    description: 'Allow comments on expenses',
+    description: 'Allow comments on transactions',
     default: true
   })
   @IsOptional()
@@ -142,7 +142,7 @@ export class UpdateCoupleSettingsDto {
   allowComments?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Allow reactions on expenses',
+    description: 'Allow reactions on transactions',
     default: true
   })
   @IsOptional()
@@ -166,7 +166,7 @@ export class UpdateCoupleSettingsDto {
   enableCrossReminders?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Enable gift mode for expenses',
+    description: 'Enable gift mode for transactions',
     default: true
   })
   @IsOptional()
@@ -202,10 +202,10 @@ export class CoupleSettingsResponseDto {
   financialModel: CoupleFinancialModel;
 
   @ApiProperty({
-    description: 'Default expense type',
-    enum: CoupleExpenseType
+    description: 'Default transaction type',
+    enum: CoupleTransactionType
   })
-  defaultExpenseType: CoupleExpenseType;
+  defaultTransactionType: CoupleTransactionType;
 
   @ApiPropertyOptional({ description: 'Contribution settings' })
   contributionSettings?: {
@@ -240,7 +240,7 @@ export class CoupleSettingsResponseDto {
 
   @ApiProperty({ description: 'Notification preferences' })
   notifications: {
-    expenseAdded: boolean;
+    transactionAdded: boolean;
     commentsAndReactions: boolean;
     giftRevealed: boolean;
     reminders: boolean;
@@ -305,14 +305,14 @@ export class AcceptCoupleInvitationDto {
 }
 
 export class CoupleStatsDto {
-  @ApiProperty({ description: 'Total shared expenses this month' })
-  totalSharedExpensesThisMonth: number;
+  @ApiProperty({ description: 'Total shared transactions this month' })
+  totalSharedTransactionsThisMonth: number;
 
-  @ApiProperty({ description: 'Total personal expenses for user this month' })
-  totalPersonalExpensesThisMonth: number;
+  @ApiProperty({ description: 'Total personal transactions for user this month' })
+  totalPersonalTransactionsThisMonth: number;
 
-  @ApiProperty({ description: 'Partner total personal expenses this month' })
-  partnerPersonalExpensesThisMonth: number;
+  @ApiProperty({ description: 'Partner total personal transactions this month' })
+  partnerPersonalTransactionsThisMonth: number;
 
   @ApiProperty({ description: 'User contribution percentage this month' })
   userContributionPercentage: number;
@@ -329,12 +329,12 @@ export class CoupleStatsDto {
   @ApiProperty({ description: 'Outstanding balance (positive = user owes, negative = partner owes)' })
   outstandingBalance: number;
 
-  @ApiProperty({ description: 'Top shared expense categories' })
+  @ApiProperty({ description: 'Top shared transaction categories' })
   topSharedCategories: Array<{
     categoryId: string;
     categoryName: string;
     totalAmount: number;
-    expenseCount: number;
+    transactionCount: number;
   }>;
 
   @ApiProperty({ description: 'Monthly trend comparison' })
@@ -342,16 +342,16 @@ export class CoupleStatsDto {
     month: string;
     userContribution: number;
     partnerContribution: number;
-    sharedExpenses: number;
+    sharedTransactions: number;
   }>;
 
-  @ApiPropertyOptional({ description: 'Gift expenses count (if gift mode enabled)' })
+  @ApiPropertyOptional({ description: 'Gift transactions count (if gift mode enabled)' })
   hiddenGiftsCount?: number;
 }
 
-export class ExpenseContextParseDto {
+export class TransactionContextParseDto {
   @ApiProperty({
-    description: 'Original expense description',
+    description: 'Original transaction description',
     example: '$50 groceries @pareja'
   })
   @IsString()
@@ -376,9 +376,9 @@ export class ExpenseContextParseDto {
   suggestedAccountId?: string;
 
   @ApiPropertyOptional({
-    description: 'Expense type for couple context',
-    enum: CoupleExpenseType,
-    example: CoupleExpenseType.SHARED
+    description: 'Transaction type for couple context',
+    enum: CoupleTransactionType,
+    example: CoupleTransactionType.SHARED
   })
-  expenseType?: CoupleExpenseType;
+  transactionType?: CoupleTransactionType;
 }

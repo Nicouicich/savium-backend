@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
-import { ExpenseCategory } from '@common/constants/expense-categories';
+import { TransactionCategory } from '@common/constants/transaction-categories';
 
 @Injectable()
 export class CategoriesRepository {
@@ -12,29 +12,29 @@ export class CategoriesRepository {
     private readonly categoryModel: Model<CategoryDocument>
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto, accountId?: string, createdBy?: string): Promise<CategoryDocument> {
+  async create(createCategoryDto: CreateCategoryDto, profileId?: string, createdBy?: string): Promise<CategoryDocument> {
     const category = new this.categoryModel({
       ...createCategoryDto,
-      accountId: accountId ? new Types.ObjectId(accountId) : undefined,
+      profileId: profileId ? new Types.ObjectId(profileId) : undefined,
       createdBy: createdBy ? new Types.ObjectId(createdBy) : undefined,
-      isCustom: !!accountId // Custom if it belongs to an account
+      isCustom: !!profileId // Custom if it belongs to a profile
     });
 
     return category.save();
   }
 
-  async findAll(accountId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
+  async findAll(profileId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
     const query: any = { isDeleted: false, isActive: true };
 
-    if (accountId && includeGlobal) {
+    if (profileId && includeGlobal) {
       // Include both account-specific and global categories
-      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
-    } else if (accountId) {
+      query.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
+    } else if (profileId) {
       // Only account-specific categories
-      query.accountId = new Types.ObjectId(accountId);
+      query.profileId = new Types.ObjectId(profileId);
     } else {
       // Only global categories
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
@@ -44,48 +44,48 @@ export class CategoriesRepository {
     return this.categoryModel.findOne({ _id: id, isDeleted: false }).populate('createdBy', 'email firstName lastName').exec();
   }
 
-  async findByName(name: string, accountId?: string): Promise<CategoryDocument | null> {
+  async findByName(name: string, profileId?: string): Promise<CategoryDocument | null> {
     const query: any = {
       name: name.toLowerCase(),
       isDeleted: false
     };
 
-    if (accountId) {
-      query.accountId = new Types.ObjectId(accountId);
+    if (profileId) {
+      query.profileId = new Types.ObjectId(profileId);
     } else {
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.findOne(query).exec();
   }
 
-  async findByType(type: ExpenseCategory, accountId?: string): Promise<CategoryDocument[]> {
+  async findByType(type: TransactionCategory, profileId?: string): Promise<CategoryDocument[]> {
     const query: any = {
       type,
       isDeleted: false,
       isActive: true
     };
 
-    if (accountId) {
-      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
+    if (profileId) {
+      query.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
     } else {
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
-  async findByKeywords(keywords: string[], accountId?: string): Promise<CategoryDocument[]> {
+  async findByKeywords(keywords: string[], profileId?: string): Promise<CategoryDocument[]> {
     const query: any = {
       keywords: { $in: keywords },
       isDeleted: false,
       isActive: true
     };
 
-    if (accountId) {
-      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
+    if (profileId) {
+      query.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
     } else {
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
@@ -187,10 +187,10 @@ export class CategoriesRepository {
     return this.categoryModel.findByIdAndUpdate(categoryId, { isVisible }, { new: true }).exec();
   }
 
-  async getCustomCategories(accountId: string): Promise<CategoryDocument[]> {
+  async getCustomCategories(profileId: string): Promise<CategoryDocument[]> {
     return this.categoryModel
       .find({
-        accountId: new Types.ObjectId(accountId),
+        profileId: new Types.ObjectId(profileId),
         isCustom: true,
         isDeleted: false
       })
@@ -201,7 +201,7 @@ export class CategoriesRepository {
   async getGlobalCategories(): Promise<CategoryDocument[]> {
     return this.categoryModel
       .find({
-        accountId: { $exists: false },
+        profileId: { $exists: false },
         isCustom: false,
         isDeleted: false,
         isActive: true
@@ -210,7 +210,7 @@ export class CategoriesRepository {
       .exec();
   }
 
-  async searchCategories(searchTerm: string, accountId?: string): Promise<CategoryDocument[]> {
+  async searchCategories(searchTerm: string, profileId?: string): Promise<CategoryDocument[]> {
     const regex = new RegExp(searchTerm, 'i');
     const query: any = {
       $or: [
@@ -225,20 +225,20 @@ export class CategoriesRepository {
       isVisible: true
     };
 
-    if (accountId) {
+    if (profileId) {
       query.$and = [
         {
-          $or: [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }]
+          $or: [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }]
         }
       ];
     } else {
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.find(query).sort({ sortOrder: 1, displayName: 1 }).exec();
   }
 
-  async getCategoryStats(accountId?: string): Promise<{
+  async getCategoryStats(profileId?: string): Promise<{
     total: number;
     custom: number;
     global: number;
@@ -247,8 +247,8 @@ export class CategoriesRepository {
   }> {
     const baseQuery: any = { isDeleted: false };
 
-    if (accountId) {
-      baseQuery.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
+    if (profileId) {
+      baseQuery.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
     }
 
     const [stats] = await this.categoryModel.aggregate([
@@ -285,7 +285,7 @@ export class CategoriesRepository {
   }
 
   async getPopularCategories(
-    accountId?: string,
+    profileId?: string,
     limit = 10
   ): Promise<
     {
@@ -295,7 +295,7 @@ export class CategoriesRepository {
       usageCount: number;
     }[]
   > {
-    // This would typically join with expenses collection
+    // This would typically join with transactions collection
     // For now, return categories ordered by creation date
     const query: any = {
       isDeleted: false,
@@ -303,10 +303,10 @@ export class CategoriesRepository {
       isVisible: true
     };
 
-    if (accountId) {
-      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
+    if (profileId) {
+      query.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
     } else {
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     const categories = await this.categoryModel.find(query).sort({ createdAt: -1 }).limit(limit).select('name displayName').exec();
@@ -315,22 +315,22 @@ export class CategoriesRepository {
       categoryId: (cat as any)._id.toString(),
       name: cat.name,
       displayName: cat.displayName,
-      usageCount: 0 // Would be calculated from expenses
+      usageCount: 0 // Would be calculated from transactions
     }));
   }
 
-  async findAllHierarchy(accountId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
+  async findAllHierarchy(profileId?: string, includeGlobal = true): Promise<CategoryDocument[]> {
     const query: any = { isDeleted: false };
 
-    if (accountId && includeGlobal) {
+    if (profileId && includeGlobal) {
       // Include both account-specific and global categories
-      query.$or = [{ accountId: new Types.ObjectId(accountId) }, { accountId: { $exists: false } }];
-    } else if (accountId) {
+      query.$or = [{ profileId: new Types.ObjectId(profileId) }, { profileId: { $exists: false } }];
+    } else if (profileId) {
       // Only account-specific categories
-      query.accountId = new Types.ObjectId(accountId);
+      query.profileId = new Types.ObjectId(profileId);
     } else {
       // Only global categories
-      query.accountId = { $exists: false };
+      query.profileId = { $exists: false };
     }
 
     return this.categoryModel.find(query).populate('createdBy', 'email firstName lastName').sort({ sortOrder: 1, displayName: 1 }).exec();

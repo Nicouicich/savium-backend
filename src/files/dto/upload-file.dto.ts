@@ -67,7 +67,7 @@ export class UploadFileDto {
 
   @ApiProperty({
     description: 'Additional metadata for the file',
-    example: { relatedExpenseId: '507f1f77bcf86cd799439013' },
+    example: { relatedTransactionId: '507f1f77bcf86cd799439013' },
     required: false
   })
   @IsOptional()

@@ -36,7 +36,7 @@ export default registerAs('stripe', () => ({
     personal: {
       priceId: process.env.STRIPE_PERSONAL_PRICE_ID,
       productId: process.env.STRIPE_PERSONAL_PRODUCT_ID,
-      features: ['basic_analytics', 'expense_tracking', 'budget_management']
+      features: ['basic_analytics', 'transaction_tracking', 'budget_management']
     },
     couple: {
       priceId: process.env.STRIPE_COUPLE_PRICE_ID,

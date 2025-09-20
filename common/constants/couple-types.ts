@@ -5,13 +5,13 @@ export enum CoupleFinancialModel {
   MIXED = 'mixed'
 }
 
-export enum CoupleExpenseType {
+export enum CoupleTransactionType {
   SHARED = 'shared',
   PERSONAL = 'personal'
 }
 
 export enum CoupleNotificationType {
-  EXPENSE_ADDED = 'expense_added',
+  EXPENSE_ADDED = 'transaction_added',
   COMMENT_ADDED = 'comment_added',
   GIFT_REVEALED = 'gift_revealed',
   GOAL_ACHIEVED = 'goal_achieved',
@@ -37,9 +37,9 @@ export interface CoupleFinancialModelConfig {
 export const COUPLE_FINANCIAL_MODELS: Record<CoupleFinancialModel, CoupleFinancialModelConfig> = {
   [CoupleFinancialModel.FIFTY_FIFTY]: {
     name: '50/50 Automatic',
-    description: 'All shared expenses are automatically divided in half between both partners',
+    description: 'All shared transactions are automatically divided in half between both partners',
     features: [
-      'automatic_expense_splitting',
+      'automatic_transaction_splitting',
       'equal_contribution_tracking',
       'settlement_suggestions'
     ],
@@ -48,7 +48,7 @@ export const COUPLE_FINANCIAL_MODELS: Record<CoupleFinancialModel, CoupleFinanci
 
   [CoupleFinancialModel.PROPORTIONAL_INCOME]: {
     name: 'Proportional to Income',
-    description: 'Expenses are split based on the configured income percentage of each partner',
+    description: 'Transactions are split based on the configured income percentage of each partner',
     features: [
       'income_based_splitting',
       'contribution_percentage_tracking',
@@ -59,7 +59,7 @@ export const COUPLE_FINANCIAL_MODELS: Record<CoupleFinancialModel, CoupleFinanci
 
   [CoupleFinancialModel.EVERYTHING_COMMON]: {
     name: 'Everything in Common',
-    description: 'No expense divisions calculated; everything is seen as shared finances',
+    description: 'No transaction divisions calculated; everything is seen as shared finances',
     features: [
       'unified_balance_view',
       'combined_analytics',
@@ -70,14 +70,14 @@ export const COUPLE_FINANCIAL_MODELS: Record<CoupleFinancialModel, CoupleFinanci
 
   [CoupleFinancialModel.MIXED]: {
     name: 'Mixed Model',
-    description: 'Allows both shared and personal expenses within the couple account',
+    description: 'Allows both shared and personal transactions within the couple account',
     features: [
-      'expense_type_selection',
+      'transaction_type_selection',
       'partial_sharing',
       'flexible_splitting',
-      'personal_expense_tracking'
+      'personal_transaction_tracking'
     ],
-    requiredSettings: ['default_expense_type']
+    requiredSettings: ['default_transaction_type']
   }
 };
 
@@ -95,7 +95,7 @@ export interface CoupleContributionSettings {
 
 export interface CouplePreferences {
   financialModel: CoupleFinancialModel;
-  defaultExpenseType: CoupleExpenseType;
+  defaultTransactionType: CoupleTransactionType;
   contributionSettings?: CoupleContributionSettings;
   allowComments: boolean;
   allowReactions: boolean;
@@ -104,7 +104,7 @@ export interface CouplePreferences {
   giftModeEnabled: boolean;
   sharedGoalsEnabled: boolean;
   notifications: {
-    expenseAdded: boolean;
+    transactionAdded: boolean;
     commentsAndReactions: boolean;
     giftRevealed: boolean;
     reminders: boolean;
@@ -114,7 +114,7 @@ export interface CouplePreferences {
 
 export const DEFAULT_COUPLE_PREFERENCES: CouplePreferences = {
   financialModel: CoupleFinancialModel.FIFTY_FIFTY,
-  defaultExpenseType: CoupleExpenseType.SHARED,
+  defaultTransactionType: CoupleTransactionType.SHARED,
   allowComments: true,
   allowReactions: true,
   showContributionStats: true,
@@ -122,7 +122,7 @@ export const DEFAULT_COUPLE_PREFERENCES: CouplePreferences = {
   giftModeEnabled: true,
   sharedGoalsEnabled: true,
   notifications: {
-    expenseAdded: true,
+    transactionAdded: true,
     commentsAndReactions: true,
     giftRevealed: true,
     reminders: true,
@@ -170,14 +170,14 @@ export const COUPLE_PREMIUM_FEATURES: Record<string, CoupePremiumFeatures> = {
   }
 };
 
-export interface ExpenseContextMap {
+export interface TransactionContextMap {
   personal: 'personal';
   pareja: 'couple';
   familia: 'family';
   negocio: 'business';
 }
 
-export const EXPENSE_CONTEXT_MAPPING: ExpenseContextMap = {
+export const EXPENSE_CONTEXT_MAPPING: TransactionContextMap = {
   personal: 'personal',
   pareja: 'couple',
   familia: 'family',

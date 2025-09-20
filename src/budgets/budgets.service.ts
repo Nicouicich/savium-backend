@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto, CreateBudgetDto, UpdateBudgetDto } from './dto';
 import { BudgetQueryService, BudgetCommandService } from './services';
-import { PaginatedResult } from '../expenses/expenses.repository';
+import { PaginatedResult } from '../transactions/transactions.repository';
 
 @Injectable()
 export class BudgetsService {
@@ -10,7 +10,7 @@ export class BudgetsService {
     private readonly budgetCommandService: BudgetCommandService
   ) {}
 
-  async create(createBudgetDto: CreateBudgetDto, userId: string): Promise<BudgetResponseDto> {
+  /*   async create(createBudgetDto: CreateBudgetDto, userId: string): Promise<BudgetResponseDto> {
     return this.budgetCommandService.create(createBudgetDto, userId);
   }
 
@@ -32,17 +32,17 @@ export class BudgetsService {
 
   async getBudgetSummary(userId: string): Promise<BudgetSummaryDto> {
     return this.budgetQueryService.getBudgetSummary(userId);
-  }
+  } */
 
-  async recalculateBudgetSpending(budgetId: string): Promise<void> {
+  /*   async recalculateBudgetSpending(budgetId: string): Promise<void> {
     return this.budgetCommandService.recalculateBudgetSpending(budgetId);
-  }
-
+  } */
+  /* 
   async createFromTemplate(templateId: string, accountId: string, userId: string): Promise<BudgetResponseDto> {
     return this.budgetCommandService.createFromTemplate(templateId, accountId, userId);
   }
 
   async processAutoRenewals(): Promise<void> {
     return this.budgetCommandService.processAutoRenewals();
-  }
+  } */
 }

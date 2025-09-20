@@ -13,10 +13,10 @@ export class GoalCommandService {
   ) {}
 
   async create(createGoalDto: CreateGoalDto, userId: string): Promise<GoalResponseDto> {
-    // Validate user has access to account
-    const hasAccess = await this.accountsService.hasUserAccess(createGoalDto.accountId, userId);
+    // Validate user has access to profile
+    const hasAccess = await this.accountsService.hasUserAccess(createGoalDto.profileId, userId);
     if (!hasAccess) {
-      throw new ForbiddenException('Access denied to this account');
+      throw new ForbiddenException('Access denied to this profile');
     }
 
     // Validate target date is in the future
@@ -48,7 +48,7 @@ export class GoalCommandService {
     const goalData = {
       ...createGoalDto,
       id: uuidv4(),
-      accountId: createGoalDto.accountId,
+      profileId: createGoalDto.profileId,
       createdBy: userId,
       startDate: createGoalDto.startDate || new Date(),
       participants: createGoalDto.participants || [],
@@ -244,11 +244,11 @@ export class GoalCommandService {
   }
 
   private async validateGoalAccess(goal: GoalDocument, userId: string): Promise<void> {
-    const hasAccountAccess = await this.accountsService.hasUserAccess(goal.accountId.toString(), userId);
+    const hasProfileAccess = await this.accountsService.hasUserAccess(goal.profileId.toString(), userId);
     const isParticipant = goal.participants.some(p => p.toString() === userId);
     const isCreator = goal.createdBy.toString() === userId;
 
-    if (!hasAccountAccess && !isParticipant && !isCreator) {
+    if (!hasProfileAccess && !isParticipant && !isCreator) {
       throw new ForbiddenException('Access denied to this goal');
     }
   }
@@ -258,8 +258,8 @@ export class GoalCommandService {
       id: goal.id,
       title: goal.title,
       description: goal.description,
-      accountId: goal.accountId,
-      accountName: (goal.accountId as any).name || 'Unknown Account',
+      profileId: goal.profileId,
+      profileName: (goal.profileId as any).displayName || 'Unknown Profile',
       createdBy: {
         id: goal.createdBy,
         name:

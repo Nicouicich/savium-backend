@@ -5,13 +5,14 @@ import { Model, Types } from 'mongoose';
 import { Account, AccountDocument } from '../schemas/account.schema';
 import { CoupleSettings, CoupleSettingsDocument } from '../schemas/couple-settings.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
-import { Expense, ExpenseDocument } from '../../expenses/schemas/expense.schema';
+import { Transaction, TransactionDocument } from '../../transactions/schemas/transaction.schema';
+import { ProfilesService } from '../../profiles/profiles.service';
 
 import { UpdateCoupleSettingsDto, CoupleSettingsResponseDto, AcceptCoupleInvitationDto, CoupleStatsDto } from '../dto/couple-settings.dto';
 
 import {
   CoupleFinancialModel,
-  CoupleExpenseType,
+  CoupleTransactionType,
   CoupleReactionType,
   DEFAULT_COUPLE_PREFERENCES,
   COUPLE_PREMIUM_FEATURES
@@ -20,6 +21,7 @@ import {
 import { AccountType } from '@common/constants/account-types';
 import { BusinessException } from '@common/exceptions/business.exception';
 import { ErrorCode } from '@common/constants/error-codes';
+import { ProfileType } from 'src/financial-profiles/schemas';
 
 @Injectable()
 export class CoupleService {
@@ -30,8 +32,9 @@ export class CoupleService {
     private readonly coupleSettingsModel: Model<CoupleSettingsDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-    @InjectModel(Expense.name)
-    private readonly expenseModel: Model<ExpenseDocument>
+    @InjectModel(Transaction.name)
+    private readonly transactionModel: Model<TransactionDocument>,
+    private readonly profilesService: ProfilesService
   ) {}
 
   /**
@@ -263,15 +266,15 @@ export class CoupleService {
     const startDate = dateRange?.startDate || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const endDate = dateRange?.endDate || new Date();
 
-    // Base expense query
-    const expenseQuery = {
+    // Base transaction query
+    const transactionQuery = {
       accountId: new Types.ObjectId(accountId),
       date: { $gte: startDate, $lte: endDate },
       isDeleted: false
     };
 
-    // Get expenses based on financial model
-    const stats = await this.calculateStatsBasedOnFinancialModel(coupleSettings.financialModel, expenseQuery, userId, partnerId, coupleSettings);
+    // Get transactions based on financial model
+    const stats = await this.calculateStatsBasedOnFinancialModel(coupleSettings.financialModel, transactionQuery, userId, partnerId, coupleSettings);
 
     // Get top shared categories
     const topSharedCategories = this.getTopSharedCategories();
@@ -282,8 +285,8 @@ export class CoupleService {
     // Get hidden gifts count if gift mode is enabled
     let hiddenGiftsCount: number | undefined;
     if (coupleSettings.giftModeEnabled) {
-      hiddenGiftsCount = await this.expenseModel.countDocuments({
-        ...expenseQuery,
+      hiddenGiftsCount = await this.transactionModel.countDocuments({
+        ...transactionQuery,
         'coupleData.isGift': true,
         'coupleData.isRevealed': false,
         'coupleData.giftFor': userId
@@ -291,9 +294,9 @@ export class CoupleService {
     }
 
     return {
-      totalSharedExpensesThisMonth: stats.totalSharedExpensesThisMonth || 0,
-      totalPersonalExpensesThisMonth: stats.totalPersonalExpensesThisMonth || 0,
-      partnerPersonalExpensesThisMonth: stats.partnerPersonalExpensesThisMonth || 0,
+      totalSharedTransactionsThisMonth: stats.totalSharedTransactionsThisMonth || 0,
+      totalPersonalTransactionsThisMonth: stats.totalPersonalTransactionsThisMonth || 0,
+      partnerPersonalTransactionsThisMonth: stats.partnerPersonalTransactionsThisMonth || 0,
       userContributionPercentage: stats.userContributionPercentage || 0,
       partnerContributionPercentage: stats.partnerContributionPercentage || 0,
       userTotalContribution: stats.userTotalContribution || 0,
@@ -306,32 +309,37 @@ export class CoupleService {
   }
 
   /**
-   * Add comment to couple expense
+   * Add comment to couple transaction
    */
-  async addExpenseComment(expenseId: string, userId: string, comment: string): Promise<{ success: boolean; comment: any }> {
-    const expense = await this.expenseModel.findById(expenseId);
-    if (!expense) {
-      throw new NotFoundException('Expense not found');
+  async addTransactionComment(transactionId: string, userId: string, comment: string): Promise<{ success: boolean; comment: any }> {
+    const transaction = await this.transactionModel.findById(transactionId);
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
     }
 
-    // Verify it's a couple expense
-    if (!expense.coupleData) {
-      throw new BadRequestException('Comments are only available for couple expenses');
+    // Verify it's a couple transaction
+    if (!transaction.coupleData) {
+      throw new BadRequestException('Comments are only available for couple transactions');
     }
 
-    // Verify user has access to the account
-    const account = await this.accountModel.findById(expense.accountId);
-    if (!account || account.type !== AccountType.COUPLE) {
-      throw new BadRequestException('Expense is not in a couple account');
+    // Verify user has access to the profile and it's a couple profile
+    const profile = await this.profilesService.findById(transaction.profileId.toString());
+    if (!profile || profile.type !== ProfileType.COUPLE) {
+      throw new BadRequestException('Transaction is not in a couple profile');
     }
 
-    this.verifyUserAccess(account, userId);
-
-    // Check if comments are allowed
-    const coupleSettings = await this.coupleSettingsModel.findOne({ accountId: expense.accountId });
-    if (!coupleSettings?.allowComments) {
-      throw new ForbiddenException('Comments are disabled for this couple account');
+    // Verify user has access to this profile
+    if (profile.userId.toString() !== userId && !profile.members?.some(memberId => memberId.toString() === userId)) {
+      throw new ForbiddenException('Access denied to this couple profile');
     }
+
+    // For now, we'll assume comments are allowed for couple profiles
+    // In the future, this could be moved to profile settings
+    // TODO: Move couple settings to profile settings or maintain relationship
+    // const coupleSettings = await this.coupleSettingsModel.findOne({ profileId: transaction.profileId });
+    // if (!coupleSettings?.allowComments) {
+    //   throw new ForbiddenException('Comments are disabled for this couple profile');
+    // }
 
     // Add comment
     const newComment = {
@@ -341,12 +349,12 @@ export class CoupleService {
       isEdited: false
     };
 
-    if (!expense.coupleData.comments) {
-      expense.coupleData.comments = [];
+    if (!transaction.coupleData.comments) {
+      transaction.coupleData.comments = [];
     }
 
-    expense.coupleData.comments.push(newComment);
-    await expense.save();
+    transaction.coupleData.comments.push(newComment);
+    await transaction.save();
 
     return {
       success: true,
@@ -358,38 +366,43 @@ export class CoupleService {
   }
 
   /**
-   * Add reaction to couple expense
+   * Add reaction to couple transaction
    */
-  async addExpenseReaction(expenseId: string, userId: string, reactionType: CoupleReactionType): Promise<{ success: boolean; reaction: any }> {
-    const expense = await this.expenseModel.findById(expenseId);
-    if (!expense) {
-      throw new NotFoundException('Expense not found');
+  async addTransactionReaction(transactionId: string, userId: string, reactionType: CoupleReactionType): Promise<{ success: boolean; reaction: any }> {
+    const transaction = await this.transactionModel.findById(transactionId);
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
     }
 
-    // Verify it's a couple expense
-    if (!expense.coupleData) {
-      throw new BadRequestException('Reactions are only available for couple expenses');
+    // Verify it's a couple transaction
+    if (!transaction.coupleData) {
+      throw new BadRequestException('Reactions are only available for couple transactions');
     }
 
-    // Verify user has access
-    const account = await this.accountModel.findById(expense.accountId);
-    if (!account) {
-      throw new NotFoundException('Account not found');
+    // Verify user has access to the profile and it's a couple profile
+    const profile = await this.profilesService.findById(transaction.profileId.toString());
+    if (!profile || profile.type !== ProfileType.COUPLE) {
+      throw new BadRequestException('Transaction is not in a couple profile');
     }
-    this.verifyUserAccess(account, userId);
 
-    // Check if reactions are allowed
-    const coupleSettings = await this.coupleSettingsModel.findOne({ accountId: expense.accountId });
-    if (!coupleSettings?.allowReactions) {
-      throw new ForbiddenException('Reactions are disabled for this couple account');
+    // Verify user has access to this profile
+    if (profile.userId.toString() !== userId && !profile.members?.some(memberId => memberId.toString() === userId)) {
+      throw new ForbiddenException('Access denied to this couple profile');
     }
+
+    // For now, we'll assume reactions are allowed for couple profiles
+    // TODO: Move couple settings to profile settings or maintain relationship
+    // const coupleSettings = await this.coupleSettingsModel.findOne({ profileId: transaction.profileId });
+    // if (!coupleSettings?.allowReactions) {
+    //   throw new ForbiddenException('Reactions are disabled for this couple profile');
+    // }
 
     // Remove existing reaction from this user
-    if (!expense.coupleData.reactions) {
-      expense.coupleData.reactions = [];
+    if (!transaction.coupleData.reactions) {
+      transaction.coupleData.reactions = [];
     }
 
-    expense.coupleData.reactions = expense.coupleData.reactions.filter(reaction => reaction.userId !== userId);
+    transaction.coupleData.reactions = transaction.coupleData.reactions.filter(reaction => reaction.userId !== userId);
 
     // Add new reaction
     const newReaction = {
@@ -398,8 +411,8 @@ export class CoupleService {
       createdAt: new Date()
     };
 
-    expense.coupleData.reactions.push(newReaction);
-    await expense.save();
+    transaction.coupleData.reactions.push(newReaction);
+    await transaction.save();
 
     return {
       success: true,
@@ -507,7 +520,7 @@ export class CoupleService {
     }
 
     // Track other significant changes
-    const trackedFields = ['defaultExpenseType', 'allowComments', 'allowReactions', 'giftModeEnabled'];
+    const trackedFields = ['defaultTransactionType', 'allowComments', 'allowReactions', 'giftModeEnabled'];
 
     trackedFields.forEach(field => {
       if (updateDto[field] !== undefined && updateDto[field] !== currentSettings[field]) {
@@ -563,26 +576,26 @@ export class CoupleService {
     // Implementation depends on the financial model
     // This is a simplified version - full implementation would be more complex
 
-    const sharedExpenses = await this.expenseModel.find({
+    const sharedTransactions = await this.transactionModel.find({
       ...baseQuery,
-      'coupleData.expenseType': CoupleExpenseType.SHARED
+      'coupleData.transactionType': CoupleTransactionType.SHARED
     });
 
-    const userPersonalExpenses = await this.expenseModel.find({
+    const userPersonalTransactions = await this.transactionModel.find({
       ...baseQuery,
-      'coupleData.expenseType': CoupleExpenseType.PERSONAL,
+      'coupleData.transactionType': CoupleTransactionType.PERSONAL,
       userId: userId
     });
 
-    const partnerPersonalExpenses = await this.expenseModel.find({
+    const partnerPersonalTransactions = await this.transactionModel.find({
       ...baseQuery,
-      'coupleData.expenseType': CoupleExpenseType.PERSONAL,
+      'coupleData.transactionType': CoupleTransactionType.PERSONAL,
       userId: partnerId
     });
 
-    const totalSharedAmount = sharedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const totalUserPersonal = userPersonalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const totalPartnerPersonal = partnerPersonalExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalSharedAmount = sharedTransactions.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalUserPersonal = userPersonalTransactions.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalPartnerPersonal = partnerPersonalTransactions.reduce((sum, exp) => sum + exp.amount, 0);
 
     // Calculate contributions based on financial model
     let userContribution = 0;
@@ -618,9 +631,9 @@ export class CoupleService {
     }
 
     return {
-      totalSharedExpensesThisMonth: totalSharedAmount,
-      totalPersonalExpensesThisMonth: totalUserPersonal,
-      partnerPersonalExpensesThisMonth: totalPartnerPersonal,
+      totalSharedTransactionsThisMonth: totalSharedAmount,
+      totalPersonalTransactionsThisMonth: totalUserPersonal,
+      partnerPersonalTransactionsThisMonth: totalPartnerPersonal,
       userContributionPercentage: totalSharedAmount > 0 ? (userContribution / totalSharedAmount) * 100 : 0,
       partnerContributionPercentage: totalSharedAmount > 0 ? (partnerContribution / totalSharedAmount) * 100 : 0,
       userTotalContribution: userContribution,
@@ -643,7 +656,7 @@ export class CoupleService {
     return {
       accountId: coupleSettings.accountId.toString(),
       financialModel: coupleSettings.financialModel,
-      defaultExpenseType: coupleSettings.defaultExpenseType,
+      defaultTransactionType: coupleSettings.defaultTransactionType,
       contributionSettings: coupleSettings.contributionSettings
         ? {
             partner1UserId: coupleSettings.contributionSettings.partner1UserId.toString(), // Convert ObjectId to string
@@ -664,7 +677,7 @@ export class CoupleService {
       giftModeEnabled: coupleSettings.giftModeEnabled,
       sharedGoalsEnabled: coupleSettings.sharedGoalsEnabled,
       notifications: {
-        expenseAdded: coupleSettings.notifications.expenseAdded,
+        transactionAdded: coupleSettings.notifications.transactionAdded,
         commentsAndReactions: coupleSettings.notifications.commentsAndReactions,
         giftRevealed: coupleSettings.notifications.giftRevealed,
         reminders: coupleSettings.notifications.reminders,

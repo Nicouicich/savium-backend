@@ -149,7 +149,7 @@ export class BillingService {
       features,
       usage: {
         accountsCreated: 0,
-        expensesThisMonth: 0,
+        transactionsThisMonth: 0,
         budgetsCreated: 0,
         goalsCreated: 0,
         apiCallsThisMonth: 0
@@ -205,7 +205,7 @@ export class BillingService {
       { userId: userId },
       {
         $set: {
-          'usage.expensesThisMonth': 0,
+          'usage.transactionsThisMonth': 0,
           'usage.apiCallsThisMonth': 0
         }
       }
@@ -220,7 +220,7 @@ export class BillingService {
 
     const usageMap: Record<string, { current: keyof Subscription['usage']; limit: keyof Subscription['features'] }> = {
       accounts: { current: 'accountsCreated', limit: 'maxAccounts' },
-      expenses: { current: 'expensesThisMonth', limit: 'maxExpensesPerMonth' },
+      transactions: { current: 'transactionsThisMonth', limit: 'maxTransactionsPerMonth' },
       budgets: { current: 'budgetsCreated', limit: 'maxBudgets' },
       goals: { current: 'goalsCreated', limit: 'maxGoals' }
     };
@@ -275,7 +275,7 @@ export class BillingService {
     const planFeatures: Record<string, any> = {
       free: {
         maxAccounts: 1,
-        maxExpensesPerMonth: 50,
+        maxTransactionsPerMonth: 50,
         maxBudgets: 2,
         maxGoals: 1,
         aiCategorization: false,
@@ -289,7 +289,7 @@ export class BillingService {
       },
       basic: {
         maxAccounts: 2,
-        maxExpensesPerMonth: 200,
+        maxTransactionsPerMonth: 200,
         maxBudgets: 5,
         maxGoals: 3,
         aiCategorization: true,
@@ -303,7 +303,7 @@ export class BillingService {
       },
       premium: {
         maxAccounts: 5,
-        maxExpensesPerMonth: 1000,
+        maxTransactionsPerMonth: 1000,
         maxBudgets: 20,
         maxGoals: 10,
         aiCategorization: true,
@@ -317,7 +317,7 @@ export class BillingService {
       },
       family: {
         maxAccounts: 10,
-        maxExpensesPerMonth: 2000,
+        maxTransactionsPerMonth: 2000,
         maxBudgets: 50,
         maxGoals: 25,
         aiCategorization: true,
@@ -331,7 +331,7 @@ export class BillingService {
       },
       business: {
         maxAccounts: -1, // unlimited
-        maxExpensesPerMonth: -1, // unlimited
+        maxTransactionsPerMonth: -1, // unlimited
         maxBudgets: -1, // unlimited
         maxGoals: -1, // unlimited
         aiCategorization: true,
@@ -533,8 +533,8 @@ export class BillingService {
           recommendations.push('You are approaching your account limit. Consider upgrading for more accounts.');
         }
 
-        if (usage.expensesThisMonth >= features.maxExpensesPerMonth * 0.8) {
-          recommendations.push('You are approaching your monthly expense limit.');
+        if (usage.transactionsThisMonth >= features.maxTransactionsPerMonth * 0.8) {
+          recommendations.push('You are approaching your monthly transaction limit.');
         }
 
         // Profile-specific recommendations

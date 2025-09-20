@@ -4,7 +4,7 @@ import { BudgetQueryDto, BudgetResponseDto, BudgetSummaryDto } from '../dto';
 import { BudgetDocument, BudgetStatus, BudgetPeriod } from '../schemas/budget.schema';
 import { AccountsService } from '../../accounts/accounts.service';
 import { CategoriesService } from '../../categories/categories.service';
-import { PaginatedResult } from '../../expenses/expenses.repository';
+import { PaginatedResult } from '../../transactions/transactions.repository';
 import { Types } from 'mongoose';
 
 @Injectable()
@@ -229,7 +229,7 @@ export class BudgetQueryService {
             progressPercentage: Math.round(progressPercentage * 100) / 100,
             isOverBudget: catBudget.spentAmount > catBudget.allocatedAmount,
             alerts: catBudget.alerts,
-            trackExpenses: catBudget.trackExpenses
+            trackTransactions: catBudget.trackTransactions
           };
         })
       );

@@ -16,7 +16,7 @@ export class CreateAccountDto {
   @IsEnum(AccountType)
   type: AccountType;
 
-  @ApiPropertyOptional({ description: 'Account description', example: 'Family expense tracking account', maxLength: 500 })
+  @ApiPropertyOptional({ description: 'Account description', example: 'Family transaction tracking account', maxLength: 500 })
   @IsOptional()
   @IsString({ message: 'Account description must be a string' })
   @MaxLength(500, { message: 'Account description cannot exceed 500 characters' })
@@ -40,11 +40,11 @@ export class CreateAccountDto {
   @IsOptional()
   @IsObject({ message: 'Privacy settings must be an object' })
   privacySettings?: {
-    expenseVisibility?: 'public' | 'private' | 'members_only';
+    transactionVisibility?: 'public' | 'private' | 'members_only';
     reportVisibility?: 'public' | 'private' | 'members_only';
     budgetVisibility?: 'public' | 'private' | 'members_only';
-    allowPrivateExpenses?: boolean;
-    childExpenseLimit?: number; // Maximum expense amount for child users
+    allowPrivateTransactions?: boolean;
+    childTransactionLimit?: number; // Maximum transaction amount for child users
     requireApproval?: boolean;
     approvalThreshold?: number; // Amount above which approval is required
   };

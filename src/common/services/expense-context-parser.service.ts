@@ -4,21 +4,21 @@ import { Model, Types } from 'mongoose';
 
 import { Account, AccountDocument } from '../../accounts/schemas/account.schema';
 import { User, UserDocument } from '../../users/schemas/user.schema';
-import { CONTEXT_KEYWORDS, EXPENSE_CONTEXT_MAPPING, CoupleExpenseType } from '@common/constants/couple-types';
+import { CONTEXT_KEYWORDS, EXPENSE_CONTEXT_MAPPING, CoupleTransactionType } from '@common/constants/couple-types';
 import { AccountType } from '@common/constants/account-types';
 
-export interface ParsedExpenseContext {
+export interface ParsedTransactionContext {
   context: 'personal' | 'couple' | 'family' | 'business' | null;
   cleanDescription: string;
   originalContext?: string;
   confidence: number;
   suggestedAccountId?: string;
-  expenseType?: CoupleExpenseType;
+  transactionType?: CoupleTransactionType;
   accountType?: AccountType;
 }
 
 @Injectable()
-export class ExpenseContextParserService {
+export class TransactionContextParserService {
   constructor(
     @InjectModel(Account.name)
     private readonly accountModel: Model<AccountDocument>,
@@ -27,10 +27,10 @@ export class ExpenseContextParserService {
   ) {}
 
   /**
-   * Parse expense description for context keywords (@pareja, @personal, etc.)
+   * Parse transaction description for context keywords (@pareja, @personal, etc.)
    */
-  async parseExpenseContext(description: string, userId: string): Promise<ParsedExpenseContext> {
-    const result: ParsedExpenseContext = {
+  async parseTransactionContext(description: string, userId: string): Promise<ParsedTransactionContext> {
+    const result: ParsedTransactionContext = {
       context: null,
       cleanDescription: description.trim(),
       confidence: 0.0
@@ -55,9 +55,9 @@ export class ExpenseContextParserService {
       result.suggestedAccountId = (suggestedAccount as any).id;
       result.accountType = suggestedAccount.type;
 
-      // For couple accounts, determine default expense type
+      // For couple accounts, determine default transaction type
       if (suggestedAccount.type === AccountType.COUPLE) {
-        result.expenseType = await this.getCoupleDefaultExpenseType((suggestedAccount as any).id);
+        result.transactionType = await this.getCoupleDefaultTransactionType((suggestedAccount as any).id);
       }
     }
 
@@ -65,7 +65,7 @@ export class ExpenseContextParserService {
   }
 
   /**
-   * Extract context keyword from expense description
+   * Extract context keyword from transaction description
    */
   private extractContextFromDescription(description: string): {
     keyword: string;
@@ -161,29 +161,29 @@ export class ExpenseContextParserService {
   }
 
   /**
-   * Get default expense type for couple account
+   * Get default transaction type for couple account
    */
-  private async getCoupleDefaultExpenseType(accountId: string): Promise<CoupleExpenseType> {
+  private async getCoupleDefaultTransactionType(accountId: string): Promise<CoupleTransactionType> {
     const account = await this.accountModel.findById(accountId).populate('coupleSettingsId');
 
     if (account?.coupleSettingsId) {
       const coupleSettings = account.coupleSettingsId as any;
-      return coupleSettings.defaultExpenseType || CoupleExpenseType.SHARED;
+      return coupleSettings.defaultTransactionType || CoupleTransactionType.SHARED;
     }
 
-    return CoupleExpenseType.SHARED; // Default fallback
+    return CoupleTransactionType.SHARED; // Default fallback
   }
 
   /**
-   * Batch parse multiple expense descriptions
+   * Batch parse multiple transaction descriptions
    */
-  async batchParseExpenseContexts(
+  async batchParseTransactionContexts(
     descriptions: { description: string; id?: string }[],
     userId: string
-  ): Promise<Array<ParsedExpenseContext & { id?: string }>> {
+  ): Promise<Array<ParsedTransactionContext & { id?: string }>> {
     const results = await Promise.all(
       descriptions.map(async ({ description, id }) => ({
-        ...(await this.parseExpenseContext(description, userId)),
+        ...(await this.parseTransactionContext(description, userId)),
         id
       }))
     );
@@ -192,7 +192,7 @@ export class ExpenseContextParserService {
   }
 
   /**
-   * Suggest context based on expense content and user history
+   * Suggest context based on transaction content and user history
    */
   async suggestContext(
     description: string,
@@ -246,7 +246,7 @@ export class ExpenseContextParserService {
       });
     }
 
-    // Couple-related keywords (shared expenses)
+    // Couple-related keywords (shared transactions)
     const coupleKeywords = ['dinner', 'groceries', 'rent', 'utilities', 'vacation', 'movie', 'date'];
     const hasCoupleKeywords = coupleKeywords.some(keyword => descLower.includes(keyword));
 
@@ -254,16 +254,16 @@ export class ExpenseContextParserService {
       suggestions.push({
         suggestedContext: 'couple',
         confidence: 0.6,
-        reason: 'Typical shared expense category'
+        reason: 'Typical shared transaction category'
       });
     }
 
-    // High amounts might suggest shared expenses
+    // High amounts might suggest shared transactions
     if (amount > 100 && userAccounts.some(acc => acc.type === AccountType.COUPLE)) {
       suggestions.push({
         suggestedContext: 'couple',
         confidence: 0.5,
-        reason: 'High amount suggests shared expense'
+        reason: 'High amount suggests shared transaction'
       });
     }
 
@@ -282,7 +282,7 @@ export class ExpenseContextParserService {
   /**
    * Validate and clean parsed context data
    */
-  validateParsedContext(parsedContext: ParsedExpenseContext, userId: string): { isValid: boolean; errors: string[] } {
+  validateParsedContext(parsedContext: ParsedTransactionContext, userId: string): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     // Validate confidence score
@@ -296,11 +296,11 @@ export class ExpenseContextParserService {
       errors.push('Invalid context value');
     }
 
-    // Validate expense type for couple context
-    if (parsedContext.context === 'couple' && parsedContext.expenseType) {
-      const validExpenseTypes = Object.values(CoupleExpenseType);
-      if (!validExpenseTypes.includes(parsedContext.expenseType)) {
-        errors.push('Invalid expense type for couple context');
+    // Validate transaction type for couple context
+    if (parsedContext.context === 'couple' && parsedContext.transactionType) {
+      const validTransactionTypes = Object.values(CoupleTransactionType);
+      if (!validTransactionTypes.includes(parsedContext.transactionType)) {
+        errors.push('Invalid transaction type for couple context');
       }
     }
 

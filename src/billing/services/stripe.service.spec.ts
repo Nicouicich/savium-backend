@@ -299,7 +299,7 @@ describe('StripeService - Unit Tests', () => {
         'stripe.subscription.automaticTax': false,
         'stripe.products.personal.priceId': 'price_personal',
         'stripe.products.personal.productId': 'prod_personal',
-        'stripe.products.personal.features': ['basic_analytics', 'expense_tracking']
+        'stripe.products.personal.features': ['basic_analytics', 'transaction_tracking']
       };
       return config[key];
     });

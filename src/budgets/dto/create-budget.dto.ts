@@ -18,7 +18,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 import { AlertType, BudgetPeriod } from '../schemas/budget.schema';
 
 export class CreateBudgetAlertDto {
@@ -80,10 +80,10 @@ export class CreateCategoryBudgetDto {
   @ArrayMaxSize(5)
   alerts?: CreateBudgetAlertDto[];
 
-  @ApiPropertyOptional({ description: 'Whether to automatically track expenses for this category', example: true })
+  @ApiPropertyOptional({ description: 'Whether to automatically track transactions for this category', example: true })
   @IsOptional()
   @IsBoolean()
-  trackExpenses?: boolean;
+  trackTransactions?: boolean;
 }
 
 export class CreateBudgetDto {
@@ -102,7 +102,7 @@ export class CreateBudgetDto {
 
   @ApiPropertyOptional({
     description: 'Budget description',
-    example: 'Budget for regular household expenses including food, utilities, and entertainment',
+    example: 'Budget for regular household transactions including food, utilities, and entertainment',
     maxLength: 500
   })
   @IsOptional()

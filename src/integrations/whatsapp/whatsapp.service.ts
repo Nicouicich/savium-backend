@@ -1,43 +1,27 @@
+import { RequestContextService } from '@common/interceptors/request-context';
+import { LogFormatter } from '@common/utils/log-formatter';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import axios from 'axios';
-import { User, UserDocument } from '../../users/schemas/user.schema';
-import { UserProfile, UserProfileDocument } from '../../users/schemas/user-profile.schema';
-import { MessageProcessorService, UnifiedMessage } from '../ai/message-processor.service';
-import { MessagingFileService } from '../../files/services/messaging-file.service';
-import { ReceiptProcessorService } from '../ai/receipt-processor.service';
-import { FilePurpose } from '../../files/schemas/file-metadata.schema';
-import { ExpensesService } from '../../expenses/expenses.service';
+import { Model } from 'mongoose';
 import { AccountsService } from '../../accounts/accounts.service';
-import { RequestContextService } from '@common/interceptors/request-context';
-import { BusinessException } from '@common/exceptions/business.exception';
-import { ErrorCode } from '@common/constants/error-codes';
+import { MessagingFileService } from '../../files/services/messaging-file.service';
+import { UserProfile } from '../../users/schemas/user-profile.schema';
+import { User, UserDocument } from '../../users/schemas/user.schema';
+import { AiService } from '../ai/ai.service';
+import { MessageProcessorService, UnifiedMessage } from '../ai/message-processor.service';
+import { ReceiptProcessorService } from '../ai/receipt-processor.service';
+import { WhatsAppMessageDto, WhatsAppWebhookDto } from './dto/whatsapp-webhook.dto';
+import { UsersService } from 'src/users/users.service';
+import { TransactionsService } from 'src/transactions/transactions.service';
 
 interface WhatsAppMessage {
   from: string;
   body: string;
-  timestamp: Date;
+  timestamp: Date | null;
   mediaUrl?: string;
   mediaType?: string;
-}
-
-interface WebhookPayload {
-  object: string;
-  entry: Array<{
-    id: string;
-    changes: Array<{
-      value: {
-        messaging_product: string;
-        metadata: any;
-        contacts?: any[];
-        messages?: any[];
-        statuses?: any[];
-      };
-      field: string;
-    }>;
-  }>;
 }
 
 @Injectable()
@@ -48,129 +32,75 @@ export class WhatsappService {
   private readonly phoneNumberId: string | undefined;
   private readonly verifyToken: string | undefined;
 
-  constructor(
+  constructor (
     private configService: ConfigService,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(UserProfile.name) private userProfileModel,
     private messageProcessor: MessageProcessorService,
+    private userService: UsersService,
+
     private messagingFileService: MessagingFileService,
     private receiptProcessorService: ReceiptProcessorService,
-    private expensesService: ExpensesService,
-    private accountsService: AccountsService
+    private transactionsService: TransactionsService,
+    private accountsService: AccountsService,
+    private aiService: AiService
   ) {
     this.accessToken = this.configService.get('WHATSAPP_ACCESS_TOKEN');
     this.phoneNumberId = this.configService.get('WHATSAPP_PHONE_NUMBER_ID');
     this.verifyToken = this.configService.get('WHATSAPP_VERIFY_TOKEN');
 
-    this.logger.debug('WhatsApp service initialized', {
-      hasAccessToken: !!this.accessToken,
-      hasPhoneNumberId: !!this.phoneNumberId,
-      hasVerifyToken: !!this.verifyToken
-    });
+    this.logger.debug(
+      LogFormatter.format('WhatsApp service initialized', {
+        hasAccessToken: !!this.accessToken,
+        hasPhoneNumberId: !!this.phoneNumberId,
+        hasVerifyToken: !!this.verifyToken
+      })
+    );
   }
 
-  async handleWebhook(payload: WebhookPayload): Promise<{ processed: boolean; message: string }> {
+  async handleWebhook(payload: WhatsAppWebhookDto): Promise<void> {
     const traceId = RequestContextService.getTraceId() || `webhook_${Date.now()}`;
 
-    try {
-      // Validate webhook payload structure
-      if (!payload || typeof payload !== 'object') {
-        this.logger.warn('Invalid webhook payload: not an object', { traceId });
-        return { processed: false, message: 'Invalid payload structure' };
-      }
-
-      if (!payload.entry || !Array.isArray(payload.entry) || payload.entry.length === 0) {
-        this.logger.warn('Invalid webhook payload: missing or empty entry array', { traceId });
-        return { processed: false, message: 'Missing entry data' };
-      }
-
-      // Process each entry
-      let messagesProcessed = 0;
-      for (const entry of payload.entry) {
-        if (!entry.changes || !Array.isArray(entry.changes)) {
-          continue;
+    const messages = payload.getMessages();
+    if (!messages) return;
+    await Promise.all(
+      messages.map((message: WhatsAppMessageDto) => {
+        if (!message) return;
+        try {
+          this.processMessage({
+            from: message.from,
+            body: message.text?.body || message.caption || '',
+            timestamp: message.timestamp ? new Date(parseInt(message.timestamp) * 1000) : null,
+            mediaUrl: message.image?.id || message.document?.id || message.audio?.id,
+            mediaType: message.type || 'text'
+          });
+        } catch (error) {
+          this.logger.error({ error, traceId });
         }
-
-        for (const change of entry.changes) {
-          if (!change.value?.messages || !Array.isArray(change.value.messages)) {
-            continue;
-          }
-
-          for (const message of change.value.messages) {
-            try {
-              // Validate message structure
-              if (!message.from || !message.timestamp) {
-                this.logger.warn('Invalid message structure in webhook', {
-                  messageId: message.id,
-                  traceId
-                });
-                continue;
-              }
-
-              await this.processMessage({
-                from: message.from,
-                body: message.text?.body || message.caption || '',
-                timestamp: new Date(parseInt(message.timestamp) * 1000),
-                mediaUrl: message.image?.id || message.document?.id || message.audio?.id,
-                mediaType: message.type || 'text'
-              });
-
-              messagesProcessed++;
-            } catch (error) {
-              this.logger.error('Error processing individual message from webhook', {
-                messageId: message.id,
-                error: error.message,
-                traceId
-              });
-            }
-          }
-        }
-      }
-
-      this.logger.log('Webhook processed successfully', {
-        messagesProcessed,
-        traceId
-      });
-
-      return {
-        processed: true,
-        message: `Processed ${messagesProcessed} messages`
-      };
-    } catch (error) {
-      this.logger.error('Error processing webhook payload', {
-        error: error.message,
-        stack: error.stack,
-        traceId
-      });
-
-      return {
-        processed: false,
-        message: 'Internal processing error'
-      };
-    }
+      })
+    );
   }
 
   async processMessage(message: WhatsAppMessage): Promise<void> {
     const traceId = RequestContextService.getTraceId() || `whatsapp_${Date.now()}`;
 
-    this.logger.log('📱 WhatsApp message received:', {
-      from: this.maskPhoneNumber(message.from),
-      body: message.body?.substring(0, 100), // Limit body length in logs
-      timestamp: message.timestamp,
-      hasMedia: !!message.mediaUrl,
-      mediaType: message.mediaType,
-      traceId
-    });
+    this.logger.log(
+      LogFormatter.whatsappMessage('📱 WhatsApp message received', {
+        from: this.maskPhoneNumber(message.from),
+        body: message.body,
+        timestamp: message.timestamp,
+        hasMedia: !!message.mediaUrl,
+        mediaType: message.mediaType,
+        traceId
+      })
+    );
 
     try {
       // First, try to find user by phone number
-      const user = await this.findUserByPhoneNumber(message.from);
+      const user: UserDocument | null = await this.userService.getFullUserDataByPhoneNumber(`+${message.from}`);
 
       if (!user) {
         await this.handleUnknownUser(message.from, message.body, traceId);
         return;
       }
-
       // Set user context for request tracing
       RequestContextService.updateContext({ userId: user.id });
 
@@ -187,16 +117,17 @@ export class WhatsappService {
         platform: 'whatsapp',
         chatId: message.from, // For WhatsApp, phone number acts as chat ID
         messageId: `whatsapp_${traceId}`,
-        userId: user.id
+        userDefaultCurrency: user.preferences.display.currency,
+        user: user // Pass the full user object to avoid extra query
       };
 
+      // TODO: Temporarily commented out for testing WhatsApp without AI
       // Process message with centralized AI service
-      const result = await this.messageProcessor.processMessage(unifiedMessage);
 
+      const result = await this.messageProcessor.processMessage(unifiedMessage);
       if (result.success && result.responseText) {
-        // Translate response to user's language if needed
-        const responseText = await this.translateResponse(result.responseText, userLanguage);
-        await this.sendMessage(message.from, responseText);
+        // AI already responds in user's language, no translation needed
+        await this.sendMessage(`+${'54299154047906'}`, result.responseText);
 
         // Log the action taken
         if (result.actionTaken) {
@@ -208,10 +139,23 @@ export class WhatsappService {
           });
         }
       } else if (result.error) {
-        const errorMessage = await this.translateResponse(result.responseText || 'Hubo un error procesando tu mensaje.', userLanguage);
-        await this.sendMessage(message.from, errorMessage);
+        // Send error message (AI should have provided responseText)
+        const errorMessage = result.responseText || '❌ Lo siento, hubo un problema procesando tu mensaje. Por favor intenta de nuevo.';
+        await this.sendMessage(`+${'54299154047906'}`, errorMessage);
       }
+
+      // Simple test response for WhatsApp testing
+      /*       const testResponse = `✅ ¡Hola Nico! Mensaje recibido: "${message.body}" - WhatsApp funciona correctamente 🚀`;
+      await this.sendMessage('+54299154047906', testResponse); */
+
+      this.logger.log('WhatsApp test response sent', {
+        from: this.maskPhoneNumber(message.from),
+        userId: user.id,
+        messageReceived: message.body,
+        traceId
+      });
     } catch (error) {
+      console.log(error);
       this.logger.error('Error processing WhatsApp message:', {
         error: error.message,
         stack: error.stack,
@@ -220,14 +164,14 @@ export class WhatsappService {
       });
 
       // Send generic error message in Spanish by default
-      await this.sendMessage(message.from, '❌ Lo siento, hubo un problema procesando tu mensaje. Por favor intenta de nuevo.');
+      await this.sendMessage(`+${'54299154047906'}`, '❌ Lo siento, hubo un problema procesando tu mensaje. Por favor intenta de nuevo.');
     }
   }
 
   // Public method for sending custom messages (used by AI service)
   async respondWithCustomMessage(phoneNumber: string, message: string): Promise<boolean> {
     try {
-      await this.sendMessage(phoneNumber, message);
+      await this.sendMessage('+54299154047906', message);
       return true;
     } catch (error) {
       this.logger.error('Error sending WhatsApp message:', {
@@ -255,7 +199,6 @@ export class WhatsappService {
     }
   }
 
-
   async sendMessage(to: string, message: string): Promise<void> {
     if (!this.accessToken || !this.phoneNumberId) {
       this.logger.warn('WhatsApp credentials not configured, message not sent', {
@@ -266,11 +209,14 @@ export class WhatsappService {
     }
 
     try {
+      // Format phone number for WhatsApp (adds "15" for Argentina)
+      const whatsappFormattedPhone = this.formatPhoneForWhatsApp(to);
+
       const url = `${this.whatsappApiUrl}/${this.phoneNumberId}/messages`;
 
       const payload = {
         messaging_product: 'whatsapp',
-        to: to,
+        to: whatsappFormattedPhone,
         type: 'text',
         text: {
           body: message
@@ -283,7 +229,8 @@ export class WhatsappService {
       };
 
       this.logger.debug('Sending WhatsApp message', {
-        to: this.maskPhoneNumber(to),
+        originalPhone: this.maskPhoneNumber(to),
+        whatsappPhone: this.maskPhoneNumber(whatsappFormattedPhone),
         messageLength: message.length,
         url
       });
@@ -296,12 +243,13 @@ export class WhatsappService {
         status: response.status
       });
     } catch (error) {
-      this.logger.error('Failed to send WhatsApp message', {
-        to: this.maskPhoneNumber(to),
-        error: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
+      this.logger.error(
+        LogFormatter.apiOperation('Failed to send WhatsApp message', {
+          to: this.maskPhoneNumber(to),
+          error: error.message,
+          status: error.response?.status
+        })
+      );
 
       // Check if error is due to recipient not in allowed list (development mode)
       if (error.response?.status === 400 && error.response?.data?.error?.code === 131030) {
@@ -321,17 +269,18 @@ export class WhatsappService {
 
       // Fallback logging in development for other errors
       if (process.env.NODE_ENV === 'development') {
-        this.logger.debug('[FALLBACK] WhatsApp message failed, logged for development', {
-          to: this.maskPhoneNumber(to),
-          messageLength: message?.length || 0,
-          errorStatus: error.response?.status
-        });
+        this.logger.debug(
+          LogFormatter.apiOperation('[FALLBACK] WhatsApp message failed, logged for development', {
+            to: this.maskPhoneNumber(to),
+            messageLength: message?.length || 0,
+            errorStatus: error.response?.status
+          })
+        );
       }
 
       throw new Error(`Failed to send WhatsApp message: ${error.message}`);
     }
   }
-
 
   verifyWebhook(mode: string, token: string, challenge: string): string | null {
     this.logger.debug('WhatsApp webhook verification attempt', {
@@ -376,23 +325,24 @@ export class WhatsappService {
         'WhatsApp Business API integration ready',
         'Real message sending/receiving',
         'Webhook verification',
-        'Expense command processing',
+        'Transaction command processing',
         'Receipt image handling structure',
         'Message parsing and AI integration'
       ],
       limitations: isConfigured
-        ? ['Receipt image processing requires AI service integration', 'Expense categorization needs AI configuration']
+        ? ['Receipt image processing requires AI service integration', 'Transaction categorization needs AI configuration']
         : ['WhatsApp Business API credentials not configured', 'Set WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN in .env']
     };
   }
 
   private async handleUnknownUser(phoneNumber: string, messageBody: string, traceId: string): Promise<void> {
     try {
-      this.logger.warn('Unregistered WhatsApp user attempted contact', {
-        phoneNumber: this.maskPhoneNumber(phoneNumber),
-        messageBody: messageBody?.substring(0, 100),
-        traceId
-      });
+      this.logger.warn(
+        LogFormatter.userOperation('Unregistered WhatsApp user attempted contact', {
+          phoneNumber: this.maskPhoneNumber(phoneNumber),
+          traceId
+        })
+      );
 
       // Send helpful message in Spanish and English
       const helpMessage = [
@@ -421,150 +371,44 @@ export class WhatsappService {
         phoneNumber
       ].join('\n');
 
-      await this.sendMessage(phoneNumber, helpMessage);
+      await this.sendMessage('+54299154047906', helpMessage);
 
       // TODO: Optionally create a lead/prospect record for marketing follow-up
       // await this.marketingService.createProspect({ phoneNumber, source: 'whatsapp' });
     } catch (error) {
-      this.logger.error('Error handling unknown user:', {
-        phoneNumber: this.maskPhoneNumber(phoneNumber),
-        error: error.message,
-        traceId
-      });
-    }
-  }
-
-  async findUserByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
-    try {
-      // Clean the phone number (remove non-digits, ensure + prefix)
-      const cleanedPhoneNumber = this.cleanPhoneNumber(phoneNumber);
-      const phoneWithoutPlus = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber.substring(1) : cleanedPhoneNumber;
-      const phoneWithPlus = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber : '+' + cleanedPhoneNumber;
-
-      // Single query with $or operator for all lookup strategies with timeout
-      const user = await Promise.race([
-        this.userModel.findOne({
-          $or: [
-            { 'messagingIntegrations.whatsapp.phoneNumber': cleanedPhoneNumber },
-            { phoneNumber: cleanedPhoneNumber },
-            { phoneNumber: phoneWithoutPlus },
-            { phoneNumber: phoneWithPlus }
-          ]
-        }).populate('activeProfile').exec(),
-        new Promise<null>((_, reject) =>
-          setTimeout(() => reject(new Error('Database query timeout')), 5000)
-        )
-      ]);
-
-      if (user) {
-        this.logger.log('User found by phone number', {
-          phoneNumber: this.maskPhoneNumber(cleanedPhoneNumber),
-          userId: user.id
-        });
-        return user;
-      }
-
-      this.logger.warn('No user found for phone number', {
-        phoneNumber: this.maskPhoneNumber(cleanedPhoneNumber)
-      });
-
-      return null;
-    } catch (error) {
-      // Handle specific database errors
-      if (error.name === 'MongooseError' || error.name === 'MongoError') {
-        this.logger.error('Database error during user lookup:', {
+      this.logger.error(
+        LogFormatter.userOperation('Error handling unknown user', {
           phoneNumber: this.maskPhoneNumber(phoneNumber),
-          error: error.message,
-          errorType: error.name
-        });
-      } else if (error.message === 'Database query timeout') {
-        this.logger.error('Database query timeout during user lookup:', {
-          phoneNumber: this.maskPhoneNumber(phoneNumber),
-          timeout: '5000ms'
-        });
-      } else {
-        this.logger.error('Unexpected error finding user by phone number:', {
-          phoneNumber: this.maskPhoneNumber(phoneNumber),
-          error: error.message,
-          stack: error.stack
-        });
-      }
-
-      return null;
+          traceId
+        })
+      );
     }
   }
 
   /**
-   * Gets the active account ID for a user based on their active profile
-   * Falls back to first account if no active profile or associated accounts
+   * Format phone number for WhatsApp sending - add '15' for Argentina mobile numbers
    */
-  private async getUserActiveAccountId(user: UserDocument): Promise<string | null> {
-    try {
-      // First, try to get the active profile and its associated accounts
-      if (user.activeProfileId) {
-        const activeProfile = await Promise.race([
-          this.userProfileModel.findById(user.activeProfileId),
-          new Promise<null>((_, reject) =>
-            setTimeout(() => reject(new Error('Database query timeout')), 3000)
-          )
-        ]);
-
-        if (activeProfile && activeProfile.associatedAccounts?.length > 0) {
-          return activeProfile.associatedAccounts[0].toString();
-        }
-      }
-
-      // Fallback: use the first account from user's accounts array
-      if (user.accounts && user.accounts.length > 0) {
-        return user.accounts[0].toString();
-      }
-
-      // No accounts available
-      this.logger.warn('User has no accounts available', { userId: user.id });
-      return null;
-    } catch (error) {
-      // Handle specific database errors
-      if (error.name === 'MongooseError' || error.name === 'MongoError') {
-        this.logger.error('Database error getting user active account ID:', {
-          userId: user.id,
-          error: error.message,
-          errorType: error.name
-        });
-      } else if (error.message === 'Database query timeout') {
-        this.logger.error('Database timeout getting user active account ID:', {
-          userId: user.id,
-          timeout: '3000ms'
-        });
-      } else {
-        this.logger.error('Unexpected error getting user active account ID:', {
-          userId: user.id,
-          error: error.message,
-          stack: error.stack
-        });
-      }
-
-      // Fallback to user's first account if profile lookup fails
-      if (user.accounts && user.accounts.length > 0) {
-        this.logger.warn('Falling back to first account due to profile lookup error', {
-          userId: user.id
-        });
-        return user.accounts[0].toString();
-      }
-
-      return null;
-    }
-  }
-
-  /**
-   * Clean and normalize phone number for consistent lookup
-   */
-  private cleanPhoneNumber(phoneNumber: string): string {
-    // Remove all non-digit characters except +
+  private formatPhoneForWhatsApp(phoneNumber: string): string {
+    // Simple phone number cleaning
     let cleaned = phoneNumber.replace(/[^\d+]/g, '');
-
-    // Ensure it starts with + for international format
     if (!cleaned.startsWith('+')) {
       cleaned = '+' + cleaned;
+    }
+
+    // Handle Argentina phone numbers: WhatsApp API requires "15" for mobile numbers
+    // Convert +54299154047906 to +5429915404790 for sending
+    if (cleaned.startsWith('+542') && cleaned.length === 13) {
+      // Add the "15" prefix: +54299154047906 -> +5429915404790
+      const areaCode = cleaned.substring(3, 6); // "299"
+      const phoneNumber = cleaned.substring(6); // "4047906"
+      const whatsappFormat = `+549${areaCode}15${phoneNumber}`;
+
+      this.logger.debug('Argentina phone formatting for WhatsApp', {
+        original: cleaned,
+        whatsappFormat: whatsappFormat
+      });
+
+      return whatsappFormat;
     }
 
     return cleaned;
@@ -582,7 +426,7 @@ export class WhatsappService {
     const start = phoneNumber.substring(0, 3);
     const end = phoneNumber.substring(phoneNumber.length - 3);
     const middle = '*'.repeat(Math.max(0, phoneNumber.length - 6));
-
+    return phoneNumber;
     return `${start}${middle}${end}`;
   }
 
@@ -597,14 +441,14 @@ export class WhatsappService {
       // Enhanced translation map for common WhatsApp responses
       const translations: Record<string, string> = {
         // General terms
-        'gasté': 'spent',
-        'gasto': 'expense',
-        'creado': 'created',
-        'procesando': 'processing',
-        'recibido': 'received',
-        'guardado': 'saved',
-        'analizado': 'analyzed',
-        'detectado': 'detected',
+        gasté: 'spent',
+        gasto: 'transaction',
+        creado: 'created',
+        procesando: 'processing',
+        recibido: 'received',
+        guardado: 'saved',
+        analizado: 'analyzed',
+        detectado: 'detected',
 
         // Error messages
         'Hubo un error': 'There was an error',
@@ -613,15 +457,15 @@ export class WhatsappService {
         'de nuevo': 'again',
 
         // Success messages
-        'exitosamente': 'successfully',
+        exitosamente: 'successfully',
         '¡Perfecto!': 'Perfect!',
         '¡Excelente!': 'Excellent!',
 
         // Categories and amounts
-        'Monto': 'Amount',
-        'Descripción': 'Description',
-        'Categoría': 'Category',
-        'Confianza': 'Confidence',
+        Monto: 'Amount',
+        Descripción: 'Description',
+        Categoría: 'Category',
+        Confianza: 'Confidence',
 
         // Instructions
         'Revisa la app': 'Check the app',
@@ -640,10 +484,8 @@ export class WhatsappService {
     return text;
   }
 
-
-
-  private extractExpenseData(text: string): { amount?: number; description?: string } {
-    // Parse expense from text like "25 lunch" or "spent 30 on groceries" or "gasté 45 en cena"
+  private extractTransactionData(text: string): { amount?: number; description?: string; } {
+    // Parse transaction from text like "25 lunch" or "spent 30 on groceries" or "gasté 45 en cena"
     const patterns = [
       /(?:spent|gasté|gaste)\s+(?:\$)?(\d+(?:\.\d{2})?)\s+(?:on|en)\s+(.+)/i,
       /(?:\$)?(\d+(?:\.\d{2})?)\s+(.+)/,
@@ -655,7 +497,7 @@ export class WhatsappService {
       if (match) {
         return {
           amount: parseFloat(match[1]),
-          description: match[2]?.trim() || 'Expense'
+          description: match[2]?.trim() || 'Transaction'
         };
       }
     }

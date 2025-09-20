@@ -27,12 +27,12 @@ export enum ExportFormat {
 
 export class ReportQueryDto {
   @ApiPropertyOptional({
-    description: 'Account ID to generate report for',
+    description: 'Profile ID to generate report for',
     example: '507f1f77bcf86cd799439011'
   })
   @IsOptional()
   @IsString()
-  accountId?: string;
+  profileId?: string;
 
   @ApiPropertyOptional({
     description: 'Report type',
@@ -116,7 +116,7 @@ export class ReportQueryDto {
   includeComparison?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Group expenses by user (for shared accounts)',
+    description: 'Group transactions by user (for shared accounts)',
     example: false
   })
   @IsOptional()

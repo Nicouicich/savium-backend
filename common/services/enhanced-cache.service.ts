@@ -27,7 +27,7 @@ export class EnhancedCacheService {
     misses: 0
   };
 
-  constructor(
+  constructor (
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService
   ) {}
@@ -39,19 +39,19 @@ export class EnhancedCacheService {
     try {
       const namespacedKey = this.buildKey(key, options.namespace);
       const cached = await this.cacheManager.get<string>(namespacedKey);
-      
+
       if (cached !== null && cached !== undefined) {
         this.stats.hits++;
-        
+
         // Decompress if needed
         const value = options.compress ? await this.decompress(cached) : cached;
-        
+
         // Parse JSON if it's a string
         return typeof value === 'string' ? JSON.parse(value) : value;
       }
 
       this.stats.misses++;
-      
+
       // Execute fallback if provided
       if (options.fallback) {
         const fallbackValue = await options.fallback();
@@ -75,7 +75,7 @@ export class EnhancedCacheService {
     try {
       const namespacedKey = this.buildKey(key, options.namespace);
       let serializedValue = JSON.stringify(value);
-      
+
       // Compress large values
       if (options.compress || serializedValue.length > 1024) {
         serializedValue = await this.compress(serializedValue);
@@ -141,12 +141,12 @@ export class EnhancedCacheService {
    * Cache query results with automatic invalidation
    */
   async cacheQuery<T>(
-    queryKey: string, 
-    queryFn: () => Promise<T>, 
+    queryKey: string,
+    queryFn: () => Promise<T>,
     options: CacheOptions = {}
   ): Promise<T> {
     const cached = await this.get<T>(queryKey, options);
-    
+
     if (cached !== null) {
       return cached;
     }
@@ -164,10 +164,10 @@ export class EnhancedCacheService {
     calculationFn: () => Promise<T>,
     ttl = 1800 // 30 minutes
   ): Promise<T> {
-    return this.cacheQuery(calculationKey, calculationFn, { 
-      ttl, 
+    return this.cacheQuery(calculationKey, calculationFn, {
+      ttl,
       namespace: 'calculations',
-      compress: true 
+      compress: true
     });
   }
 
@@ -175,8 +175,8 @@ export class EnhancedCacheService {
    * Cache budget calculations for better performance
    */
   async cacheBudgetCalculation(
-    accountId: string, 
-    period: string, 
+    accountId: string,
+    period: string,
     calculation: () => Promise<any>
   ): Promise<any> {
     const key = `budget:${accountId}:${period}`;
@@ -184,15 +184,15 @@ export class EnhancedCacheService {
   }
 
   /**
-   * Cache expense aggregations
+   * Cache transaction aggregations
    */
-  async cacheExpenseAggregation(
+  async cacheTransactionAggregation(
     accountId: string,
     aggregationType: string,
     timeframe: string,
     aggregation: () => Promise<any>
   ): Promise<any> {
-    const key = `expense_agg:${accountId}:${aggregationType}:${timeframe}`;
+    const key = `transaction_agg:${accountId}:${aggregationType}:${timeframe}`;
     return this.cacheCalculation(key, aggregation);
   }
 
@@ -221,7 +221,7 @@ export class EnhancedCacheService {
       for (const tag of tags) {
         const tagKey = `tag:${tag}`;
         const associatedKeys = await this.cacheManager.get<string[]>(tagKey);
-        
+
         if (associatedKeys && associatedKeys.length > 0) {
           await Promise.all(associatedKeys.map(key => this.cacheManager.del(key)));
           await this.cacheManager.del(tagKey);
@@ -290,13 +290,13 @@ export class EnhancedCacheService {
   async warmUpCache(): Promise<void> {
     try {
       this.logger.log('Starting cache warm-up...');
-      
+
       // This would be implemented based on your specific needs
       // Examples:
       // - Pre-load active user sessions
-      // - Pre-calculate common expense aggregations
+      // - Pre-calculate common transaction aggregations
       // - Pre-load account settings
-      
+
       this.logger.log('Cache warm-up completed');
     } catch (error) {
       this.logger.error('Error during cache warm-up:', error);
@@ -313,17 +313,17 @@ export class EnhancedCacheService {
   ): Promise<T> {
     // Try cache first
     let data = await this.get<T>(key, options);
-    
+
     if (data === null) {
       // Cache miss - fetch from database
       data = await databaseQuery();
-      
+
       if (data !== null) {
         // Store in cache for next time
         await this.set(key, data, options);
       }
     }
-    
+
     return data as T;
   }
 
@@ -339,7 +339,7 @@ export class EnhancedCacheService {
     try {
       // Write to database first
       await databaseWrite(data);
-      
+
       // Then update cache
       await this.set(key, data, options);
     } catch (error) {
@@ -360,7 +360,7 @@ export class EnhancedCacheService {
     try {
       // Update cache immediately
       await this.set(key, data, options);
-      
+
       // Schedule database write (could use a queue in production)
       setImmediate(async () => {
         try {
@@ -416,20 +416,20 @@ export class EnhancedCacheService {
     error?: string;
   }> {
     const start = Date.now();
-    
+
     try {
       const testKey = 'health_check';
       const testValue = { timestamp: Date.now() };
-      
+
       await this.set(testKey, testValue, { ttl: 30 });
       const retrieved = await this.get(testKey);
-      
+
       if (JSON.stringify(retrieved) !== JSON.stringify(testValue)) {
         throw new Error('Cache read/write mismatch');
       }
-      
+
       await this.delete(testKey);
-      
+
       return {
         status: 'healthy',
         latency: Date.now() - start

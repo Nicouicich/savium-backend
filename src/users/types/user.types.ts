@@ -22,20 +22,7 @@ export interface IUser {
   }>;
   oauthProvider?: string;
   oauthProviderId?: string;
-  messagingIntegrations?: {
-    telegram?: {
-      chatId?: string;
-      username?: string;
-      firstName?: string;
-      lastName?: string;
-      connectedAt?: Date;
-    };
-    whatsapp?: {
-      phoneNumber?: string;
-      name?: string;
-      connectedAt?: Date;
-    };
-  };
+  telegramChatId?: string;
   activeProfileId?: Types.ObjectId;
   profiles: Types.ObjectId[];
   preferences: {
@@ -96,7 +83,6 @@ export interface UserPublicInfo {
   phoneNumber?: string;
   isPhoneVerified?: boolean;
   preferences: IUser['preferences'];
-  accounts: string[]; // MongoDB ObjectId strings
   status: IUser['status'];
   createdAt: Date;
   updatedAt: Date;

@@ -31,6 +31,8 @@ import { HealthCheckService } from './services/health-check.service';
 import { TokenBlacklistService } from './services/token-blacklist.service';
 import { TwoFactorAuthService } from './services/two-factor-auth.service';
 import { SmsVerificationService } from './services/sms-verification.service';
+import { EncryptionService } from '../src/common/services/encryption.service';
+import { RequestContextService } from '../src/common/services/request-context.service';
 
 // Filters
 import { HttpExceptionFilter } from './filters/http-exception.filter';
@@ -45,7 +47,8 @@ export * from './decorators/validation.decorator';
 // Constants and Enums
 export * from './constants/account-types';
 export * from './constants/user-roles';
-export * from './constants/expense-categories';
+export * from './constants/transaction-categories';
+export * from './constants/card-types';
 
 // Utils
 export * from './utils/pagination.util';
@@ -68,6 +71,10 @@ export * from './services/token-blacklist.service';
 export * from './services/two-factor-auth.service';
 export * from './services/sms-verification.service';
 export * from './guards/two-factor-auth.guard';
+
+// Card management services
+export * from '../src/common/services/encryption.service';
+export * from '../src/common/services/request-context.service';
 
 @Global()
 @Module({
@@ -127,6 +134,8 @@ export * from './guards/two-factor-auth.guard';
     TokenBlacklistService,
     TwoFactorAuthService,
     SmsVerificationService,
+    EncryptionService,
+    RequestContextService,
   ],
   exports: [
     JwtAuthGuard,
@@ -146,6 +155,8 @@ export * from './guards/two-factor-auth.guard';
     TokenBlacklistService,
     TwoFactorAuthService,
     SmsVerificationService,
+    EncryptionService,
+    RequestContextService,
   ],
 })
 export class CommonModule {}

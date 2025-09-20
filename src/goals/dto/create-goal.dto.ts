@@ -16,7 +16,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 import { GoalPriority, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class CreateGoalMilestoneDto {
@@ -91,7 +91,7 @@ export class CreateGoalSettingsDto {
   reminderDaysBefore?: number;
 
   @ApiPropertyOptional({
-    description: 'Automatically track progress based on expenses/savings',
+    description: 'Automatically track progress based on transactions/savings',
     example: true
   })
   @IsOptional()
@@ -115,7 +115,7 @@ export class CreateGoalSettingsDto {
   showInDashboard?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Make this goal private in shared accounts',
+    description: 'Make this goal private in shared profiles',
     example: false
   })
   @IsOptional()
@@ -159,7 +159,7 @@ export class CreateGoalDto {
 
   @ApiPropertyOptional({
     description: 'Goal description',
-    example: 'Build an emergency fund to cover 6 months of expenses',
+    example: 'Build an emergency fund to cover 6 months of transactions',
     maxLength: 1000
   })
   @IsOptional()
@@ -168,11 +168,11 @@ export class CreateGoalDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Account ID this goal belongs to',
+    description: 'Profile ID this goal belongs to',
     example: '507f1f77bcf86cd799439011'
   })
   @IsString()
-  accountId: string;
+  profileId: string;
 
   @ApiProperty({
     description: 'Type of goal',

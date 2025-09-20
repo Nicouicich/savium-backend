@@ -8,12 +8,12 @@ export class UpdateMemberDto {
   @IsEnum(AccountRole)
   role?: AccountRole;
 
-  @ApiPropertyOptional({ description: 'New expense limit for the member (0 means no limit)', example: 2000, minimum: 0, maximum: 1000000 })
+  @ApiPropertyOptional({ description: 'New transaction limit for the member (0 means no limit)', example: 2000, minimum: 0, maximum: 1000000 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(1000000)
-  expenseLimit?: number;
+  transactionLimit?: number;
 
   @ApiPropertyOptional({ description: 'Active status of the member', example: true })
   @IsOptional()

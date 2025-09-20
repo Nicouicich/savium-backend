@@ -218,8 +218,8 @@ export class CouplePremiumService {
       jointEvolutionPanel: 'Joint financial evolution dashboard with trends and insights',
       downloadableReports: 'Download detailed financial reports and statements',
       advancedAnalytics: 'AI-powered insights and behavioral analytics',
-      unlimitedComments: 'Unlimited comments on expenses and transactions',
-      customCategories: 'Create custom expense categories tailored to your needs'
+      unlimitedComments: 'Unlimited comments on transactions and transactions',
+      customCategories: 'Create custom transaction categories tailored to your needs'
     };
 
     const featureLimitations: Record<keyof CoupePremiumFeatures, string[]> = {
@@ -228,7 +228,7 @@ export class CouplePremiumService {
       jointEvolutionPanel: ['Basic dashboard view', 'No advanced charts'],
       downloadableReports: ['No report downloads', 'View-only access'],
       advancedAnalytics: ['Basic analytics only', 'No AI insights'],
-      unlimitedComments: ['Limited to 10 comments per expense', 'Basic emoji reactions only'],
+      unlimitedComments: ['Limited to 10 comments per transaction', 'Basic emoji reactions only'],
       customCategories: ['Standard categories only', 'Cannot create custom categories']
     };
 
@@ -408,7 +408,7 @@ export class CouplePremiumService {
       return {
         benefit: 'Upgrade to Premium for advanced couple features',
         cost: 9.99, // Mock pricing
-        features: ['Unlimited comments and reactions', 'Custom expense categories', 'Enhanced analytics']
+        features: ['Unlimited comments and reactions', 'Custom transaction categories', 'Enhanced analytics']
       };
     } else {
       return {

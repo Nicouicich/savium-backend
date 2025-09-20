@@ -48,10 +48,10 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       accountId = accountResponse.body.id;
 
-      // Step 3: Create Expense Categories
+      // Step 3: Create Transaction Categories
       const categoryData = TestDataFactory.createCategoryData(accountId, {
         name: 'Groceries',
-        type: 'expense'
+        type: 'transaction'
       });
 
       const categoryResponse = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/categories').send(categoryData).expect(201);
@@ -79,25 +79,25 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       const budgetId = budgetResponse.body.id;
 
-      // Step 5: Add Multiple Expenses
-      const expenses = [
+      // Step 5: Add Multiple Transactions
+      const transactions = [
         { amount: 45.5, description: 'Weekly grocery shopping', categoryId },
         { amount: 12.75, description: 'Coffee and snacks', categoryId },
         { amount: 89.2, description: 'Monthly grocery haul', categoryId }
       ];
 
-      const expenseIds: string[] = [];
+      const transactionIds: string[] = [];
 
-      for (const expenseData of expenses) {
-        const fullExpenseData = TestDataFactory.createExpenseData(accountId, userId, expenseData);
+      for (const transactionData of transactions) {
+        const fullTransactionData = TestDataFactory.createTransactionData(accountId, userId, transactionData);
 
-        const expenseResponse = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(fullExpenseData).expect(201);
+        const transactionResponse = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(fullTransactionData).expect(201);
 
-        expect(expenseResponse.body).toHaveProperty('id');
-        expect(expenseResponse.body.amount).toBeValidMonetaryAmount();
-        expect(expenseResponse.body.description).toBe(expenseData.description);
+        expect(transactionResponse.body).toHaveProperty('id');
+        expect(transactionResponse.body.amount).toBeValidMonetaryAmount();
+        expect(transactionResponse.body.description).toBe(transactionData.description);
 
-        expenseIds.push(expenseResponse.body.id);
+        transactionIds.push(transactionResponse.body.id);
       }
 
       // Step 6: Check Budget Status
@@ -107,13 +107,13 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       expect(budgetStatusResponse.body).toHaveProperty('remainingBudget');
       expect(budgetStatusResponse.body).toHaveProperty('percentageUsed');
 
-      // Total spent should be sum of all expenses
-      const totalExpected = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+      // Total spent should be sum of all transactions
+      const totalExpected = transactions.reduce((sum, exp) => sum + exp.amount, 0);
       expect(budgetStatusResponse.body.totalSpent).toBeCloseTo(totalExpected, 2);
 
-      // Step 7: Generate Expense Report
+      // Step 7: Generate Transaction Report
       const reportResponse = await TestUtils.authenticatedRequest(app, authToken)
-        .get(`/api/v1/reports/expenses`)
+        .get(`/api/v1/reports/transactions`)
         .query({
           accountId,
           startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
@@ -121,35 +121,35 @@ describe('Financial Flow Integration Tests (e2e)', () => {
         })
         .expect(200);
 
-      expect(reportResponse.body).toHaveProperty('totalExpenses');
+      expect(reportResponse.body).toHaveProperty('totalTransactions');
       expect(reportResponse.body).toHaveProperty('categoryBreakdown');
       expect(reportResponse.body).toHaveProperty('monthlyBreakdown');
-      expect(reportResponse.body.totalExpenses).toBeCloseTo(totalExpected, 2);
+      expect(reportResponse.body.totalTransactions).toBeCloseTo(totalExpected, 2);
 
-      // Step 8: Update Expense
-      const updatedExpenseData = {
+      // Step 8: Update Transaction
+      const updatedTransactionData = {
         amount: 95.75,
         description: 'Updated monthly grocery haul'
       };
 
       const updateResponse = await TestUtils.authenticatedRequest(app, authToken)
-        .patch(`/api/v1/expenses/${expenseIds[2]}`)
-        .send(updatedExpenseData)
+        .patch(`/api/v1/transactions/${transactionIds[2]}`)
+        .send(updatedTransactionData)
         .expect(200);
 
       expect(updateResponse.body.amount).toBe(95.75);
-      expect(updateResponse.body.description).toBe(updatedExpenseData.description);
+      expect(updateResponse.body.description).toBe(updatedTransactionData.description);
 
-      // Step 9: Delete Expense
-      await TestUtils.authenticatedRequest(app, authToken).delete(`/api/v1/expenses/${expenseIds[1]}`).expect(200);
+      // Step 9: Delete Transaction
+      await TestUtils.authenticatedRequest(app, authToken).delete(`/api/v1/transactions/${transactionIds[1]}`).expect(200);
 
       // Verify deletion
-      await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/expenses/${expenseIds[1]}`).expect(404);
+      await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/transactions/${transactionIds[1]}`).expect(404);
 
       // Step 10: Get Final Summary
       const summaryResponse = await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/accounts/${accountId}/summary`).expect(200);
 
-      expect(summaryResponse.body).toHaveProperty('totalExpenses');
+      expect(summaryResponse.body).toHaveProperty('totalTransactions');
       expect(summaryResponse.body).toHaveProperty('totalCategories');
       expect(summaryResponse.body).toHaveProperty('activeBudgets');
     });
@@ -185,7 +185,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
         .send({
           email: member.email,
           role: 'CHILD',
-          expenseLimit: 100
+          transactionLimit: 100
         })
         .expect(201);
 
@@ -214,47 +214,47 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       const sharedCategoryId = categoryResponse.body.id;
 
-      // Both users can add expenses to the account
-      const ownerExpense = TestDataFactory.createExpenseData(familyAccountId, ownerId, {
+      // Both users can add transactions to the account
+      const ownerTransaction = TestDataFactory.createTransactionData(familyAccountId, ownerId, {
         categoryId: sharedCategoryId,
         amount: 150,
         description: 'Family dinner'
       });
 
-      const memberExpense = TestDataFactory.createExpenseData(familyAccountId, memberId, {
+      const memberTransaction = TestDataFactory.createTransactionData(familyAccountId, memberId, {
         categoryId: sharedCategoryId,
         amount: 25,
         description: 'School supplies'
       });
 
-      await TestUtils.authenticatedRequest(app, ownerToken).post('/api/v1/expenses').send(ownerExpense).expect(201);
+      await TestUtils.authenticatedRequest(app, ownerToken).post('/api/v1/transactions').send(ownerTransaction).expect(201);
 
-      await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/expenses').send(memberExpense).expect(201);
+      await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/transactions').send(memberTransaction).expect(201);
 
-      // Test expense limit enforcement
-      const overLimitExpense = TestDataFactory.createExpenseData(familyAccountId, memberId, {
+      // Test transaction limit enforcement
+      const overLimitTransaction = TestDataFactory.createTransactionData(familyAccountId, memberId, {
         categoryId: sharedCategoryId,
         amount: 150, // Exceeds the 100 limit set for child
         description: 'Expensive item'
       });
 
-      await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/expenses').send(overLimitExpense).expect(400); // Should be rejected due to expense limit
+      await TestUtils.authenticatedRequest(app, memberToken).post('/api/v1/transactions').send(overLimitTransaction).expect(400); // Should be rejected due to transaction limit
 
-      // Owner can view all expenses
-      const allExpensesResponse = await TestUtils.authenticatedRequest(app, ownerToken)
-        .get('/api/v1/expenses')
+      // Owner can view all transactions
+      const allTransactionsResponse = await TestUtils.authenticatedRequest(app, ownerToken)
+        .get('/api/v1/transactions')
         .query({ accountId: familyAccountId })
         .expect(200);
 
-      expect(allExpensesResponse.body.data).toHaveLength(2);
+      expect(allTransactionsResponse.body.data).toHaveLength(2);
 
-      // Member can view all expenses too (in a family account)
-      const memberExpensesResponse = await TestUtils.authenticatedRequest(app, memberToken)
-        .get('/api/v1/expenses')
+      // Member can view all transactions too (in a family account)
+      const memberTransactionsResponse = await TestUtils.authenticatedRequest(app, memberToken)
+        .get('/api/v1/transactions')
         .query({ accountId: familyAccountId })
         .expect(200);
 
-      expect(memberExpensesResponse.body.data).toHaveLength(2);
+      expect(memberTransactionsResponse.body.data).toHaveLength(2);
     });
 
     it('should handle budget alerts and notifications', async () => {
@@ -292,14 +292,14 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       const budgetId = budgetResponse.body.id;
 
-      // Add expenses up to alert threshold
-      const expense1 = TestDataFactory.createExpenseData(accountId, userId, {
+      // Add transactions up to alert threshold
+      const transaction1 = TestDataFactory.createTransactionData(accountId, userId, {
         categoryId,
         amount: 100,
-        description: 'First expense'
+        description: 'First transaction'
       });
 
-      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expense1).expect(201);
+      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transaction1).expect(201);
 
       // Check budget status - should not be in alert yet
       let budgetStatus = await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/budgets/${budgetId}/status`).expect(200);
@@ -307,14 +307,14 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       expect(budgetStatus.body.percentageUsed).toBeLessThan(75);
       expect(budgetStatus.body.alerts).toHaveLength(0);
 
-      // Add expense that triggers alert
-      const expense2 = TestDataFactory.createExpenseData(accountId, userId, {
+      // Add transaction that triggers alert
+      const transaction2 = TestDataFactory.createTransactionData(accountId, userId, {
         categoryId,
         amount: 60,
-        description: 'Expense triggering alert'
+        description: 'Transaction triggering alert'
       });
 
-      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expense2).expect(201);
+      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transaction2).expect(201);
 
       // Check budget status - should now have alert
       budgetStatus = await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/budgets/${budgetId}/status`).expect(200);
@@ -323,14 +323,14 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       expect(budgetStatus.body.alerts).toHaveLength(1);
       expect(budgetStatus.body.alerts[0].type).toBe('BUDGET_THRESHOLD_EXCEEDED');
 
-      // Add expense that exceeds budget
-      const expense3 = TestDataFactory.createExpenseData(accountId, userId, {
+      // Add transaction that exceeds budget
+      const transaction3 = TestDataFactory.createTransactionData(accountId, userId, {
         categoryId,
         amount: 50,
-        description: 'Expense exceeding budget'
+        description: 'Transaction exceeding budget'
       });
 
-      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expense3).expect(201);
+      await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transaction3).expect(201);
 
       // Check budget status - should have multiple alerts
       budgetStatus = await TestUtils.authenticatedRequest(app, authToken).get(`/api/v1/budgets/${budgetId}/status`).expect(200);
@@ -365,22 +365,22 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       ];
 
       for (const { amount } of invalidAmounts) {
-        const expenseData = {
+        const transactionData = {
           amount,
-          description: 'Test expense',
+          description: 'Test transaction',
           categoryId: testUtils.createTestId(),
           accountId,
           date: new Date().toISOString(),
           currency: 'USD'
         };
 
-        const response = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expenseData);
+        const response = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transactionData);
 
         expect(response.status).toBe(400);
       }
     });
 
-    it('should handle concurrent expense creation', async () => {
+    it('should handle concurrent transaction creation', async () => {
       const accountData = TestDataFactory.createAccountData(userId);
       const accountResponse = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/accounts').send(accountData).expect(201);
 
@@ -391,21 +391,21 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       const categoryId = categoryResponse.body.id;
 
-      // Create multiple expenses concurrently
-      const expensePromises = [];
+      // Create multiple transactions concurrently
+      const transactionPromises = [];
       for (let i = 0; i < 5; i++) {
-        const expenseData = TestDataFactory.createExpenseData(accountId, userId, {
+        const transactionData = TestDataFactory.createTransactionData(accountId, userId, {
           categoryId,
           amount: 10 * (i + 1),
-          description: `Concurrent expense ${i + 1}`
+          description: `Concurrent transaction ${i + 1}`
         });
 
-        const promise = TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expenseData);
+        const promise = TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transactionData);
 
-        expensePromises.push(promise);
+        transactionPromises.push(promise);
       }
 
-      const responses = await Promise.all(expensePromises);
+      const responses = await Promise.all(transactionPromises);
 
       // All should succeed
       responses.forEach(response => {
@@ -413,17 +413,17 @@ describe('Financial Flow Integration Tests (e2e)', () => {
         expect(response.body).toHaveProperty('id');
       });
 
-      // Verify all expenses were created
-      const expensesResponse = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/expenses').query({ accountId }).expect(200);
+      // Verify all transactions were created
+      const transactionsResponse = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/transactions').query({ accountId }).expect(200);
 
-      expect(expensesResponse.body.data).toHaveLength(5);
+      expect(transactionsResponse.body.data).toHaveLength(5);
     });
 
     it('should handle database connection failures gracefully', async () => {
       // This test would require mocking the database connection
       // For now, we'll test the error response structure
 
-      const response = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/expenses/invalid-id').expect(404);
+      const response = await TestUtils.authenticatedRequest(app, authToken).get('/api/v1/transactions/invalid-id').expect(404);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('timestamp');
@@ -444,7 +444,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       accountId = accountResponse.body.id;
     });
 
-    it('should handle bulk expense creation efficiently', async () => {
+    it('should handle bulk transaction creation efficiently', async () => {
       const categoryData = TestDataFactory.createCategoryData(accountId);
       const categoryResponse = await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/categories').send(categoryData).expect(201);
 
@@ -453,15 +453,15 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       const metrics = await TestUtils.measurePerformance(async () => {
         const promises = [];
 
-        // Create 50 expenses
+        // Create 50 transactions
         for (let i = 0; i < 50; i++) {
-          const expenseData = TestDataFactory.createExpenseData(accountId, userId, {
+          const transactionData = TestDataFactory.createTransactionData(accountId, userId, {
             categoryId,
             amount: Math.round((Math.random() * 100 + 10) * 100) / 100,
-            description: `Bulk expense ${i + 1}`
+            description: `Bulk transaction ${i + 1}`
           });
 
-          promises.push(TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expenseData));
+          promises.push(TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transactionData));
         }
 
         const responses = await Promise.all(promises);
@@ -471,7 +471,7 @@ describe('Financial Flow Integration Tests (e2e)', () => {
       expect(metrics.result).toBe(50); // All should succeed
       TestUtils.assertPerformance(metrics, 10000, 50 * 1024 * 1024); // Max 10s, 50MB
 
-      console.log(`Bulk expense creation: ${metrics.duration}ms for 50 expenses`);
+      console.log(`Bulk transaction creation: ${metrics.duration}ms for 50 transactions`);
     });
 
     it('should generate reports efficiently', async () => {
@@ -481,22 +481,22 @@ describe('Financial Flow Integration Tests (e2e)', () => {
 
       const categoryId = categoryResponse.body.id;
 
-      // Add 20 expenses
+      // Add 20 transactions
       for (let i = 0; i < 20; i++) {
-        const expenseData = TestDataFactory.createExpenseData(accountId, userId, {
+        const transactionData = TestDataFactory.createTransactionData(accountId, userId, {
           categoryId,
           amount: Math.round((Math.random() * 100 + 10) * 100) / 100,
-          description: `Test expense ${i + 1}`,
+          description: `Test transaction ${i + 1}`,
           date: testUtils.createTestDate(-i) // Spread across different days
         });
 
-        await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/expenses').send(expenseData).expect(201);
+        await TestUtils.authenticatedRequest(app, authToken).post('/api/v1/transactions').send(transactionData).expect(201);
       }
 
       // Test report generation performance
       const metrics = await TestUtils.measurePerformance(async () => {
         const response = await TestUtils.authenticatedRequest(app, authToken)
-          .get('/api/v1/reports/expenses')
+          .get('/api/v1/reports/transactions')
           .query({
             accountId,
             startDate: testUtils.createTestDate(-30).toISOString(),
@@ -507,11 +507,11 @@ describe('Financial Flow Integration Tests (e2e)', () => {
         return response.body;
       });
 
-      expect(metrics.result).toHaveProperty('totalExpenses');
+      expect(metrics.result).toHaveProperty('totalTransactions');
       expect(metrics.result).toHaveProperty('categoryBreakdown');
       TestUtils.assertPerformance(metrics, 2000, 10 * 1024 * 1024); // Max 2s, 10MB
 
-      console.log(`Report generation: ${metrics.duration}ms for 20 expenses`);
+      console.log(`Report generation: ${metrics.duration}ms for 20 transactions`);
     });
   });
 });

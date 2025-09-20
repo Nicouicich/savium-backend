@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 import { GoalPriority, GoalStatus, GoalType, RecurrenceType } from '../schemas/goal.schema';
 
 export class GoalMilestoneResponseDto {
@@ -53,7 +53,7 @@ export class GoalSettingsResponseDto {
   @ApiProperty({ description: 'Show this goal in dashboard' })
   showInDashboard: boolean;
 
-  @ApiProperty({ description: 'Goal is private in shared accounts' })
+  @ApiProperty({ description: 'Goal is private in shared profiles' })
   isPrivate: boolean;
 
   @ApiProperty({ description: 'Linked category IDs', type: [String] })
@@ -142,11 +142,11 @@ export class GoalResponseDto {
   @ApiPropertyOptional({ description: 'Goal description' })
   description?: string;
 
-  @ApiProperty({ description: 'Account ID' })
-  accountId: string;
+  @ApiProperty({ description: 'Profile ID' })
+  profileId: string;
 
-  @ApiProperty({ description: 'Account name' })
-  accountName: string;
+  @ApiProperty({ description: 'Profile name' })
+  profileName: string;
 
   @ApiProperty({ description: 'User who created the goal' })
   createdBy: {

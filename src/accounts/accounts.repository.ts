@@ -167,7 +167,7 @@ export class AccountsRepository {
       .exec();
   }
 
-  async addMember(accountId: string, userId: string, role: AccountRole, expenseLimit?: number): Promise<AccountDocument | null> {
+  async addMember(accountId: string, userId: string, role: AccountRole, transactionLimit?: number): Promise<AccountDocument | null> {
     return this.accountModel
       .findByIdAndUpdate(
         accountId,
@@ -178,7 +178,7 @@ export class AccountsRepository {
               role,
               joinedAt: new Date(),
               isActive: true,
-              expenseLimit: expenseLimit || 0,
+              transactionLimit: transactionLimit || 0,
               permissions: []
             }
           },
@@ -197,7 +197,7 @@ export class AccountsRepository {
     updates: {
       role?: AccountRole;
       isActive?: boolean;
-      expenseLimit?: number;
+      transactionLimit?: number;
       permissions?: string[];
     }
   ): Promise<AccountDocument | null> {
@@ -209,8 +209,8 @@ export class AccountsRepository {
     if (updates.isActive !== undefined) {
       updateFields['members.$.isActive'] = updates.isActive;
     }
-    if (updates.expenseLimit !== undefined) {
-      updateFields['members.$.expenseLimit'] = updates.expenseLimit;
+    if (updates.transactionLimit !== undefined) {
+      updateFields['members.$.transactionLimit'] = updates.transactionLimit;
     }
     if (updates.permissions !== undefined) {
       updateFields['members.$.permissions'] = updates.permissions;
@@ -253,7 +253,7 @@ export class AccountsRepository {
       invitedBy: string;
       token: string;
       expiresAt: Date;
-      expenseLimit?: number;
+      transactionLimit?: number;
     }
   ): Promise<AccountDocument | null> {
     return this.accountModel

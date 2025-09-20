@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { UserRole } from '@common/constants/user-roles';
+import { AnyProfileDocument, BaseProfile, CompanyProfile, CoupleProfile, FamilyProfile, PersonalProfile, ProfileType } from 'src/financial-profiles/schemas';
 
 export type UserDocument = User & Document;
 
@@ -90,45 +91,26 @@ export class User {
   @Prop()
   oauthProviderId?: string; // Provider's user ID
 
-  // Messaging platform integration
-  @Prop({
-    type: {
-      telegram: {
-        chatId: { type: String, sparse: true },
-        username: { type: String, sparse: true },
-        firstName: { type: String },
-        lastName: { type: String },
-        connectedAt: { type: Date }
-      },
-      whatsapp: {
-        phoneNumber: { type: String, sparse: true },
-        name: { type: String },
-        connectedAt: { type: Date }
-      }
-    },
-    default: {}
-  })
-  messagingIntegrations?: {
-    telegram?: {
-      chatId?: string;
-      username?: string;
-      firstName?: string;
-      lastName?: string;
-      connectedAt?: Date;
-    };
-    whatsapp?: {
-      phoneNumber?: string;
-      name?: string;
-      connectedAt?: Date;
-    };
-  };
+  // Simple messaging integration
+  @Prop({ type: String, sparse: true })
+  telegramChatId?: string;
 
   // Multi-profile system
-  @Prop({ type: Types.ObjectId, ref: 'UserProfile' })
-  activeProfileId?: Types.ObjectId; // Currently active profile
+  /*   @Prop({ type: Types.ObjectId, ref: 'UserProfile' })
+    activeUserProfileId?: Types.ObjectId; // Currently active user profile (personal info) */
 
-  @Prop([{ type: Types.ObjectId, ref: 'UserProfile' }])
-  profiles: Types.ObjectId[]; // All user profiles
+  /*   @Prop([{ type: Types.ObjectId, ref: 'UserProfile' }])
+    userProfiles: Types.ObjectId[]; // All user profiles (personal info) */
+
+  /*   // Financial profile system
+    @Prop({
+      type: String,
+      enum: ['personal', 'couple', 'family', 'business']
+    })
+    activeProfileType?: 'personal' | 'couple' | 'family' | 'business'; // Type of currently active financial profile */
+
+  @Prop({ type: Types.ObjectId })
+  activeProfileId?: Types.ObjectId; // Currently active financial profile ID
 
   // Global user preferences (applies to all profiles)
   @Prop({
@@ -190,8 +172,8 @@ export class User {
   };
 
   // Account relationships (unchanged)
-  @Prop([{ type: Types.ObjectId, ref: 'Account' }])
-  accounts: Types.ObjectId[];
+  /* @Prop([{ type: Types.ObjectId, ref: 'Account' }])
+  accounts: Types.ObjectId[]; */
 
   // Referral system fields
   @Prop({
@@ -246,6 +228,34 @@ export class User {
 
   @Prop()
   updatedAt?: Date;
+
+  @Prop({
+    type: String,
+    enum: ProfileType, // tiene que ser el name del modelo
+    required: false,
+    default: null
+  })
+  activeProfileType: ProfileType;
+
+  @Prop({
+    type: Types.ObjectId,
+    refPath: 'activeProfileType', // esto es lo que le dice a Mongoose qué modelo usar
+    required: false,
+    default: null
+  })
+  activeProfileRef: Types.ObjectId | AnyProfileDocument;
+
+  @Prop({ type: Types.ObjectId, ref: 'personal' })
+  personalProfile?: Types.ObjectId | PersonalProfile;
+
+  @Prop({ type: Types.ObjectId, ref: 'couple' })
+  coupleProfile?: Types.ObjectId | CoupleProfile;
+
+  @Prop({ type: Types.ObjectId, ref: 'family' })
+  familyProfile?: Types.ObjectId | FamilyProfile;
+
+  @Prop({ type: Types.ObjectId, ref: 'company' })
+  companyProfile?: Types.ObjectId | CompanyProfile;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
@@ -387,20 +397,12 @@ UserSchema.index(
 
 // Messaging integration indexes
 UserSchema.index(
-  { 'messagingIntegrations.telegram.chatId': 1 },
+  { telegramChatId: 1 },
   {
     name: 'telegram_chat_id_idx',
     background: true,
-    sparse: true
-  }
-);
-
-UserSchema.index(
-  { 'messagingIntegrations.whatsapp.phoneNumber': 1 },
-  {
-    name: 'whatsapp_phone_idx',
-    background: true,
-    sparse: true
+    sparse: true,
+    unique: true
   }
 );
 
@@ -429,18 +431,13 @@ UserSchema.virtual('fullName').get(function (this: User) {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Virtual to populate active profile
-UserSchema.virtual('activeProfile', {
-  ref: 'UserProfile',
-  localField: 'activeProfileId',
-  foreignField: '_id',
-  justOne: true
-});
+// Note: activeProfile virtual removed - with 4 separate profile schemas,
+// we use ProfilesService to dynamically fetch the correct profile type based on activeProfileType
 
-// Virtual to populate all profiles
-UserSchema.virtual('userProfiles', {
+// Virtual to populate all user profiles
+UserSchema.virtual('populatedUserProfiles', {
   ref: 'UserProfile',
-  localField: 'profiles',
+  localField: 'userProfiles',
   foreignField: '_id'
 });
 

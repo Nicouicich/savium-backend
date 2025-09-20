@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 
 export type GoalDocument = Goal & Document;
 
@@ -75,7 +75,7 @@ export class GoalSettings {
   reminderDaysBefore: number; // Days before target date to send reminder
 
   @Prop({ default: true })
-  trackAutomatically: boolean; // Auto-track related expenses/savings
+  trackAutomatically: boolean; // Auto-track related transactions/savings
 
   @Prop({ default: false })
   allowOverage: boolean; // Allow going over target amount
@@ -105,7 +105,7 @@ export class Goal {
   description?: string;
 
   @Prop({ type: String, required: true })
-  accountId: string;
+  profileId: string;
 
   @Prop({ type: String, required: true })
   createdBy: string;
@@ -197,20 +197,20 @@ GoalSchema.set('toJSON', {
 });
 
 // Critical compound indexes for performance (from MEJORAS.md DB-002)
-// Account-based goal queries with status filtering
+// Profile-based goal queries with status filtering
 GoalSchema.index(
-  { accountId: 1, status: 1, isDeleted: 1 },
+  { profileId: 1, status: 1, isDeleted: 1 },
   {
-    name: 'account_status_deleted_idx',
+    name: 'profile_status_deleted_idx',
     background: true
   }
 );
 
-// Goal type filtering within accounts
+// Goal type filtering within profiles
 GoalSchema.index(
-  { accountId: 1, type: 1, status: 1, isDeleted: 1 },
+  { profileId: 1, type: 1, status: 1, isDeleted: 1 },
   {
-    name: 'account_type_status_deleted_idx',
+    name: 'profile_type_status_deleted_idx',
     background: true
   }
 );
@@ -244,27 +244,27 @@ GoalSchema.index(
 
 // Template goal queries
 GoalSchema.index(
-  { isTemplate: 1, accountId: 1, isDeleted: 1 },
+  { isTemplate: 1, profileId: 1, isDeleted: 1 },
   {
-    name: 'template_account_deleted_idx',
+    name: 'template_profile_deleted_idx',
     background: true
   }
 );
 
 // Priority-based goal filtering
 GoalSchema.index(
-  { accountId: 1, priority: 1, status: 1, isDeleted: 1 },
+  { profileId: 1, priority: 1, status: 1, isDeleted: 1 },
   {
-    name: 'account_priority_status_deleted_idx',
+    name: 'profile_priority_status_deleted_idx',
     background: true
   }
 );
 
 // Date-based goal tracking and analytics
 GoalSchema.index(
-  { accountId: 1, targetDate: -1, status: 1 },
+  { profileId: 1, targetDate: -1, status: 1 },
   {
-    name: 'account_targetdate_status_idx',
+    name: 'profile_targetdate_status_idx',
     background: true
   }
 );
@@ -280,18 +280,18 @@ GoalSchema.index(
 
 // Currency-based filtering for multi-currency support
 GoalSchema.index(
-  { accountId: 1, currency: 1, status: 1 },
+  { profileId: 1, currency: 1, status: 1 },
   {
-    name: 'account_currency_status_idx',
+    name: 'profile_currency_status_idx',
     background: true
   }
 );
 
 // Progress tracking queries
 GoalSchema.index(
-  { accountId: 1, currentAmount: -1, status: 1 },
+  { profileId: 1, currentAmount: -1, status: 1 },
   {
-    name: 'account_progress_status_idx',
+    name: 'profile_progress_status_idx',
     background: true
   }
 );

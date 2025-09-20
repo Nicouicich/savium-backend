@@ -28,7 +28,7 @@ export class StripeTestConfig {
         personal: {
           priceId: 'price_test_personal',
           productId: 'prod_test_personal',
-          features: ['basic_analytics', 'expense_tracking', 'budget_management']
+          features: ['basic_analytics', 'transaction_tracking', 'budget_management']
         },
         couple: {
           priceId: 'price_test_couple',

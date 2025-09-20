@@ -108,104 +108,104 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
     }
   },
 
-  // Expenses collection indexes
+  // Transactions collection indexes
   {
-    collection: 'expenses',
-    index: { accountId: 1, date: -1 },
+    collection: 'transactions',
+    index: { profileId: 1, date: -1 },
     options: {
-      name: 'expenses_by_account_date',
+      name: 'transactions_by_profile_date',
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { userId: 1, isDeleted: 1 },
     options: {
-      name: 'expenses_by_user_deleted_status',
+      name: 'transactions_by_user_deleted_status',
       background: true
     }
   },
   {
-    collection: 'expenses',
-    index: { accountId: 1, isDeleted: 1, date: -1 },
+    collection: 'transactions',
+    index: { profileId: 1, isDeleted: 1, date: -1 },
     options: {
-      name: 'expenses_by_account_active_date',
+      name: 'transactions_by_profile_active_date',
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { userId: 1, date: -1 },
     options: {
-      name: 'expenses_by_user_date',
+      name: 'transactions_by_user_date',
       background: true
     }
   },
   {
-    collection: 'expenses',
-    index: { accountId: 1, categoryId: 1, date: -1 },
+    collection: 'transactions',
+    index: { profileId: 1, categoryId: 1, date: -1 },
     options: {
-      name: 'expenses_by_account_category_date',
+      name: 'transactions_by_profile_category_date',
       background: true
     }
   },
   {
-    collection: 'expenses',
-    index: { accountId: 1, amount: -1 },
+    collection: 'transactions',
+    index: { profileId: 1, amount: -1 },
     options: {
-      name: 'expenses_by_account_amount',
+      name: 'transactions_by_profile_amount',
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: {
-      accountId: 1,
+      profileId: 1,
       date: -1,
       amount: -1,
       categoryId: 1
     },
     options: {
-      name: 'expenses_composite_queries',
+      name: 'transactions_composite_queries',
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { tags: 1 },
     options: {
-      name: 'expenses_by_tags',
+      name: 'transactions_by_tags',
       sparse: true,
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { description: 'text', notes: 'text' },
     options: {
-      name: 'expenses_text_search',
+      name: 'transactions_text_search',
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { createdAt: -1 },
     options: {
-      name: 'expenses_by_creation',
+      name: 'transactions_by_creation',
       background: true
     }
   },
   {
-    collection: 'expenses',
-    index: { recurringExpenseId: 1 },
+    collection: 'transactions',
+    index: { recurringTransactionId: 1 },
     options: {
-      name: 'recurring_expenses',
+      name: 'recurring_transactions',
       sparse: true,
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { isRecurring: 1, 'recurringPattern.nextOccurrence': 1 },
     options: {
       name: 'recurring_pattern_next_occurrence',
@@ -214,19 +214,19 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
     }
   },
   {
-    collection: 'expenses',
-    index: { isSharedExpense: 1, sharedWith: 1 },
+    collection: 'transactions',
+    index: { isSharedTransaction: 1, sharedWith: 1 },
     options: {
-      name: 'shared_expenses',
-      partialFilterExpression: { isSharedExpense: true },
+      name: 'shared_transactions',
+      partialFilterExpression: { isSharedTransaction: true },
       background: true
     }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { paymentMethod: 1, date: -1 },
     options: {
-      name: 'expenses_by_payment_method',
+      name: 'transactions_by_payment_method',
       sparse: true,
       background: true
     }
@@ -235,15 +235,15 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Categories collection indexes
   {
     collection: 'categories',
-    index: { accountId: 1, isActive: 1 },
+    index: { profileId: 1, isActive: 1 },
     options: {
-      name: 'active_categories_by_account',
+      name: 'active_categories_by_profile',
       background: true
     }
   },
   {
     collection: 'categories',
-    index: { accountId: 1, parentCategory: 1 },
+    index: { profileId: 1, parentCategory: 1 },
     options: {
       name: 'categories_by_parent',
       background: true
@@ -269,15 +269,15 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Budgets collection indexes
   {
     collection: 'budgets',
-    index: { accountId: 1, period: 1, status: 1 },
+    index: { profileId: 1, period: 1, status: 1 },
     options: {
-      name: 'budgets_by_account_period_status',
+      name: 'budgets_by_profile_period_status',
       background: true
     }
   },
   {
     collection: 'budgets',
-    index: { accountId: 1, startDate: 1, endDate: 1 },
+    index: { profileId: 1, startDate: 1, endDate: 1 },
     options: {
       name: 'budgets_by_date_range',
       background: true
@@ -304,15 +304,15 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
   // Goals collection indexes
   {
     collection: 'goals',
-    index: { accountId: 1, status: 1 },
+    index: { profileId: 1, status: 1 },
     options: {
-      name: 'goals_by_account_status',
+      name: 'goals_by_profile_status',
       background: true
     }
   },
   {
     collection: 'goals',
-    index: { accountId: 1, targetDate: 1 },
+    index: { profileId: 1, targetDate: 1 },
     options: {
       name: 'goals_by_target_date',
       background: true
@@ -563,13 +563,13 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
 
   // Performance monitoring indexes with proper partial filter
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: {
-      accountId: 1,
+      profileId: 1,
       date: -1
     },
     options: {
-      name: 'recent_expenses_partial',
+      name: 'recent_transactions_partial',
       partialFilterExpression: {
         date: { $gte: new Date('2024-01-01') }
       },
@@ -618,26 +618,26 @@ export const DATABASE_INDEXES: IndexDefinition[] = [
 
   // Compound indexes for complex queries
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: {
-      accountId: 1,
+      profileId: 1,
       userId: 1,
       date: -1,
       categoryId: 1,
       amount: -1
     },
     options: {
-      name: 'expenses_full_composite',
+      name: 'transactions_full_composite',
       background: true
     }
   },
 
-  // Geospatial index if you track expense locations
+  // Geospatial index if you track transaction locations
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { location: '2dsphere' },
     options: {
-      name: 'expense_locations',
+      name: 'transaction_locations',
       sparse: true,
       background: true
     }
@@ -654,20 +654,20 @@ export const CRITICAL_INDEXES: IndexDefinition[] = [
     options: { name: 'email_1', unique: true }
   },
   {
-    collection: 'expenses',
-    index: { accountId: 1, date: -1 },
-    options: { name: 'accountId_1_date_-1' }
+    collection: 'transactions',
+    index: { profileId: 1, date: -1 },
+    options: { name: 'profileId_1_date_-1' }
   },
   {
-    collection: 'expenses',
-    index: { accountId: 1, isDeleted: 1, date: -1 },
-    options: { name: 'accountId_1_isDeleted_1_date_-1' }
+    collection: 'transactions',
+    index: { profileId: 1, isDeleted: 1, date: -1 },
+    options: { name: 'profileId_1_isDeleted_1_date_-1' }
   },
   {
-    collection: 'expenses',
+    collection: 'transactions',
     index: { isRecurring: 1, 'recurringPattern.nextOccurrence': 1 },
     options: {
-      name: 'recurring_expenses_critical',
+      name: 'recurring_transactions_critical',
       partialFilterExpression: { isRecurring: true }
     }
   },
@@ -725,12 +725,12 @@ export const CRITICAL_INDEXES: IndexDefinition[] = [
  */
 export const QUERY_PATTERNS = {
   // Most common query patterns observed
-  expenses: [
-    'Find expenses by account and date range',
-    'Find expenses by user and date range',
-    'Find expenses by category and date range',
-    'Find expenses by amount range',
-    'Text search in expense descriptions'
+  transactions: [
+    'Find transactions by account and date range',
+    'Find transactions by user and date range',
+    'Find transactions by category and date range',
+    'Find transactions by amount range',
+    'Text search in transaction descriptions'
   ],
   accounts: ['Find accounts by owner', 'Find accounts by member', 'Find accounts by type', 'Search account invitations by token'],
   budgets: ['Find active budgets by account', 'Find budgets by date range', 'Find category-specific budgets'],
@@ -756,7 +756,7 @@ export const QUERY_PATTERNS = {
 export const INDEX_MONITORING_QUERIES = {
   getIndexUsageStats: () => `
     db.runCommand({
-      aggregate: "expenses",
+      aggregate: "transactions",
       pipeline: [
         { $indexStats: {} },
         { $sort: { "accesses.ops": -1 } }

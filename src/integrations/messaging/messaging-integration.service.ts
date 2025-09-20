@@ -17,7 +17,7 @@ export class MessagingIntegrationService {
   ) {}
 
   async connectUserToMessaging(request: ConnectUserRequest): Promise<boolean> {
-    const { userId, platform, chatId, phoneNumber, additionalData } = request;
+    const { userId, platform, chatId, phoneNumber } = request;
 
     try {
       const user = await this.userModel.findById(userId);
@@ -25,36 +25,15 @@ export class MessagingIntegrationService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      const updateData: Record<
-        string,
-        {
-          chatId?: string;
-          username?: string;
-          firstName?: string;
-          lastName?: string;
-          phoneNumber?: string;
-          name?: string;
-          connectedAt: Date;
-        }
-      > = {};
+      const updateData: any = {};
 
       if (platform === 'telegram' && chatId) {
-        updateData['messagingIntegrations.telegram'] = {
-          chatId,
-          username: additionalData?.username,
-          firstName: additionalData?.firstName,
-          lastName: additionalData?.lastName,
-          connectedAt: new Date()
-        };
+        updateData.telegramChatId = chatId;
         this.logger.log(`Connected user ${userId} to Telegram chat ${chatId}`);
       }
 
       if (platform === 'whatsapp' && phoneNumber) {
-        updateData['messagingIntegrations.whatsapp'] = {
-          phoneNumber,
-          name: additionalData?.name,
-          connectedAt: new Date()
-        };
+        updateData.phoneNumber = phoneNumber;
         this.logger.log(`Connected user ${userId} to WhatsApp ${phoneNumber}`);
       }
 
@@ -69,15 +48,18 @@ export class MessagingIntegrationService {
   async findUserByChatId(chatId: string): Promise<UserDocument | null> {
     return this.userModel
       .findOne({
-        'messagingIntegrations.telegram.chatId': chatId
+        telegramChatId: chatId
       })
       .exec();
   }
 
   async findUserByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
+    const withPlus = phoneNumber.startsWith('+') ? phoneNumber : '+' + phoneNumber;
+    const withoutPlus = phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+
     return this.userModel
       .findOne({
-        'messagingIntegrations.whatsapp.phoneNumber': phoneNumber
+        $or: [{ phoneNumber: phoneNumber }, { phoneNumber: withPlus }, { phoneNumber: withoutPlus }]
       })
       .exec();
   }
@@ -94,9 +76,9 @@ export class MessagingIntegrationService {
       const results: MessageResult[] = [];
 
       if (platform === 'telegram' || platform === 'both') {
-        const telegramChatId = user.messagingIntegrations?.telegram?.chatId;
+        const telegramChatId = user.telegramChatId;
         if (telegramChatId) {
-          try {
+          /*  try {
             const success = await this.telegramService.sendMessage(parseInt(telegramChatId), message);
             results.push({
               platform: 'telegram',
@@ -111,7 +93,7 @@ export class MessagingIntegrationService {
               error: error.message,
               chatId: telegramChatId
             });
-          }
+          } */
         } else {
           results.push({
             platform: 'telegram',
@@ -122,7 +104,7 @@ export class MessagingIntegrationService {
       }
 
       if (platform === 'whatsapp' || platform === 'both') {
-        const whatsappPhone = user.messagingIntegrations?.whatsapp?.phoneNumber;
+        const whatsappPhone = user.phoneNumber;
         if (whatsappPhone) {
           try {
             const success = await this.whatsappService.respondWithCustomMessage(whatsappPhone, message);
@@ -168,8 +150,8 @@ export class MessagingIntegrationService {
 
   async getUserMessagingStatus(userId: string): Promise<{
     userId: string;
-    telegram: { connected: boolean; chatId?: string; connectedAt?: Date };
-    whatsapp: { connected: boolean; phoneNumber?: string; connectedAt?: Date };
+    telegram: { connected: boolean; chatId?: string };
+    whatsapp: { connected: boolean; phoneNumber?: string };
   }> {
     const user = await this.userModel.findById(userId);
     if (!user) {
@@ -179,14 +161,12 @@ export class MessagingIntegrationService {
     return {
       userId,
       telegram: {
-        connected: !!user.messagingIntegrations?.telegram?.chatId,
-        chatId: user.messagingIntegrations?.telegram?.chatId,
-        connectedAt: user.messagingIntegrations?.telegram?.connectedAt
+        connected: !!user.telegramChatId,
+        chatId: user.telegramChatId
       },
       whatsapp: {
-        connected: !!user.messagingIntegrations?.whatsapp?.phoneNumber,
-        phoneNumber: user.messagingIntegrations?.whatsapp?.phoneNumber,
-        connectedAt: user.messagingIntegrations?.whatsapp?.connectedAt
+        connected: !!user.phoneNumber,
+        phoneNumber: user.phoneNumber
       }
     };
   }

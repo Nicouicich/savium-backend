@@ -1,9 +1,11 @@
 # Savium Backend QA Testing Guide
 
 ## 🎯 **Testing Overview**
-This guide provides comprehensive end-to-end testing scenarios for the Savium AI Backend application. Test the complete user journey from registration to expense management with multi-currency support and request tracing.
+
+This guide provides comprehensive end-to-end testing scenarios for the Savium AI Backend application. Test the complete user journey from registration to transaction management with multi-currency support and request tracing.
 
 ## 🔧 **Prerequisites**
+
 - Application running on: `http://localhost:3000`
 - Swagger docs available at: `http://localhost:3000/api/docs`
 - MongoDB and Redis services running locally
@@ -16,6 +18,7 @@ This guide provides comprehensive end-to-end testing scenarios for the Savium AI
 ### **Scenario 1: User Registration & Account Creation**
 
 #### **1.1 User Registration**
+
 ```bash
 POST /api/v1/auth/register
 Content-Type: application/json
@@ -31,12 +34,14 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Status 201 Created
 - ✅ Response contains user data and JWT tokens
 - ✅ `x-trace-id` header present in response
 - ✅ Password is hashed (not returned in response)
 
 #### **1.2 Account Creation - Personal Account (ARS)**
+
 ```bash
 POST /api/v1/accounts
 Authorization: Bearer {access_token}
@@ -52,6 +57,7 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Status 201 Created
 - ✅ Account created with ARS as base currency
 - ✅ User is set as owner
@@ -59,9 +65,10 @@ Content-Type: application/json
 
 ---
 
-### **Scenario 2: Multi-Currency Expense Testing**
+### **Scenario 2: Multi-Currency Transaction Testing**
 
 #### **2.1 Create Categories First**
+
 ```bash
 POST /api/v1/categories
 Authorization: Bearer {access_token}
@@ -76,9 +83,10 @@ Content-Type: application/json
 }
 ```
 
-#### **2.2 Create Expense in Account Currency (ARS)**
+#### **2.2 Create Transaction in Account Currency (ARS)**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
@@ -95,13 +103,15 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Currency should default to account currency (ARS)
 - ✅ Amount stored as 5500 ARS
 - ✅ Status 201 Created
 
-#### **2.3 Create Expense in Different Currency (USD)**
+#### **2.3 Create Transaction in Different Currency (USD)**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
@@ -120,13 +130,15 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Currency explicitly set to USD
 - ✅ Amount stored as 25.99 USD
 - ✅ Different currency than account base
 
-#### **2.4 Create Expense in EUR**
+#### **2.4 Create Transaction in EUR**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
@@ -146,49 +158,57 @@ Content-Type: application/json
 
 ---
 
-### **Scenario 3: Expense Retrieval & Filtering**
+### **Scenario 3: Transaction Retrieval & Filtering**
 
-#### **3.1 Get All Expenses (Mixed Currencies)**
+#### **3.1 Get All Transactions (Mixed Currencies)**
+
 ```bash
-GET /api/v1/expenses?accountId={account_id}&limit=10
+GET /api/v1/transactions?accountId={account_id}&limit=10
 Authorization: Bearer {access_token}
 ```
 
 **Expected Results:**
-- ✅ Returns all expenses with their original currencies
+
+- ✅ Returns all transactions with their original currencies
 - ✅ ARS: 5500, USD: 25.99, EUR: 89.50
-- ✅ Each expense shows its currency field
+- ✅ Each transaction shows its currency field
 - ✅ Request tracing ID in response headers
 
 #### **3.2 Get Stats by Currency - ARS Only**
+
 ```bash
-GET /api/v1/expenses/stats?accountId={account_id}&currency=ARS
+GET /api/v1/transactions/stats?accountId={account_id}&currency=ARS
 Authorization: Bearer {access_token}
 ```
 
 **Expected Results:**
-- ✅ Only shows ARS expenses (5500 ARS)
+
+- ✅ Only shows ARS transactions (5500 ARS)
 - ✅ Total amount in ARS
-- ✅ Excludes USD and EUR expenses
+- ✅ Excludes USD and EUR transactions
 
 #### **3.3 Get Stats by Currency - USD Only**
+
 ```bash
-GET /api/v1/expenses/stats?accountId={account_id}&currency=USD
+GET /api/v1/transactions/stats?accountId={account_id}&currency=USD
 Authorization: Bearer {access_token}
 ```
 
 **Expected Results:**
-- ✅ Only shows USD expenses (25.99 USD)
+
+- ✅ Only shows USD transactions (25.99 USD)
 - ✅ Total amount in USD
-- ✅ Excludes ARS and EUR expenses
+- ✅ Excludes ARS and EUR transactions
 
 #### **3.4 Get Stats by Currency - All Mixed**
+
 ```bash
-GET /api/v1/expenses/stats?accountId={account_id}
+GET /api/v1/transactions/stats?accountId={account_id}
 Authorization: Bearer {access_token}
 ```
 
 **Expected Results:**
+
 - ✅ Shows summary of all currencies
 - ✅ Breakdown by currency type
 - ✅ Total count across all currencies
@@ -198,6 +218,7 @@ Authorization: Bearer {access_token}
 ### **Scenario 4: Family/Couple Account Testing**
 
 #### **4.1 Create Couple Account**
+
 ```bash
 POST /api/v1/accounts
 Authorization: Bearer {access_token}
@@ -211,9 +232,10 @@ Content-Type: application/json
 }
 ```
 
-#### **4.2 Create Shared Expense in Couple Account**
+#### **4.2 Create Shared Transaction in Couple Account**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
@@ -223,7 +245,7 @@ Content-Type: application/json
   "date": "2025-09-08T11:00:00.000Z",
   "categoryId": "{category_id}",
   "accountId": "{couple_account_id}",
-  "isSharedExpense": true,
+  "isSharedTransaction": true,
   "splitDetails": {
     "totalAmount": 120.50,
     "splitMethod": "equal",
@@ -239,8 +261,9 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Uses account currency (USD) when not specified
-- ✅ Creates shared expense structure
+- ✅ Creates shared transaction structure
 - ✅ Split details properly configured
 
 ---
@@ -248,19 +271,22 @@ Content-Type: application/json
 ### **Scenario 5: Request Tracing Verification**
 
 #### **5.1 Trace ID Consistency**
+
 ```bash
 # Make multiple requests and verify trace IDs
 curl -X GET "http://localhost:3000/api/v1/health" -H "Accept: application/json" -v
-curl -X GET "http://localhost:3000/api/v1/expenses" -H "Authorization: Bearer {token}" -v
+curl -X GET "http://localhost:3000/api/v1/transactions" -H "Authorization: Bearer {token}" -v
 ```
 
 **Expected Results:**
+
 - ✅ Each request has unique `x-trace-id` in response headers
 - ✅ UUIDs follow format: `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`
 - ✅ Different requests have different trace IDs
 - ✅ Same request context maintains same trace ID
 
 #### **5.2 Custom Trace ID**
+
 ```bash
 curl -X GET "http://localhost:3000/api/v1/health" \
   -H "x-trace-id: custom-test-trace-123" \
@@ -268,6 +294,7 @@ curl -X GET "http://localhost:3000/api/v1/health" \
 ```
 
 **Expected Results:**
+
 - ✅ Response should return the custom trace ID in headers
 - ✅ Application respects provided trace ID
 
@@ -276,8 +303,9 @@ curl -X GET "http://localhost:3000/api/v1/health" \
 ### **Scenario 6: Error Handling & Edge Cases**
 
 #### **6.1 Invalid Currency Code**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
@@ -292,22 +320,25 @@ Content-Type: application/json
 ```
 
 **Expected Results:**
+
 - ✅ Status 400 Bad Request
 - ✅ Validation error for invalid currency
 - ✅ Error response includes trace ID
 
 #### **6.2 Missing Required Fields**
+
 ```bash
-POST /api/v1/expenses
+POST /api/v1/transactions
 Authorization: Bearer {access_token}
 Content-Type: application/json
 
 {
-  "description": "Incomplete expense"
+  "description": "Incomplete transaction"
 }
 ```
 
 **Expected Results:**
+
 - ✅ Status 400 Bad Request
 - ✅ Clear validation error messages
 - ✅ Lists all missing required fields
@@ -316,9 +347,10 @@ Content-Type: application/json
 
 ### **Scenario 7: File Upload Testing**
 
-#### **7.1 Upload Receipt with Expense**
+#### **7.1 Upload Receipt with Transaction**
+
 ```bash
-POST /api/v1/expenses/upload
+POST /api/v1/transactions/upload
 Authorization: Bearer {access_token}
 Content-Type: multipart/form-data
 
@@ -334,10 +366,11 @@ vendor: "Restaurante Barcelona"
 ```
 
 **Expected Results:**
+
 - ✅ Status 201 Created
-- ✅ Files uploaded and linked to expense
+- ✅ Files uploaded and linked to transaction
 - ✅ EUR currency properly set
-- ✅ Expense created with attachments
+- ✅ Transaction created with attachments
 
 ---
 
@@ -346,6 +379,7 @@ vendor: "Restaurante Barcelona"
 ### **Scenario 8: Business Account with Multiple Currencies**
 
 #### **8.1 Create Business Account**
+
 ```bash
 POST /api/v1/accounts
 Authorization: Bearer {access_token}
@@ -359,10 +393,11 @@ Content-Type: application/json
 }
 ```
 
-#### **8.2 Create Multiple Currency Business Expenses**
+#### **8.2 Create Multiple Currency Business Transactions**
+
 ```bash
 # Office supplies in ARS
-POST /api/v1/expenses
+POST /api/v1/transactions
 {
   "description": "Papelería y útiles",
   "amount": 15000,
@@ -372,7 +407,7 @@ POST /api/v1/expenses
 }
 
 # Software license in USD
-POST /api/v1/expenses
+POST /api/v1/transactions
 {
   "description": "Licencia Adobe Creative Suite",
   "amount": 599.99,
@@ -384,10 +419,11 @@ POST /api/v1/expenses
 ```
 
 #### **8.3 Generate Business Reports by Currency**
+
 ```bash
-GET /api/v1/expenses/category-breakdown?accountId={business_account_id}
-GET /api/v1/expenses/stats?accountId={business_account_id}&currency=USD
-GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
+GET /api/v1/transactions/category-breakdown?accountId={business_account_id}
+GET /api/v1/transactions/stats?accountId={business_account_id}&currency=USD
+GET /api/v1/transactions/stats?accountId={business_account_id}&currency=ARS
 ```
 
 ---
@@ -395,14 +431,16 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 ## ✅ **Success Criteria**
 
 ### **Multi-Currency Support**
+
 - [ ] Account base currency properly set during creation
-- [ ] Expenses default to account currency when not specified
-- [ ] Expenses accept explicit currency in request body
+- [ ] Transactions default to account currency when not specified
+- [ ] Transactions accept explicit currency in request body
 - [ ] Stats endpoints filter by specific currency correctly
 - [ ] Multiple currencies can coexist in same account
 - [ ] Currency validation works (only valid ISO codes accepted)
 
 ### **Request Tracing**
+
 - [ ] Every response includes unique `x-trace-id` header
 - [ ] Trace IDs follow UUID v4 format
 - [ ] Custom trace IDs are respected when provided
@@ -410,6 +448,7 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 - [ ] Error responses include trace IDs
 
 ### **Application Health**
+
 - [ ] All endpoints respond correctly
 - [ ] MongoDB connection stable
 - [ ] Authentication works properly
@@ -417,6 +456,7 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 - [ ] Error handling is consistent
 
 ### **Performance & Reliability**
+
 - [ ] Response times under 500ms for standard requests
 - [ ] Concurrent requests handle properly
 - [ ] Database queries optimized
@@ -426,12 +466,12 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 
 ## 🚨 **Common Issues to Check**
 
-1. **Currency Defaults**: Ensure expenses use account currency when not specified in body
-2. **Validation**: Check that invalid currencies are rejected properly  
+1. **Currency Defaults**: Ensure transactions use account currency when not specified in body
+2. **Validation**: Check that invalid currencies are rejected properly
 3. **Trace ID Format**: Verify UUIDs are properly formatted
 4. **Error Handling**: All errors should include trace IDs for debugging
 5. **Multi-Account**: Different accounts can have different base currencies
-6. **Stats Accuracy**: Currency-filtered stats should only include matching expenses
+6. **Stats Accuracy**: Currency-filtered stats should only include matching transactions
 
 ---
 
@@ -441,29 +481,35 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 ## Test Execution Results - [Date]
 
 ### Scenario 1: User Registration ✅/❌
-- Registration: ✅ 
+
+- Registration: ✅
 - Account Creation: ✅
 - Currency Setup: ✅
 
-### Scenario 2: Multi-Currency Expenses ✅/❌
-- ARS Expense (default): ✅
-- USD Expense (explicit): ✅  
-- EUR Expense (explicit): ✅
+### Scenario 2: Multi-Currency Transactions ✅/❌
+
+- ARS Transaction (default): ✅
+- USD Transaction (explicit): ✅
+- EUR Transaction (explicit): ✅
 
 ### Scenario 3: Currency Filtering ✅/❌
+
 - Stats by ARS: ✅
 - Stats by USD: ✅
 - Mixed currency retrieval: ✅
 
 ### Request Tracing ✅/❌
+
 - Unique trace IDs: ✅
 - UUID format: ✅
 - Custom trace ID handling: ✅
 
 ### Issues Found:
+
 - None / [List any issues discovered]
 
 ### Performance Notes:
+
 - Average response time: Xms
 - Memory usage: Stable/High
 - Database performance: Good/Poor
@@ -475,7 +521,7 @@ GET /api/v1/expenses/stats?accountId={business_account_id}&currency=ARS
 
 1. **Check Application Logs**: Look for trace IDs in console output
 2. **Swagger Documentation**: Use `/api/docs` for interactive testing
-3. **Database Inspection**: Verify expenses are stored with correct currencies
+3. **Database Inspection**: Verify transactions are stored with correct currencies
 4. **Header Analysis**: Always check response headers for trace IDs
 5. **Error Messages**: Should be clear and include error codes
 

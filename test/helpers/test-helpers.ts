@@ -161,18 +161,18 @@ export class TestDataFactory {
   }
 
   /**
-   * Create test expense data
+   * Create test transaction data
    */
-  static createExpenseData(accountId: string, userId: string, overrides: Partial<any> = {}) {
+  static createTransactionData(accountId: string, userId: string, overrides: Partial<any> = {}) {
     return {
       amount: 100.5,
-      description: 'Test expense',
+      description: 'Test transaction',
       categoryId: '507f1f77bcf86cd799439011',
       accountId,
       userId,
       date: new Date(),
       currency: 'USD',
-      type: 'expense',
+      type: 'transaction',
       ...overrides
     };
   }
@@ -183,7 +183,7 @@ export class TestDataFactory {
   static createCategoryData(accountId: string, overrides: Partial<any> = {}) {
     return {
       name: `Test Category ${Date.now()}`,
-      type: 'expense',
+      type: 'transaction',
       color: '#FF5733',
       icon: 'shopping',
       accountId,

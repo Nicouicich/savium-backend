@@ -13,8 +13,8 @@ export type AccountName = Brand<string, 'AccountName'>;
 export type MonetaryAmount = Brand<number, 'MonetaryAmount'>;
 export type CurrencyCode = Brand<string, 'CurrencyCode'>;
 
-// Expense-related branded types
-export type ExpenseId = Brand<string, 'ExpenseId'>;
+// Transaction-related branded types
+export type TransactionId = Brand<string, 'TransactionId'>;
 export type CategoryId = Brand<string, 'CategoryId'>;
 
 // Budget-related branded types
@@ -40,7 +40,7 @@ export const createAccountId = (id: string): AccountId => id as AccountId;
 export const createAccountName = (name: string): AccountName => name as AccountName;
 export const createMonetaryAmount = (amount: number): MonetaryAmount => amount as MonetaryAmount;
 export const createCurrencyCode = (code: string): CurrencyCode => code as CurrencyCode;
-export const createExpenseId = (id: string): ExpenseId => id as ExpenseId;
+export const createTransactionId = (id: string): TransactionId => id as TransactionId;
 export const createCategoryId = (id: string): CategoryId => id as CategoryId;
 export const createBudgetId = (id: string): BudgetId => id as BudgetId;
 export const createJWT = (token: string): JWT => token as JWT;

@@ -23,7 +23,7 @@ export interface RateLimitResult {
 export class AdvancedRateLimiterService {
   private readonly logger = new Logger(AdvancedRateLimiterService.name);
 
-  constructor(
+  constructor (
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private configService: ConfigService
   ) {}
@@ -39,9 +39,9 @@ export class AdvancedRateLimiterService {
 
       // Get current count from cache
       const currentCount = (await this.cacheManager.get<number>(cacheKey)) || 0;
-      
+
       const newCount = currentCount + 1;
-      
+
       // Set the count with expiration
       const ttl = Math.ceil(config.windowMs / 1000); // Convert to seconds
       await this.cacheManager.set(cacheKey, newCount, ttl);
@@ -85,7 +85,7 @@ export class AdvancedRateLimiterService {
    */
   async checkUserRateLimit(userId: string, endpoint?: string): Promise<RateLimitResult> {
     const key = endpoint ? `user:${userId}:${endpoint}` : `user:${userId}`;
-    
+
     return this.checkRateLimit(key, {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 1000, // 1000 requests per 15 minutes per user
@@ -109,7 +109,7 @@ export class AdvancedRateLimiterService {
    */
   async checkEndpointRateLimit(endpoint: string, identifier: string): Promise<RateLimitResult> {
     const key = `${endpoint}:${identifier}`;
-    
+
     // Different limits for different endpoint types
     const endpointConfigs: Record<string, Partial<RateLimitConfig>> = {
       'auth/login': {
@@ -124,9 +124,9 @@ export class AdvancedRateLimiterService {
         windowMs: 60 * 60 * 1000, // 1 hour
         maxRequests: 3, // Only 3 password reset requests per hour
       },
-      'expenses/create': {
+      'transactions/create': {
         windowMs: 60 * 1000, // 1 minute
-        maxRequests: 10, // 10 expense creations per minute
+        maxRequests: 10, // 10 transaction creations per minute
       },
       'reports/generate': {
         windowMs: 5 * 60 * 1000, // 5 minutes
@@ -150,7 +150,7 @@ export class AdvancedRateLimiterService {
    */
   async checkFinancialTransactionRateLimit(userId: string, accountId: string): Promise<RateLimitResult> {
     const key = `financial:${userId}:${accountId}`;
-    
+
     return this.checkRateLimit(key, {
       windowMs: 60 * 1000, // 1 minute
       maxRequests: 5, // Only 5 financial operations per minute
@@ -172,11 +172,11 @@ export class AdvancedRateLimiterService {
   /**
    * Suspicious activity detection and temporary bans
    */
-  async checkSuspiciousActivity(identifier: string): Promise<{ isBanned: boolean; banExpiresAt?: number }> {
+  async checkSuspiciousActivity(identifier: string): Promise<{ isBanned: boolean; banExpiresAt?: number; }> {
     try {
       const banKey = `ban:${identifier}`;
-      const banData = await this.cacheManager.get<{ bannedAt: number; duration: number }>(banKey);
-      
+      const banData = await this.cacheManager.get<{ bannedAt: number; duration: number; }>(banKey);
+
       if (banData) {
         const banExpiresAt = banData.bannedAt + banData.duration;
         if (Date.now() < banExpiresAt) {
@@ -204,10 +204,10 @@ export class AdvancedRateLimiterService {
         bannedAt: Date.now(),
         duration: durationMs
       };
-      
+
       const ttl = Math.ceil(durationMs / 1000);
       await this.cacheManager.set(banKey, banData, ttl);
-      
+
       this.logger.warn(`Temporary ban applied`, {
         identifier,
         duration: durationMs,
@@ -225,10 +225,10 @@ export class AdvancedRateLimiterService {
     try {
       const abuseKey = `abuse:${identifier}:${endpoint}`;
       const abuseCount = (await this.cacheManager.get<number>(abuseKey)) || 0;
-      
+
       const newAbuseCount = abuseCount + 1;
       await this.cacheManager.set(abuseKey, newAbuseCount, 3600); // 1 hour TTL
-      
+
       // Apply progressive penalties
       if (newAbuseCount >= 50) {
         // 4 hour ban for severe abuse
@@ -250,7 +250,7 @@ export class AdvancedRateLimiterService {
    */
   async getRateLimitStats(identifier: string): Promise<{
     current: Record<string, number>;
-    banStatus: { isBanned: boolean; expiresAt?: number };
+    banStatus: { isBanned: boolean; expiresAt?: number; };
   }> {
     try {
       const patterns = [
@@ -262,7 +262,7 @@ export class AdvancedRateLimiterService {
       ];
 
       const current: Record<string, number> = {};
-      
+
       // This would require Redis SCAN in a real implementation
       // For now, we'll return empty stats
       for (const pattern of patterns) {

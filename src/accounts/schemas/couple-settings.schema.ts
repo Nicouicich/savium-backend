@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types, Schema as MongooseSchema } from 'mongoose';
-import { CoupleFinancialModel, CoupleExpenseType } from '@common/constants/couple-types';
+import { CoupleFinancialModel, CoupleTransactionType } from '@common/constants/couple-types';
 
 export type CoupleSettingsDocument = CoupleSettings &
   Document & {
@@ -41,7 +41,7 @@ export class CoupleContributionSettings {
 @Schema()
 export class CoupleNotificationSettings {
   @Prop({ default: true })
-  expenseAdded: boolean;
+  transactionAdded: boolean;
 
   @Prop({ default: true })
   commentsAndReactions: boolean;
@@ -70,10 +70,10 @@ export class CoupleSettings {
 
   @Prop({
     type: String,
-    enum: Object.values(CoupleExpenseType),
-    default: CoupleExpenseType.SHARED
+    enum: Object.values(CoupleTransactionType),
+    default: CoupleTransactionType.SHARED
   })
-  defaultExpenseType: CoupleExpenseType;
+  defaultTransactionType: CoupleTransactionType;
 
   @Prop({ type: CoupleContributionSettings })
   contributionSettings?: CoupleContributionSettings;

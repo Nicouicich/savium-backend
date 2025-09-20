@@ -26,14 +26,14 @@ export class GoalsRepository {
         }
       },
 
-      // Lookup account information
+      // Lookup profile information
       {
         $lookup: {
-          from: 'accounts',
-          localField: 'accountId',
-          foreignField: 'id',
-          as: 'account',
-          pipeline: [{ $project: { name: 1, type: 1 } }]
+          from: 'userprofiles',
+          localField: 'profileId',
+          foreignField: '_id',
+          as: 'profile',
+          pipeline: [{ $project: { profileType: 1, displayName: 1 } }]
         }
       },
 
@@ -62,7 +62,7 @@ export class GoalsRepository {
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: { $arrayElemAt: ['$account', 0] },
+          profileId: { $arrayElemAt: ['$profile', 0] },
           createdBy: { $arrayElemAt: ['$creator', 0] },
           participants: '$participantsData'
         }
@@ -71,7 +71,7 @@ export class GoalsRepository {
       // Remove temporary fields
       {
         $project: {
-          account: 0,
+          profile: 0,
           creator: 0,
           participantsData: 0
         }
@@ -86,14 +86,14 @@ export class GoalsRepository {
       // Match stage - filter documents early
       { $match: matchQuery },
 
-      // Lookup account information
+      // Lookup profile information
       {
         $lookup: {
-          from: 'accounts',
-          localField: 'accountId',
-          foreignField: 'id',
-          as: 'account',
-          pipeline: [{ $project: { name: 1, type: 1 } }]
+          from: 'userprofiles',
+          localField: 'profileId',
+          foreignField: '_id',
+          as: 'profile',
+          pipeline: [{ $project: { profileType: 1, displayName: 1 } }]
         }
       },
 
@@ -122,7 +122,7 @@ export class GoalsRepository {
       // Transform the data to match populate structure
       {
         $addFields: {
-          accountId: { $arrayElemAt: ['$account', 0] },
+          profileId: { $arrayElemAt: ['$profile', 0] },
           createdBy: { $arrayElemAt: ['$creator', 0] },
           participants: '$participantsData'
         }
@@ -131,7 +131,7 @@ export class GoalsRepository {
       // Remove temporary fields
       {
         $project: {
-          account: 0,
+          profile: 0,
           creator: 0,
           participantsData: 0
         }
@@ -157,10 +157,10 @@ export class GoalsRepository {
     };
   }
 
-  async findByAccountId(accountId: string): Promise<GoalDocument[]> {
+  async findByProfileId(profileId: string): Promise<GoalDocument[]> {
     return this.goalModel
       .find({
-        accountId: accountId,
+        profileId: profileId,
         isDeleted: false
       })
       .exec();

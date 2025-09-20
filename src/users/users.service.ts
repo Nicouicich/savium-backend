@@ -8,6 +8,7 @@ import { UserAuthService } from './services/user-auth.service';
 import { UserProfileService, CreateProfileDto } from './services/user-profile.service';
 import { UserQueryService } from './services/user-query.service';
 import { UserCommandService } from './services/user-command.service';
+import { ProfileType } from 'src/financial-profiles/schemas';
 
 @Injectable()
 export class UsersService {
@@ -21,37 +22,21 @@ export class UsersService {
     private readonly userCommandService: UserCommandService
   ) {}
 
-  async create(createUserDto: CreateUserDto & { profile?: CreateProfileDto }): Promise<UserDocument> {
+  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     // Check if user already exists
     const existingUser = await this.userQueryService.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Create user using command service
-    const user = await this.userCommandService.create(createUserDto);
+    // Create user using command service (this now handles profile creation internally)
+    const user: UserDocument = await this.userCommandService.create(createUserDto);
 
     // Create authentication record
     await this.userAuthService.createAuthRecord(user.id);
 
-    // Create default profile
-    const defaultProfile: CreateProfileDto = createUserDto.profile || {
-      name: `${user.firstName} ${user.lastName}`,
-      profileType: 'personal',
-      privacy: {
-        visibility: 'private',
-        showContactInfo: false,
-        showSocialLinks: false,
-        indexInSearchEngines: false
-      }
-    };
-
-    const profile = await this.userProfileService.createProfile(user.id, defaultProfile);
-
-    // Set as active profile
-    await this.userProfileService.switchActiveProfile(user.id, profile.id);
-
-    this.logger.log(`User created successfully: ${user.email} with profile: ${profile.id}`);
+    // Profile creation is now handled by UserCommandService.create()
+    this.logger.log(`User created successfully: ${user.email}`);
     return user;
   }
 
@@ -356,6 +341,27 @@ export class UsersService {
   }
 
   /**
+   * Update user's active profile
+   */
+  async updateActiveProfile(userId: string, profileId: string): Promise<void> {
+    try {
+      await this.userCommandService.updateInternal(userId, {
+        activeProfileId: profileId,
+        $addToSet: { profiles: profileId }
+      });
+
+      this.logger.log(`Active profile updated for user: ${userId} to profile: ${profileId}`);
+    } catch (error) {
+      this.logger.error('Failed to update active profile', {
+        userId,
+        profileId,
+        error: error.message
+      });
+      throw new InternalServerErrorException('Failed to update active profile');
+    }
+  }
+
+  /**
    * Mask phone number for logging (security)
    */
   private maskPhoneNumber(phoneNumber: string): string {
@@ -364,11 +370,44 @@ export class UsersService {
     }
     const start = phoneNumber.substring(0, 2);
     const end = phoneNumber.substring(phoneNumber.length - 2);
+    return phoneNumber;
     return `${start}***${end}`;
   }
 
   private async hashPassword(password: string): Promise<string> {
     const saltRounds = this.configService.get('app.bcryptRounds', 12);
     return bcrypt.hash(password, saltRounds);
+  }
+
+  /**
+   * Add profile to user's profiles array
+   */
+  async addProfile(userId: string, profileId: string): Promise<UserDocument | null> {
+    return this.userCommandService.addProfile(userId, profileId);
+  }
+
+  /**
+   * Remove profile from user's profiles array
+   */
+  async removeProfile(userId: string, profileId: string): Promise<UserDocument | null> {
+    return this.userCommandService.removeProfile(userId, profileId);
+  }
+
+  /**
+   * Set user's active profile
+   */
+  async setActiveProfile(userId: string, profileId: string): Promise<UserDocument | null> {
+    return this.userCommandService.setActiveProfile(userId, profileId);
+  }
+
+  /**
+   * Set user's active financial profile
+   */
+  async setActiveFinancialProfile(userId: string, profileId: string, profileType: string): Promise<UserDocument | null> {
+    return this.userCommandService.setActiveFinancialProfile(userId, profileId, profileType);
+  }
+
+  async getFullUserDataByPhoneNumber(phoneNumber: string): Promise<UserDocument | null> {
+    return this.userQueryService.getFullUserDataByPhoneNumber(phoneNumber);
   }
 }

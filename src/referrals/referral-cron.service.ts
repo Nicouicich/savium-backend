@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { ReferralsService } from './referrals.service';
-import { ReferralReward, ReferralRewardDocument } from './schemas/referral-reward.schema';
+import { ReferralRewardRepository } from './referral-reward.repository';
+import { RewardStatus } from './schemas/referral-reward.schema';
 
 @Injectable()
 export class ReferralCronService {
@@ -14,7 +13,7 @@ export class ReferralCronService {
   constructor(
     private readonly referralsService: ReferralsService,
     private readonly configService: ConfigService,
-    @InjectModel(ReferralReward.name) private readonly referralRewardModel: Model<ReferralRewardDocument>
+    private readonly referralRewardRepository: ReferralRewardRepository
   ) {
     // Allow disabling cron jobs in development/testing
     this.isEnabled = this.configService.get('app.env') !== 'test';
@@ -88,17 +87,10 @@ export class ReferralCronService {
     try {
       this.logger.log('Starting weekly referral maintenance...');
 
-      // Example: Clean expired rewards
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      // Clean expired rewards using repository
+      const result = await this.referralRewardRepository.markRewardsAsExpired();
 
-      await this.referralRewardModel.updateMany(
-        {
-          status: 'available',
-          createdAt: { $lt: oneYearAgo }
-        },
-        { status: 'expired' }
-      );
+      this.logger.log(`Marked ${result.modifiedCount} rewards as expired`);
 
       this.logger.log('Weekly referral maintenance completed');
     } catch (error) {

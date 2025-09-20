@@ -45,6 +45,8 @@ export class AuthService {
         throw new Error('User creation failed - no user returned');
       }
 
+      // Profile creation is now handled by UserCommandService during user creation
+
       // Generate tokens
       const tokens = await this.generateTokens(user);
 
@@ -52,11 +54,11 @@ export class AuthService {
         throw new Error('Token generation failed');
       }
 
-      // Store refresh token
-      await this.usersService.addRefreshToken(UserMapper.getMongoId(user), tokens.refreshToken);
-
-      // Update last login
-      await this.usersService.updateLastLogin(UserMapper.getMongoId(user));
+      // Store refresh token and update last login in parallel
+      await Promise.all([
+        this.usersService.addRefreshToken(UserMapper.getMongoId(user), tokens.refreshToken),
+        this.usersService.updateLastLogin(UserMapper.getMongoId(user))
+      ]);
 
       this.logger.log(`User registered successfully: ${user.email}`);
 
@@ -282,6 +284,8 @@ export class AuthService {
         avatar: oauthData.profilePicture
       });
 
+      // Profile creation is now handled by UserCommandService during OAuth user creation
+
       this.logger.log(`New OAuth user created: ${newUser.email} via ${oauthData.oauthProvider}`);
 
       return newUser.toJSON();
@@ -393,7 +397,7 @@ export class AuthService {
   async sendSmsVerification(userId: string | undefined, phoneNumber: string): Promise<SendSmsResponseDto> {
     this.logger.log('Sending SMS verification code', {
       userId: userId || 'anonymous',
-      phoneNumber: this.maskPhoneNumber(phoneNumber)
+      phoneNumber: phoneNumber
     });
 
     try {
@@ -402,7 +406,7 @@ export class AuthService {
 
       this.logger.log('SMS verification code sent successfully', {
         userId,
-        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        phoneNumber: phoneNumber,
         verificationId: result.verificationId,
         expiresAt: result.expiresAt
       });
@@ -420,7 +424,7 @@ export class AuthService {
     } catch (error) {
       this.logger.error('Failed to send SMS verification code', {
         userId,
-        phoneNumber: this.maskPhoneNumber(phoneNumber),
+        phoneNumber: phoneNumber,
         error: error.message,
         stack: error.stack
       });
@@ -451,7 +455,7 @@ export class AuthService {
   }> {
     this.logger.log('Phone verification for existing user', {
       userId,
-      phoneNumber: this.maskPhoneNumber(verifyPhoneDto.phoneNumber),
+      phoneNumber: verifyPhoneDto.phoneNumber,
       verificationId: verifyPhoneDto.verificationId
     });
 
@@ -476,7 +480,7 @@ export class AuthService {
 
       this.logger.log('Phone verification successful for existing user', {
         userId,
-        phoneNumber: this.maskPhoneNumber(verifyPhoneDto.phoneNumber),
+        phoneNumber: verifyPhoneDto.phoneNumber,
         verificationId: verifyPhoneDto.verificationId
       });
 
@@ -489,7 +493,7 @@ export class AuthService {
       this.logger.error('Phone verification failed for existing user', {
         userId,
         error: error.message,
-        phoneNumber: this.maskPhoneNumber(verifyPhoneDto.phoneNumber),
+        phoneNumber: verifyPhoneDto.phoneNumber,
         verificationId: verifyPhoneDto.verificationId
       });
 
@@ -531,18 +535,6 @@ export class AuthService {
 
       throw new BusinessException('Failed to remove phone number', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
     }
-  }
-
-  /**
-   * Mask phone number for logging (security)
-   */
-  private maskPhoneNumber(phoneNumber: string): string {
-    if (!phoneNumber || phoneNumber.length < 4) {
-      return '***';
-    }
-    const start = phoneNumber.substring(0, 2);
-    const end = phoneNumber.substring(phoneNumber.length - 2);
-    return `${start}***${end}`;
   }
 
   private isDatabaseConnectionError(error: any): boolean {

@@ -22,7 +22,7 @@ OUTPUT: { trx?: object, msg: string, actionTaken: {type, data?} }
    - Income doesn't need method
 
 4. TRX OBJECT STRUCTURE
-   Required: amount, type ("transaction"|"income"), description
+   Required: amount, type ("expense"|"income"), description
    Optional: method (required for expenses), currency (defaultCurrency), date (today), categoryId
 
 5. PAYMENT METHODS
@@ -40,7 +40,7 @@ OUTPUT: { trx?: object, msg: string, actionTaken: {type, data?} }
 1. EXPENSE NO METHOD:
 IN: "Gasté 500 en comida"
 OUT: {
-  msg: "Registrando $500 en comida 🍕 ¿Con qué pagaste?",
+  msg: "Entendido, $500 en comida 🍕 ¿Con qué pagaste?",
   actionTaken: {type:"CLARIFICATION", data:"needs_method"}
 }
 
@@ -62,11 +62,11 @@ OUT: {
   actionTaken: {type:"TRANSACTION"}
 }
 
-4. NO AMOUNT:
+4. NO AMOUNT & METHOD:
 IN: "Compré pan"
 OUT: {
-  msg: "Pan 🥖 ¿Cuánto gastaste?",
-  actionTaken: {type:"CLARIFICATION", data:"needs_amount"}
+  msg: "Pan 🥖 ¿Cuánto gastaste y con qué pagaste?",
+  actionTaken: {type:"CLARIFICATION", data:"needs_amount_and_method"}
 }
 
 5. GENERAL QUESTION:

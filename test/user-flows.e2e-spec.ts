@@ -11,7 +11,7 @@ describe('User Flows (e2e)', () => {
   let refreshToken: string;
   let accountId: string;
   let categoryId: string;
-  let expenseId: string;
+  let transactionId: string;
 
   const testUser = {
     email: 'test@savium.com',
@@ -240,14 +240,14 @@ describe('User Flows (e2e)', () => {
     });
   });
 
-  describe('Expense Management Flow', () => {
+  describe('Transaction Management Flow', () => {
     it('should create a default category', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/categories')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Food & Dining',
-          description: 'Food and restaurant expenses',
+          description: 'Food and restaurant transactions',
           color: '#FF5722',
           icon: 'restaurant',
           accountId
@@ -258,9 +258,9 @@ describe('User Flows (e2e)', () => {
       expect(response.body.name).toBe('Food & Dining');
     });
 
-    it('should create a new expense', async () => {
+    it('should create a new transaction', async () => {
       const response = await request(app.getHttpServer())
-        .post('/api/v1/expenses')
+        .post('/api/v1/transactions')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           amount: 25.99,
@@ -275,21 +275,24 @@ describe('User Flows (e2e)', () => {
         })
         .expect(201);
 
-      expenseId = response.body.id;
+      transactionId = response.body.id;
       expect(response.body.amount).toBe(25.99);
       expect(response.body.description).toBe('Lunch at restaurant');
     });
 
-    it('should get all expenses for account', async () => {
-      const response = await request(app.getHttpServer()).get(`/api/v1/expenses/account/${accountId}`).set('Authorization', `Bearer ${authToken}`).expect(200);
+    it('should get all transactions for account', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/v1/transactions/account/${accountId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
 
       expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].amount).toBe(25.99);
     });
 
-    it('should update an expense', async () => {
+    it('should update an transaction', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/api/v1/expenses/${expenseId}`)
+        .patch(`/api/v1/transactions/${transactionId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           amount: 28.99,
@@ -301,21 +304,21 @@ describe('User Flows (e2e)', () => {
       expect(response.body.description).toBe('Lunch at restaurant - updated');
     });
 
-    it('should get expense statistics', async () => {
+    it('should get transaction statistics', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/expenses/stats')
+        .get('/api/v1/transactions/stats')
         .query({ accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('totalExpenses');
+      expect(response.body).toHaveProperty('totalTransactions');
       expect(response.body).toHaveProperty('totalAmount');
       expect(response.body.totalAmount).toBe(28.99);
     });
 
     it('should get category breakdown', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/expenses/category-breakdown')
+        .get('/api/v1/transactions/category-breakdown')
         .query({ accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -325,9 +328,9 @@ describe('User Flows (e2e)', () => {
       expect(response.body[0]).toHaveProperty('totalAmount');
     });
 
-    it('should search expenses', async () => {
+    it('should search transactions', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/v1/expenses/search')
+        .get('/api/v1/transactions/search')
         .query({ q: 'lunch', accountId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -417,7 +420,7 @@ describe('User Flows (e2e)', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('summary');
-      expect(response.body).toHaveProperty('expenses');
+      expect(response.body).toHaveProperty('transactions');
       expect(response.body).toHaveProperty('categories');
     });
 
@@ -456,17 +459,17 @@ describe('User Flows (e2e)', () => {
 
   describe('Error Handling', () => {
     it('should return 401 for unauthenticated requests', async () => {
-      await request(app.getHttpServer()).get('/api/v1/expenses').expect(401);
+      await request(app.getHttpServer()).get('/api/v1/transactions').expect(401);
     });
 
     it('should return 403 for insufficient permissions', async () => {
-      // Try to access another user's expense
-      await request(app.getHttpServer()).get('/api/v1/expenses/invalid-expense-id').set('Authorization', `Bearer ${authToken}`).expect(404);
+      // Try to access another user's transaction
+      await request(app.getHttpServer()).get('/api/v1/transactions/invalid-transaction-id').set('Authorization', `Bearer ${authToken}`).expect(404);
     });
 
     it('should return 400 for invalid data', async () => {
       await request(app.getHttpServer())
-        .post('/api/v1/expenses')
+        .post('/api/v1/transactions')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           amount: 'invalid',
@@ -477,8 +480,8 @@ describe('User Flows (e2e)', () => {
   });
 
   describe('Cleanup', () => {
-    it('should delete expense', async () => {
-      await request(app.getHttpServer()).delete(`/api/v1/expenses/${expenseId}`).set('Authorization', `Bearer ${authToken}`).expect(200);
+    it('should delete transaction', async () => {
+      await request(app.getHttpServer()).delete(`/api/v1/transactions/${transactionId}`).set('Authorization', `Bearer ${authToken}`).expect(200);
     });
 
     it('should logout user', async () => {

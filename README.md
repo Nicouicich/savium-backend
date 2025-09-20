@@ -20,17 +20,19 @@ A comprehensive NestJS backend for a personal, family, couple, and business fina
 ## 🚀 Features
 
 ### Core Features
+
 - **Multi-Account Types**: Personal, Couple, Family, and Business accounts
 - **JWT Authentication**: Access and refresh token system with Redis storage
 - **Role-Based Access Control**: Comprehensive permission system
-- **Expense Tracking**: Manual entry, AI processing, file upload support
-- **AI Integration**: OpenAI GPT for expense categorization and analysis
+- **Transaction Tracking**: Manual entry, AI processing, file upload support
+- **AI Integration**: OpenAI GPT for transaction categorization and analysis
 - **Multi-Platform Integration**: WhatsApp and Telegram bot support
 - **Comprehensive Reporting**: Monthly reports, category analysis, export functionality
 - **Budget & Goal Management**: Financial planning and tracking
 - **Real-time Notifications**: Email, push, and SMS notifications
 
 ### Technical Features
+
 - **Production-Ready Architecture**: Clean code, SOLID principles
 - **Comprehensive Security**: Helmet, CORS, rate limiting, input validation
 - **Database Optimization**: MongoDB with proper indexing and aggregations
@@ -63,6 +65,7 @@ Before running this application, make sure you have the following installed:
 - **Redis** (v7 or higher)
 
 ### Optional (for integrations)
+
 - OpenAI API key
 - WhatsApp Business API credentials
 - Telegram Bot token
@@ -70,12 +73,14 @@ Before running this application, make sure you have the following installed:
 ## 🚀 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd savium
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -85,12 +90,15 @@ Before running this application, make sure you have the following installed:
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
+
    Edit the `.env` file with your configurations (see [Configuration](#-configuration) section).
 
 4. **Start required services**
+
    ```bash
    # Start MongoDB (if running locally)
    mongod
@@ -106,6 +114,7 @@ Before running this application, make sure you have the following installed:
 Create a `.env` file in the root directory with the following variables:
 
 #### Required Variables
+
 ```env
 # Application
 NODE_ENV=development
@@ -125,6 +134,7 @@ JWT_REFRESH_SECRET=your-very-secure-refresh-token-secret-key-here
 ```
 
 #### Optional Variables (for full functionality)
+
 ```env
 # External APIs
 OPENAI_API_KEY=your-openai-api-key
@@ -142,18 +152,22 @@ See `.env.example` for all available configuration options.
 ## 🏃‍♂️ Running the Application
 
 ### Development Mode
+
 ```bash
 npm run start:dev
 ```
+
 The application will start at `http://localhost:3000` with hot reloading enabled.
 
 ### Production Mode
+
 ```bash
 npm run build
 npm run start:prod
 ```
 
 ### Debug Mode
+
 ```bash
 npm run start:debug
 ```
@@ -161,12 +175,15 @@ npm run start:debug
 ## 📚 API Documentation
 
 ### Swagger Documentation
+
 Once the application is running, you can access the interactive API documentation at:
+
 - **Swagger UI**: `http://localhost:3000/api/docs`
 
 ### Key Endpoints
 
 #### Authentication
+
 - `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/refresh` - Refresh access token
@@ -174,11 +191,13 @@ Once the application is running, you can access the interactive API documentatio
 - `GET /api/v1/auth/me` - Get current user profile
 
 #### Users
+
 - `GET /api/v1/users/me` - Get current user profile
 - `PATCH /api/v1/users/me` - Update user profile
 - `GET /api/v1/users` - List users (admin only)
 
 #### Health Check
+
 - `GET /health` - Application health status
 - `GET /` - Welcome message
 
@@ -225,6 +244,7 @@ src/
    - [MongoDB Installation Guide](https://docs.mongodb.com/manual/installation/)
 
 2. **Start MongoDB**
+
    ```bash
    mongod
    ```
@@ -248,6 +268,7 @@ src/
 ### Database Indexes
 
 The application automatically creates necessary indexes for optimal performance:
+
 - User email index (unique)
 - User role and status indexes
 - Timestamp indexes for queries
@@ -255,6 +276,7 @@ The application automatically creates necessary indexes for optimal performance:
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 # Unit tests
 npm run test
@@ -270,6 +292,7 @@ npm run test:e2e
 ```
 
 ### Test Structure
+
 ```
 test/
 ├── unit/                  # Unit tests
@@ -279,6 +302,7 @@ test/
 ## 🚀 Deployment
 
 ### Environment Setup
+
 1. Set `NODE_ENV=production`
 2. Use strong JWT secrets
 3. Configure production database URLs
@@ -286,12 +310,14 @@ test/
 5. Configure CORS for your frontend domains
 
 ### Production Build
+
 ```bash
 npm run build
 npm run start:prod
 ```
 
 ### Docker Support (Optional)
+
 ```dockerfile
 # Dockerfile example
 FROM node:18-alpine
@@ -304,6 +330,7 @@ CMD ["node", "dist/main"]
 ```
 
 ### Environment Variables for Production
+
 ```env
 NODE_ENV=production
 MONGODB_URI=mongodb+srv://your-production-uri
@@ -346,6 +373,7 @@ This project is proprietary and confidential.
 ## 📞 Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Contact the development team
 

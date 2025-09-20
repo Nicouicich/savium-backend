@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from '@common/constants/expense-categories';
+import { Currency } from '@common/constants/transaction-categories';
 
 export class CategoryBreakdownDto {
   @ApiProperty({ description: 'Category ID' })
@@ -17,8 +17,8 @@ export class CategoryBreakdownDto {
   @ApiProperty({ description: 'Total amount spent' })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Number of expenses' })
-  expenseCount: number;
+  @ApiProperty({ description: 'Number of transactions' })
+  transactionCount: number;
 
   @ApiProperty({ description: 'Percentage of total spending' })
   percentage: number;
@@ -44,10 +44,10 @@ export class MonthlyBreakdownDto {
   @ApiProperty({ description: 'Total amount spent' })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Number of expenses' })
-  expenseCount: number;
+  @ApiProperty({ description: 'Number of transactions' })
+  transactionCount: number;
 
-  @ApiProperty({ description: 'Average expense amount' })
+  @ApiProperty({ description: 'Average transaction amount' })
   averageAmount: number;
 
   @ApiPropertyOptional({ description: 'Comparison with previous month' })
@@ -71,8 +71,8 @@ export class UserBreakdownDto {
   @ApiProperty({ description: 'Total amount spent' })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Number of expenses' })
-  expenseCount: number;
+  @ApiProperty({ description: 'Number of transactions' })
+  transactionCount: number;
 
   @ApiProperty({ description: 'Percentage of total spending' })
   percentage: number;
@@ -82,16 +82,16 @@ export class SummaryStatsDto {
   @ApiProperty({ description: 'Total amount spent' })
   totalAmount: number;
 
-  @ApiProperty({ description: 'Total number of expenses' })
-  totalExpenses: number;
+  @ApiProperty({ description: 'Total number of transactions' })
+  totalTransactions: number;
 
-  @ApiProperty({ description: 'Average expense amount' })
+  @ApiProperty({ description: 'Average transaction amount' })
   averageAmount: number;
 
-  @ApiProperty({ description: 'Highest single expense' })
+  @ApiProperty({ description: 'Highest single transaction' })
   maxAmount: number;
 
-  @ApiProperty({ description: 'Lowest single expense' })
+  @ApiProperty({ description: 'Lowest single transaction' })
   minAmount: number;
 
   @ApiProperty({ description: 'Currency used' })
@@ -100,7 +100,7 @@ export class SummaryStatsDto {
   @ApiProperty({ description: 'Number of different categories used' })
   categoriesUsed: number;
 
-  @ApiProperty({ description: 'Number of active days (days with expenses)' })
+  @ApiProperty({ description: 'Number of active days (days with transactions)' })
   activeDays: number;
 
   @ApiPropertyOptional({ description: 'Comparison with previous period' })
@@ -122,11 +122,11 @@ export class ReportMetadataDto {
   @ApiProperty({ description: 'Report period end date' })
   periodEnd: Date;
 
-  @ApiProperty({ description: 'Account ID' })
-  accountId: string;
+  @ApiProperty({ description: 'Profile ID' })
+  profileId: string;
 
-  @ApiProperty({ description: 'Account name' })
-  accountName: string;
+  @ApiProperty({ description: 'Profile name' })
+  profileName: string;
 
   @ApiProperty({ description: 'User who requested the report' })
   requestedBy: string;
@@ -152,7 +152,7 @@ export class MonthlyReportDto {
   dailyBreakdown: Array<{
     date: string;
     totalAmount: number;
-    expenseCount: number;
+    transactionCount: number;
   }>;
 
   @ApiProperty({
@@ -161,8 +161,8 @@ export class MonthlyReportDto {
   })
   categoryBreakdown: CategoryBreakdownDto[];
 
-  @ApiProperty({ description: 'Top expenses' })
-  topExpenses: Array<{
+  @ApiProperty({ description: 'Top transactions' })
+  topTransactions: Array<{
     id: string;
     description: string;
     amount: number;

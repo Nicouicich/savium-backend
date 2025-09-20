@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { ExpenseCategory } from '@common/constants/expense-categories';
+import { TransactionCategory } from '@common/constants/transaction-categories';
 
 export type CategoryDocument = Category & Document;
 
@@ -27,8 +27,8 @@ export class Category {
   @Prop({ required: true, trim: true })
   displayName: string;
 
-  @Prop({ type: String, enum: ExpenseCategory })
-  type?: ExpenseCategory;
+  @Prop({ type: String, enum: TransactionCategory })
+  type?: TransactionCategory;
 
   @Prop({ required: true })
   icon: string;
@@ -42,8 +42,8 @@ export class Category {
   @Prop({ type: [Subcategory], default: [] })
   subcategories: Subcategory[];
 
-  @Prop({ type: Types.ObjectId, ref: 'Account' })
-  accountId?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Profile' })
+  profileId?: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   createdBy?: Types.ObjectId;
@@ -81,9 +81,9 @@ export const CategorySchema = SchemaFactory.createForClass(Category);
 // Critical compound indexes for performance (from MEJORAS.md DB-002)
 // Account-specific category queries with active filtering
 CategorySchema.index(
-  { accountId: 1, isActive: 1, isVisible: 1 },
+  { profileId: 1, isActive: 1, isVisible: 1 },
   {
-    name: 'account_active_visible_idx',
+    name: 'profile_active_visible_idx',
     background: true
   }
 );
@@ -99,10 +99,10 @@ CategorySchema.index(
 
 // Unique constraint for category names per account
 CategorySchema.index(
-  { name: 1, accountId: 1 },
+  { name: 1, profileId: 1 },
   {
     unique: true,
-    name: 'name_account_unique_idx'
+    name: 'name_profile_unique_idx'
   }
 );
 
@@ -117,9 +117,9 @@ CategorySchema.index(
 
 // Custom category queries
 CategorySchema.index(
-  { isCustom: 1, isActive: 1, accountId: 1 },
+  { isCustom: 1, isActive: 1, profileId: 1 },
   {
-    name: 'custom_active_account_idx',
+    name: 'custom_active_profile_idx',
     background: true
   }
 );
@@ -145,9 +145,9 @@ CategorySchema.index(
 
 // Account and type combination with soft delete filtering
 CategorySchema.index(
-  { accountId: 1, type: 1, isDeleted: 1 },
+  { profileId: 1, type: 1, isDeleted: 1 },
   {
-    name: 'account_type_deleted_idx',
+    name: 'profile_type_deleted_idx',
     background: true
   }
 );

@@ -6,6 +6,7 @@ import { User, UserDocument } from '../schemas/user.schema';
 import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { PersonalProfileRepository } from '../../financial-profiles/repositories/personal-profile.repository';
 
 /**
  * UserCommandService - Handles all write operations for User entities
@@ -17,7 +18,8 @@ export class UserCommandService {
 
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfileDocument>
+    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfileDocument>,
+    private readonly personalProfileRepository: PersonalProfileRepository
   ) {}
 
   /**
@@ -36,8 +38,6 @@ export class UserCommandService {
         password: hashedPassword,
         email: createUserDto.email.toLowerCase(),
         status: 'pending_verification',
-        profiles: [],
-        accounts: [],
         refreshTokens: [],
         referralCode: createUserDto.email.toLowerCase(), // Use email as default referral code
         lastActiveAt: new Date(),
@@ -68,15 +68,28 @@ export class UserCommandService {
           },
           ...createUserDto.preferences
         },
-        termsAcceptedAt: new Date(),
-        metadata: {}
+        termsAcceptedAt: new Date()
       };
 
       const user = new this.userModel(userData);
       const savedUser = await user.save();
 
-      // Create default personal profile automatically
-      await this.createDefaultProfile((savedUser as any)._id.toString(), savedUser.firstName, savedUser.lastName);
+      // Create default personal UserProfile automatically
+      try {
+        const personalProfile = await this.createDefaultProfile(savedUser);
+
+        // Update user with the created profile
+        await this.userModel.findByIdAndUpdate(savedUser._id, {
+          activeProfileRef: personalProfile._id,
+          activeProfileType: 'personal',
+          personalProfile: personalProfile._id
+        });
+
+        this.logger.log(`Default UserProfile created for user: ${savedUser.email}, profileId: ${personalProfile._id}`);
+      } catch (profileError) {
+        this.logger.error(`Failed to create default profile for user ${savedUser.email}: ${profileError.message}`, profileError.stack);
+        // Don't fail user creation if profile creation fails, but log it
+      }
 
       this.logger.log(`User created successfully: ${savedUser.email}`);
       return savedUser;
@@ -151,8 +164,22 @@ export class UserCommandService {
       const user = new this.userModel(userData);
       const savedUser = await user.save();
 
-      // Create default personal profile automatically
-      await this.createDefaultProfile((savedUser as any)._id.toString(), savedUser.firstName, savedUser.lastName);
+      // Create default personal UserProfile automatically
+      try {
+        const personalProfile = await this.createDefaultProfile(savedUser);
+
+        // Update user with the created profile
+        await this.userModel.findByIdAndUpdate(savedUser._id, {
+          activeProfileRef: personalProfile._id,
+          activeProfileType: 'personal',
+          personalProfile: personalProfile._id
+        });
+
+        this.logger.log(`Default UserProfile created for OAuth user: ${savedUser.email}, profileId: ${personalProfile._id}`);
+      } catch (profileError) {
+        this.logger.error(`Failed to create default profile for OAuth user ${savedUser.email}: ${profileError.message}`, profileError.stack);
+        // Don't fail OAuth user creation if profile creation fails, but log it
+      }
 
       this.logger.log(`OAuth user created successfully: ${savedUser.email}`);
       return savedUser;
@@ -395,39 +422,51 @@ export class UserCommandService {
   }
 
   /**
-   * Create default personal profile for a new user
+   * Set active financial profile
    */
-  private async createDefaultProfile(userId: string, firstName: string, lastName: string): Promise<UserProfileDocument> {
+  async setActiveFinancialProfile(userId: string, profileId: string, profileType: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          activeProfileId: new Types.ObjectId(profileId),
+          activeProfileType: profileType
+        },
+        { new: true }
+      )
+      .exec();
+  }
+
+  /**
+   * Create default UserProfile for new user
+   */
+  private async createDefaultProfile(user: UserDocument): Promise<any> {
     try {
-      const defaultProfile = new this.userProfileModel({
-        userId: userId,
-        name: `${firstName} ${lastName}`,
-        displayName: firstName,
-        profileType: 'personal',
-        isDefault: true,
+      // Create a PersonalProfile using the new specialized schema
+      const profileData = {
+        userId: user._id as Types.ObjectId,
+        name: `${user.firstName} ${user.lastName}`,
+        displayName: user.firstName,
         isActive: true,
+        isDefault: true,
+        profileType: 'personal' as const,
         privacy: {
-          visibility: 'private',
+          visibility: 'private' as const,
           showContactInfo: false,
           showSocialLinks: false,
           indexInSearchEngines: false
         },
         associatedAccounts: [],
         metadata: {}
-      });
+      };
 
-      const savedProfile = await defaultProfile.save();
+      // Use PersonalProfileRepository to create the profile
+      const savedProfile = await this.personalProfileRepository.create(profileData);
 
-      // Update user to reference this profile
-      await this.userModel.findByIdAndUpdate(userId, {
-        $push: { profiles: savedProfile._id },
-        activeProfileId: savedProfile._id
-      });
-
-      this.logger.log(`Default personal profile created for user: ${userId}, profileId: ${(savedProfile as any)._id.toString()}`);
+      this.logger.log(`Default PersonalProfile created: ${savedProfile._id} for user: ${user.email}`);
       return savedProfile;
     } catch (error) {
-      this.logger.error(`Error creating default profile for user ${userId}: ${error.message}`, error.stack);
+      this.logger.error(`Error creating default profile: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Failed to create default profile');
     }
   }

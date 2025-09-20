@@ -6,7 +6,7 @@ import { WhatsappService } from './whatsapp.service';
 import { MessageProcessorService } from '../ai/message-processor.service';
 import { MessagingFileService } from '../../files/services/messaging-file.service';
 import { ReceiptProcessorService } from '../ai/receipt-processor.service';
-import { ExpensesService } from '../../expenses/expenses.service';
+import { TransactionsService } from '../../transactions/transactions.service';
 import { AccountsService } from '../../accounts/accounts.service';
 import { User } from '../../users/schemas/user.schema';
 import { UserProfile } from '../../users/schemas/user-profile.schema';
@@ -17,7 +17,7 @@ describe('WhatsappService', () => {
   let userModel: any;
   let userProfileModel: any;
   let messageProcessor: MessageProcessorService;
-  let expensesService: ExpensesService;
+  let transactionsService: TransactionsService;
   let accountsService: AccountsService;
   let configService: ConfigService;
 
@@ -47,7 +47,7 @@ describe('WhatsappService', () => {
     processMessage: jest.fn()
   };
 
-  const mockExpensesService = {
+  const mockTransactionsService = {
     create: jest.fn()
   };
 
@@ -87,8 +87,8 @@ describe('WhatsappService', () => {
           useValue: mockReceiptProcessorService
         },
         {
-          provide: ExpensesService,
-          useValue: mockExpensesService
+          provide: TransactionsService,
+          useValue: mockTransactionsService
         },
         {
           provide: AccountsService,
@@ -105,7 +105,7 @@ describe('WhatsappService', () => {
     userModel = module.get(getModelToken(User.name));
     userProfileModel = module.get(getModelToken(UserProfile.name));
     messageProcessor = module.get<MessageProcessorService>(MessageProcessorService);
-    expensesService = module.get<ExpensesService>(ExpensesService);
+    transactionsService = module.get<TransactionsService>(TransactionsService);
     accountsService = module.get<AccountsService>(AccountsService);
     configService = module.get<ConfigService>(ConfigService);
 
@@ -204,7 +204,7 @@ describe('WhatsappService', () => {
         success: true,
         responseText: 'Gasto registrado exitosamente',
         actionTaken: {
-          type: 'expense_created',
+          type: 'transaction_created',
           data: { amount: 25, description: 'almuerzo' }
         }
       });

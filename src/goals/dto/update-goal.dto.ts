@@ -4,7 +4,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateGoalDto } from './create-goal.dto';
 import { GoalStatus } from '../schemas/goal.schema';
 
-export class UpdateGoalDto extends PartialType(OmitType(CreateGoalDto, ['accountId'] as const)) {
+export class UpdateGoalDto extends PartialType(OmitType(CreateGoalDto, ['profileId'] as const)) {
   @ApiPropertyOptional({
     description: 'Goal status',
     enum: GoalStatus,

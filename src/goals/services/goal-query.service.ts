@@ -3,7 +3,7 @@ import { GoalsRepository } from '../goals.repository';
 import { GoalQueryDto, GoalResponseDto, GoalSummaryDto, GoalProgressDto } from '../dto';
 import { GoalDocument, GoalStatus, GoalType } from '../schemas/goal.schema';
 import { AccountsService } from '../../accounts/accounts.service';
-import { PaginatedResult } from '../../expenses/expenses.repository';
+import { PaginatedResult } from '../../transactions/transactions.repository';
 
 @Injectable()
 export class GoalQueryService {
@@ -35,18 +35,18 @@ export class GoalQueryService {
     // Build query
     const mongoQuery: any = { isDeleted: false };
 
-    // Account access filter
-    if (filters.accountId) {
-      const hasAccess = await this.accountsService.hasUserAccess(filters.accountId, userId);
+    // Profile access filter
+    if (filters.profileId) {
+      const hasAccess = await this.accountsService.hasUserAccess(filters.profileId, userId);
       if (!hasAccess) {
-        throw new ForbiddenException('Access denied to this account');
+        throw new ForbiddenException('Access denied to this profile');
       }
-      mongoQuery.accountId = filters.accountId;
+      mongoQuery.profileId = filters.profileId;
     } else {
-      // Get user's accessible accounts
+      // Get user's accessible profiles (TODO: Replace with ProfilesService)
       const userAccounts = await this.accountsService.findByUser(userId);
-      const accountIds = userAccounts.map(account => account.id);
-      mongoQuery.$or = [{ accountId: { $in: accountIds } }, { participants: userId }, { createdBy: userId }];
+      const profileIds = userAccounts.map(account => account.id);
+      mongoQuery.$or = [{ profileId: { $in: profileIds } }, { participants: userId }, { createdBy: userId }];
     }
 
     // Apply filters
@@ -113,13 +113,13 @@ export class GoalQueryService {
     };
   }
 
-  async getGoalSummary(accountId: string, userId: string): Promise<GoalSummaryDto> {
-    const hasAccess = await this.accountsService.hasUserAccess(accountId, userId);
+  async getGoalSummary(profileId: string, userId: string): Promise<GoalSummaryDto> {
+    const hasAccess = await this.accountsService.hasUserAccess(profileId, userId);
     if (!hasAccess) {
-      throw new ForbiddenException('Access denied to this account');
+      throw new ForbiddenException('Access denied to this profile');
     }
 
-    const goals = await this.goalsRepository.findByAccountId(accountId);
+    const goals = await this.goalsRepository.findByProfileId(profileId);
 
     const activeGoals = goals.filter(g => g.status === GoalStatus.ACTIVE);
     const completedGoals = goals.filter(g => g.status === GoalStatus.COMPLETED);
@@ -174,11 +174,11 @@ export class GoalQueryService {
   }
 
   private async validateGoalAccess(goal: GoalDocument, userId: string): Promise<void> {
-    const hasAccountAccess = await this.accountsService.hasUserAccess(goal.accountId.toString(), userId);
+    const hasProfileAccess = await this.accountsService.hasUserAccess(goal.profileId.toString(), userId);
     const isParticipant = goal.participants.some(p => p.toString() === userId);
     const isCreator = goal.createdBy.toString() === userId;
 
-    if (!hasAccountAccess && !isParticipant && !isCreator) {
+    if (!hasProfileAccess && !isParticipant && !isCreator) {
       throw new ForbiddenException('Access denied to this goal');
     }
   }
@@ -188,8 +188,8 @@ export class GoalQueryService {
       id: goal.id,
       title: goal.title,
       description: goal.description,
-      accountId: goal.accountId,
-      accountName: (goal.accountId as any).name || 'Unknown Account',
+      profileId: goal.profileId,
+      profileName: (goal.profileId as any).displayName || 'Unknown Profile',
       createdBy: {
         id: goal.createdBy,
         name:

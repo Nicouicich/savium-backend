@@ -14,8 +14,8 @@ export default registerAs('swagger', () => ({
       name: 'Accounts',
       description: 'Account management for personal, couple, family, and business'
     },
-    { name: 'Expenses', description: 'Expense tracking and management' },
-    { name: 'Categories', description: 'Expense categorization' },
+    { name: 'Transactions', description: 'Transaction tracking and management' },
+    { name: 'Categories', description: 'Transaction categorization' },
     { name: 'Reports', description: 'Financial reports and analytics' },
     { name: 'Budgets', description: 'Budget management' },
     { name: 'Goals', description: 'Financial goals and targets' },

@@ -14,7 +14,7 @@ import {
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { ApiResponseDto } from '@common/decorators/api-response.decorator';
-import { ExpenseCategory } from '@common/constants/expense-categories';
+import { TransactionCategory } from '@common/constants/transaction-categories';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -110,13 +110,13 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Get categories by type' })
   @ApiParam({
     name: 'type',
-    enum: ExpenseCategory,
+    enum: TransactionCategory,
     description: 'Category type'
   })
   @ApiResponseDto([CategoryResponseDto], 200, 'Categories retrieved successfully')
   @ApiQuery({ name: 'accountId', required: false, description: 'Account ID' })
   async findByType(
-    @Param('type') type: ExpenseCategory,
+    @Param('type') type: TransactionCategory,
     @CurrentUser('id') userId: string,
     @Query('accountId') accountId?: string
   ): Promise<CategoryResponseDto[]> {
