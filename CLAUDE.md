@@ -16,49 +16,90 @@ Savium is a comprehensive NestJS backend for a personal, family, couple, and bus
 
 ## Development Commands
 
+**IMPORTANT**: This project uses PNPM as the package manager. Always use `pnpm` commands instead of `npm`.
+
 ### Start Development
 
 ```bash
-npm run start:dev        # Start with hot reloading
-npm run start:debug      # Start in debug mode
+pnpm start:dev          # Start with hot reloading
+pnpm start:debug        # Start in debug mode
+pnpm start:dev:clean    # Kill port 8080 and start dev (Windows-specific)
 ```
 
 ### Build and Production
 
 ```bash
-npm run build           # Build the application
-npm run start:prod      # Start production build
+pnpm build              # Build the application
+pnpm start              # Start production build
+pnpm start:prod         # Start production build (alternative)
 ```
 
 ### Testing
 
 ```bash
-npm run test           # Run unit tests
-npm run test:watch     # Run tests in watch mode
-npm run test:cov       # Run tests with coverage
-npm run test:e2e       # Run end-to-end tests (includes comprehensive user flow tests)
+pnpm test               # Run unit tests
+pnpm test:watch         # Run tests in watch mode
+pnpm test:cov           # Run tests with coverage
+pnpm test:e2e           # Run end-to-end tests (includes comprehensive user flow tests)
+pnpm test:debug         # Run tests in debug mode
 ```
 
 ### Code Quality
 
 ```bash
-npm run lint           # Run ESLint with auto-fix (backend-oriented rules)
-npm run format         # Format code with Prettier
+pnpm lint               # Run ESLint with auto-fix (backend-oriented rules)
+pnpm format             # Format code with dprint (replaces Prettier)
+pnpm kill-port          # Kill process on port 8080 (Windows-specific)
 ```
 
-### Important: Always run linting and type checking after making changes
+### Important: Always run linting after making changes
 
 - The project uses strict backend-oriented ESLint rules
+- Uses dprint for code formatting instead of Prettier
 - Custom path mapping: `@common/*` points to `common/` directory (outside src)
 
 ## Critical Coding Standards
 
 ### TypeScript Strict Rules
 
-- **NEVER use `as any` type assertions** - This is strictly prohibited in the codebase
+- **PROHIBIDO usar `as any` type assertions** - This is strictly prohibited in the codebase
 - Use proper TypeScript typing and interfaces instead of type assertions
 - If you encounter type issues, create proper interfaces or use generic types
 - When working with external libraries, create proper type definitions rather than using `any`
+
+### Architecture Layer Separation (MANDATORY)
+
+**PROHIBIDO**: Implementar cualquier funcionalidad sin testearla. Always implement tests for any functionality.
+
+**Controller → Service → Repository Pattern**:
+- **Controllers**: Only handle HTTP requests/responses, no business logic
+- **Services**: Contain all business logic, orchestrate repository calls
+- **Repositories**: Handle all database queries and operations, separated by domain
+
+**🚨 EXTREMADAMENTE PROHIBIDO: CROSS-DOMAIN REPOSITORY ACCESS 🚨**:
+- **NEVER** access repositories from other domains directly
+- Example: WhatsApp Service CANNOT access User Repository directly
+- Example: Transaction Service CANNOT access Category Repository directly
+- **ALWAYS** go through the owning service: WhatsApp Service → User Service → User Repository
+- This enforces proper domain boundaries and SOLID principles
+
+**Repository Ownership Rule**:
+- Only the schema owner can interact with its repository
+- Each domain owns its own data access layer
+- Cross-domain data access MUST go through services, never repositories
+- **NO QUERIES WITHIN SERVICES** - All database operations must go through repositories
+
+**SOLID Principles Enforcement (100%)**:
+- **Single Responsibility**: Each service/repository has one clear purpose
+- **Open/Closed**: Extend behavior through interfaces, not modification
+- **Liskov Substitution**: Implementations must be substitutable
+- **Interface Segregation**: No forced dependencies on unused interfaces
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+**Query Separation**:
+- Separate read and write operations in repositories when beneficial
+- Keep complex queries isolated in repository methods
+- Use meaningful method names that describe the query purpose
 
 ## Architecture Overview
 
@@ -66,7 +107,7 @@ npm run format         # Format code with Prettier
 
 The application follows NestJS modular architecture with domain-driven design:
 
-- **Core Business Modules**: `auth/`, `users/`, `accounts/`, `transactions/`, `budgets/`, `goals/`, `reports/`, `categories/`
+- **Core Business Modules**: `auth/`, `users/`, `financial-profiles/`, `transactions/`, `budgets/`, `goals/`, `reports/`, `categories/`
 - **Integration Modules**: `integrations/ai/`, `integrations/whatsapp/`, `integrations/telegram/`
 - **Support Modules**: `notifications/`, `common/`
 
@@ -88,16 +129,22 @@ The application follows NestJS modular architecture with domain-driven design:
 **Database Layer**:
 
 - MongoDB with Mongoose ODM
-- Repository pattern for data access
+- **Strict Repository Pattern**: Each module has its own repository for database access
+- **Domain Repository Ownership**: Only schema owners can access their repositories
+- **ZERO Cross-Domain Repository Access**: Domains communicate only through services
+- Repository examples: `UsersRepository`, `TransactionsRepository`, `CategoriesRepository`
+- Service-to-Service communication for cross-domain data access
 - Proper indexing and aggregation pipelines
 - Schema validation with class-transformer/class-validator
 
-**Multi-Account System**:
+**Multi-Profile System**:
 
-- Four account types: Personal, Couple, Family, Business
-- Account-specific role permissions (see `common/constants/user-roles.ts`)
-- Configurable privacy settings per account type
-- Member management with invitation system
+- Four profile types: Personal, Couple, Family, Business (NOT account types)
+- All users have a Personal profile created automatically during account creation
+- All transactions and categories are assigned to a specific profile
+- Profile-specific privacy settings and permissions
+- Each profile type has different member management capabilities
+- Users can have multiple profiles and switch between them
 
 **Request Tracing & Logging**:
 
@@ -127,11 +174,13 @@ The application follows NestJS modular architecture with domain-driven design:
 - Account-specific roles: `OWNER`, `PARTNER`, `PARENT`, `CHILD`, `BUSINESS_OWNER`, `MANAGER`, etc.
 - Permission system with detailed role-permission mappings
 
-**Account Types** (`src/common/constants/account-types.ts`):
+**Profile Types** (`src/financial-profiles/schemas/index.ts`):
 
-- Account types with member limits and feature configurations
-- Privacy settings per account type
-- Status management (active, inactive, suspended, pending)
+- Four profile types: Personal, Couple, Family, Business
+- Profile-specific schemas and repositories for each type
+- Each profile has its own privacy settings, transactions, and categories
+- Base profile schema with common fields shared across all types
+- Profile status management (active, inactive, archived)
 
 ## Database Setup Requirements
 

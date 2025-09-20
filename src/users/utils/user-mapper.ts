@@ -40,7 +40,8 @@ export class UserMapper {
       email: user.email,
       role: user.role,
       isActive: user.isActive,
-      fullName: `${user.firstName} ${user.lastName}`.trim()
+      fullName: `${user.firstName} ${user.lastName}`.trim(),
+      activeProfileId: user.activeProfileId?.toString()
     };
   }
 

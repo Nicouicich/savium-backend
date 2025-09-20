@@ -45,7 +45,6 @@ export * from './decorators/roles.decorator';
 export * from './decorators/validation.decorator';
 
 // Constants and Enums
-export * from './constants/account-types';
 export * from './constants/card-types';
 export * from './constants/transaction-categories';
 export * from './constants/user-roles';

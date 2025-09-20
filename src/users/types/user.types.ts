@@ -50,7 +50,6 @@ export interface IUser {
       requirePasswordChange: boolean;
     };
   };
-  accounts: Types.ObjectId[];
   referralCode?: string;
   referredByUserId?: Types.ObjectId;
   referralCompletedAt?: Date;
@@ -96,4 +95,5 @@ export interface UserForJWT {
   role: UserRole;
   isActive: boolean;
   fullName: string;
+  activeProfileId?: string; // MongoDB ObjectId as string
 }
