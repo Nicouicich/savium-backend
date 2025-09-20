@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Currency, PaymentMethod } from '@common/constants/transaction-categories';
 import { CoupleTransactionType, CoupleReactionType } from '@common/constants/couple-types';
+import { CategoryDocument } from 'src/categories/schemas/category.schema';
 
 export type TransactionDocument = Transaction &
   Document & {
@@ -198,7 +199,7 @@ export class Transaction {
   date: Date;
 
   @Prop({ type: Types.ObjectId, ref: 'Category', required: false })
-  categoryId?: Types.ObjectId;
+  categoryId?: Types.ObjectId | CategoryDocument;
 
   @Prop()
   subcategoryName?: string;

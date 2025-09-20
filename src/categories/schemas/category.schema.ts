@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { TransactionCategory } from '@common/constants/transaction-categories';
+import { AnyProfileDocument } from 'src/financial-profiles/schemas';
 
 export type CategoryDocument = Category & Document;
 
@@ -21,35 +22,23 @@ export class Subcategory {
 
 @Schema({ timestamps: true })
 export class Category {
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true})
   name: string;
 
-  @Prop({ required: true, trim: true })
-  displayName: string;
+  @Prop({ required: false })
+  icon?: string;
 
-  @Prop({ type: String, enum: TransactionCategory })
-  type?: TransactionCategory;
-
-  @Prop({ required: true })
-  icon: string;
-
-  @Prop({ required: true })
-  color: string;
+  @Prop({ required: false })
+  color?: string;
 
   @Prop()
   description?: string;
-
+/* 
   @Prop({ type: [Subcategory], default: [] })
-  subcategories: Subcategory[];
+  subcategories: Subcategory[]; */
 
   @Prop({ type: Types.ObjectId, ref: 'Profile' })
-  profileId?: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  createdBy?: Types.ObjectId;
-
-  @Prop({ default: false })
-  isCustom: boolean;
+  profileId?: Types.ObjectId | AnyProfileDocument;
 
   @Prop({ default: true })
   isActive: boolean;
@@ -59,21 +48,6 @@ export class Category {
 
   @Prop({ type: [String], default: [] })
   keywords: string[];
-
-  @Prop({ type: Object, default: {} })
-  aiConfig: Record<string, any>;
-
-  @Prop({ type: Number, default: 0 })
-  sortOrder: number;
-
-  @Prop({ type: Object, default: {} })
-  metadata: Record<string, any>;
-
-  @Prop({ default: false })
-  isDeleted: boolean;
-
-  @Prop({ type: Date })
-  deletedAt?: Date;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

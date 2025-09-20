@@ -68,11 +68,4 @@ export class CreateCategoryDto {
   @IsString()
   @MaxLength(500)
   description?: string;
-
-  @ApiPropertyOptional({ description: 'Keywords for AI categorization', type: [String], example: ['restaurant', 'food', 'dining', 'grocery'], maxItems: 50 })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  @ArrayMaxSize(50)
-  keywords?: string[];
 }
